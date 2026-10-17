@@ -5,12 +5,14 @@ import { loadProgress, type StudyProgress } from "./lib/storage/db";
 import { loadReviewOverview, loadDueReviewIds, type ReviewOverview } from "./features/review/queue";
 import { clearStudyRecords, createStudyBackup, importStudyBackup, parseStudyBackup } from "./lib/storage/backup";
 import { PracticeScreen } from "./features/practice/PracticeScreen";
+import { VocabularyScreen } from "./features/vocabulary/VocabularyScreen";
 
 type Session = { level: CetLevel; reviewExercises?: Exercise[] };
 const LEVELS: CetLevel[] = ["CET4", "CET6"];
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [lexiconLevel, setLexiconLevel] = useState<CetLevel | null>(null);
   const [positions, setPositions] = useState<Partial<Record<CetLevel, StudyProgress>>>({});
   const [reviewOverview, setReviewOverview] = useState<Record<CetLevel, ReviewOverview>>({
     CET4: { due: 0, later: 0, total: 0 },
@@ -126,14 +128,18 @@ export default function App() {
   return (
     <div className="page-shell">
       <header className="site-header">
-        <button className="brand brand-button" type="button" onClick={() => setSession(null)} aria-label="返回首页">
+        <button className="brand brand-button" type="button" onClick={() => { setSession(null); setLexiconLevel(null); }} aria-label="返回首页">
           <span className="brand-mark" aria-hidden="true">⌘</span>
           CET Typing
         </button>
         <span className="header-note">中译英 · 主动输出</span>
       </header>
 
-      {session === null ? (
+      {lexiconLevel ? (
+        <main className="practice-main">
+          <VocabularyScreen level={lexiconLevel} onBack={() => setLexiconLevel(null)} />
+        </main>
+      ) : session === null ? (
         <main className="main-content">
           <div className="eyebrow"><span className="status-dot" /> 四六级英语训练</div>
           <h1>把英语<br /><em>打出来。</em></h1>
@@ -162,6 +168,16 @@ export default function App() {
               ))}
             </div>
             <p className="review-future">待下次复习：四级 {reviewOverview.CET4.later} · 六级 {reviewOverview.CET6.later}</p>
+          </div>
+          <div className="lexicon-entry" aria-label="开源参考词库">
+            <div className="lexicon-entry-copy">
+              <strong>词汇检索</strong>
+              <span>独立开源词表 · 可查释义及试听发音，非正式渐进练习题</span>
+            </div>
+            <div className="lexicon-entry-actions">
+              <button type="button" onClick={() => setLexiconLevel("CET4")}>四级参考词库 ↗</button>
+              <button type="button" onClick={() => setLexiconLevel("CET6")}>六级参考词库 ↗</button>
+            </div>
           </div>
           <div className="data-tools" aria-label="学习记录管理">
             <span>本地记录</span>

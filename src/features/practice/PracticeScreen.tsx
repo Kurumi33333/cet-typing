@@ -163,7 +163,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       setCompleted((previous) => previous + 1);
       setFeedback("答对了！按 Enter 立即下一题");
     } else {
-      void recordMistake(level, lesson.id, exercise.id, displayValues.join(" ")).catch(() => {
+      const sourceLessonId = reviewMode
+        ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
+        : lesson.id;
+      void recordMistake(level, sourceLessonId, exercise.id, displayValues.join(" ")).catch(() => {
         setStorageNotice("错题记录失败，请检查本地存储权限。");
       });
       ping("error");

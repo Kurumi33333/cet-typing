@@ -31,13 +31,13 @@ function parseReviewRow(input: unknown): ReviewSchedule {
     throw Error("FSRS 日期损坏");
   }
   const numeric = ["stability","difficulty","elapsed_days","scheduled_days","reps","lapses","learning_steps"];
-  if (numeric.some((field) => typeof raw[field] !== "number" || !Number.isFinite(raw[field]))) {
+  if (numeric.some((field) => typeof raw[field] !== "number" || !Number.isFinite(raw[field] as number))) {
     throw Error("FSRS 学习参数损坏");
   }
-  if (!Number.isInteger(raw.state) || (raw.state as number) < 0 || (raw.state as number) > 3 ||
-    !Number.isInteger(raw.reps) || (raw.reps as number) < 0 ||
-    !Number.isInteger(raw.lapses) || (raw.lapses as number) < 0 ||
-    !Number.isInteger(raw.learning_steps) || (raw.learning_steps as number) < 0) {
+  if (!Number.isInteger(raw.state as number) || (raw.state as number) < 0 || (raw.state as number) > 3 ||
+    !Number.isInteger(raw.reps as number) || (raw.reps as number) < 0 ||
+    !Number.isInteger(raw.lapses as number) || (raw.lapses as number) < 0 ||
+    !Number.isInteger(raw.learning_steps as number) || (raw.learning_steps as number) < 0) {
     throw Error("FSRS 状态数据损坏");
   }
   const card = { ...raw, due, last_review } as Card;

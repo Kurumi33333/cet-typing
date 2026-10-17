@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "./sounds";
 import type { CetLevel } from "../course/types";
@@ -40,6 +41,8 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   const [feedback, setFeedback] = useState("按空格切换到下一格，按 Enter 检查答案");
   const [focused, setFocused] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
+  const [errorPulse, setErrorPulse] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
@@ -105,6 +108,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
       setCompleted((previous) => previous + 1);
       setFeedback("正确！即将进入下一题");
     } else {
+      setErrorPulse((n) => n + 1);
       setPhase("review");
       setFeedback(`有 ${errors.length} 个单词需要修正。直接打字，或点一下红色单词。`);
     }
@@ -300,7 +304,9 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
       </div>
       <div className="progress-track" role="progressbar" aria-label="练习进度"
         aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>
-        <div className="progress-fill" style={{ width: `${(index / exercises.length) * 100}%` }} />
+        <motion.div className="progress-fill" initial={false}
+          animate={{ width: `${(index / exercises.length) * 100}%` }}
+          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 27 }} />
       </div>
       <div className="lesson-navigation">
         <button className="lesson-toggle" type="button"
@@ -310,7 +316,12 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
           <span className="lesson-toggle-title">{lesson.title}</span>
           <span aria-hidden="true">{showLessonPicker ? "⌃" : "⌄"}</span>
         </button>
-        {showLessonPicker && <div id="lesson-options" className="lesson-options" aria-label="选择训练单元">
+        <AnimatePresence initial={false}>
+        {showLessonPicker && <motion.div id="lesson-options" className="lesson-options" aria-label="选择训练单元"
+          initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={reducedMotion ? undefined : { opacity: 0, y: -6, scale: 0.99 }}
+          transition={{ duration: reducedMotion ? 0 : 0.18 }}>
           {courseList.map((entry, at) => (
             <button key={entry.id} type="button"
               className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
@@ -320,9 +331,15 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
               <span aria-hidden="true">{at === lessonIndex ? "✓" : "↗"}</span>
             </button>
           ))}
-        </div>}
+        </motion.div>}
+        </AnimatePresence>
       </div>
-      <div className="question-body centered-practice">
+      <AnimatePresence mode="wait" initial={false}>
+      <motion.div key={exercise.id} className="question-body centered-practice"
+        initial={reducedMotion ? false : { opacity: 0, y: 17 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reducedMotion ? undefined : { opacity: 0, y: -13 }}
+        transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}>
         <div className="eyebrow"><span className="status-dot" /> {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}</div>
         <h2 className="chinese-sentence">{exercise.chinese}</h2>
         <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" : exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>
@@ -371,10 +388,16 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
                       else focusInput();
                     }}
                     title={phase === "review" && incorrect ? "点击修改这个单词" : undefined}>
-                    <span className={`slot-word ${appearance}`}
-                      style={{ minWidth: `${slot.widthCh}ch` }}>
+                    <motion.span key={`${exercise.id}-${at}-${phase === "review" && incorrect ? errorPulse : 0}`}
+                      className={`slot-word ${appearance}`}
+                      style={{ minWidth: `${slot.widthCh}ch` }}
+                      initial={false}
+                      animate={phase === "review" && incorrect && !reducedMotion
+                        ? { x: [0, -10, 8, -5, 3, 0], scale: [1, 1.055, 1] }
+                        : { x: 0, scale: 1 }}
+                      transition={{ duration: phase === "review" && incorrect ? 0.48 : 0.14, ease: "easeOut" }}>
                       {visible || "\u00a0"}
-                    </span>
+                    </motion.span>
                     {slot.punctuation && <span className="slot-punctuation">{slot.punctuation}</span>}
                   </div>
                 );
@@ -382,9 +405,23 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             </div>
           </div>
 
-          <p id="practice-feedback" className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`} role="status" aria-live="polite">
+          <motion.p key={`${exercise.id}-${phase}-${errorPulse}`}
+            id="practice-feedback" className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`}
+            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.2 }}
+            role="status" aria-live="polite">
             {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
-          </p>
+          </motion.p>
+          <AnimatePresence>
+            {phase === "passed" && <motion.div className="success-emphasis"
+              initial={reducedMotion ? false : { opacity: 0, y: 12, scale: 0.87 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
+              transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 340, damping: 22 }}>
+              <span aria-hidden="true">✦</span> Nice!
+            </motion.div>}
+          </AnimatePresence>
 
           {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
 
@@ -401,7 +438,8 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             )}
           </div>
         </form>
-      </div>
+      </motion.div>
+      </AnimatePresence>
     </section>
   );
 }

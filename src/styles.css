@@ -94,7 +94,7 @@ h1 em { color: #7ba995; font-style: normal; }
 .slot-active { color: #8354a8; border-color: #ae83cc; border-bottom-width: 3px; }
 .slot-idle { color: #54615a; }
 .slot-verified { border-color: #bdc8bf; color: #52645a; }
-.slot-incorrect { color: #db4f56; border-color: #db4f56; border-bottom-width: 3px; animation: slot-shake 320ms ease; }
+.slot-incorrect { color: #db4f56; border-color: #db4f56; border-bottom-width: 3px; }
 .slot-correct { color: #43836b; border-color: #69a68a; }
 .slot-needs-fix { cursor: pointer; }
 .slot-feedback { color: #8a978f; min-height: 27px; font-size: 13px; margin: 30px auto 0; line-height: 1.75; }
@@ -134,3 +134,10 @@ h1 em { color: #7ba995; font-style: normal; }
 .sound-toggle[aria-pressed="false"] { color: #929e94; background: transparent; border-color: #e3e9e3; }
 .sound-toggle span:first-child { font-size: 17px; }
 @media(max-width:560px) { .practice-top-actions { gap: 7px; } }
+
+/* Motion choreography: small spring for correct, repeatable shake + localized red glow for errors. */
+.slot-incorrect { position: relative; text-shadow: 0 0 16px #de5d6033; background: linear-gradient(to top, #fce7e7a0, transparent 36%); }
+.slot-incorrect::after { position: absolute; content: ""; bottom: -5px; left: 8%; width: 84%; height: 5px; background: #e85d6170; filter: blur(5px); pointer-events: none; }
+.success-emphasis { pointer-events: none; color: #61997a; letter-spacing: .08em; font-family: Georgia, serif; font-size: 18px; margin: 0 auto; font-weight: 600; }
+.success-emphasis span { font-size: 14px; margin-right: 6px; }
+@media (prefers-reduced-motion: reduce) { .slot-word, .slot-list, .progress-fill { transition-duration: 0ms !important; } }

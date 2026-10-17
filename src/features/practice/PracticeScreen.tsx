@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
-import { loadProgress, saveProgress, recordMistake, resolveMistake } from "../../lib/storage/db";
+import { loadProgress, saveProgress, recordMistake } from "../../lib/storage/db";
+import { gradeReviewAttempt } from "../review/queue";
 import { resolveSavedPosition } from "../course/position";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "./sounds";
 import {
@@ -53,6 +54,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const [pronunciationEnabled, setPronunciationEnabled] = useState(readPronunciationPreference);
   const [sentencePlayback, setSentencePlayback] = useState(false);
   const [errorPulse, setErrorPulse] = useState(0);
+  const [reviewGraded, setReviewGraded] = useState(false);
   const reducedMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
@@ -130,6 +132,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     setSentencePlayback(false);
     setValues([]);
     setActiveIndex(0);
+    setReviewGraded(false);
     setPhase("typing");
     setRevealed(false);
     setFeedback(DEFAULT_HINT);
@@ -154,26 +157,33 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     if (phase === "passed") return;
     const errors = incorrectSlots(displayValues, slots);
     setAttempts((previous) => previous + 1);
+    // Grade the FIRST unaided review attempt only. Re-typing after a failed
+    // attempt teaches the answer but does not count as a second Good recall.
+    if (reviewMode && !reviewGraded) {
+      setReviewGraded(true);
+      void gradeReviewAttempt(
+        exercise.id, level, errors.length === 0, displayValues.join(" "),
+      ).catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
+    }
     if (errors.length === 0) {
-      if (reviewMode) {
-        void resolveMistake(exercise.id).catch(() => setStorageNotice("错题状态保存失败"));
-      }
       ping("success");
       setPhase("passed");
       setCompleted((previous) => previous + 1);
-      setFeedback("答对了！按 Enter 立即下一题");
+      setFeedback(reviewMode ? (reviewGraded ? "已修正；将按首次回忆结果安排复习。按 Enter 继续" : "答对了！已安排下次复习，按 Enter 继续") : "答对了！按 Enter 立即下一题");
     } else {
       const sourceLessonId = reviewMode
         ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
         : lesson.id;
-      void recordMistake(level, sourceLessonId, exercise.id, displayValues.join(" ")).catch(() => {
-        setStorageNotice("错题记录失败，请检查本地存储权限。");
-      });
+      if (!reviewMode) {
+        void recordMistake(level, sourceLessonId, exercise.id, displayValues.join(" ")).catch(() => {
+          setStorageNotice("错题记录失败，请检查本地存储权限。");
+        });
+      }
       ping("error");
       setPhase("review");
       setActiveIndex(errors[0]);
       setErrorPulse((n) => n + 1);
-      setFeedback(`有 ${errors.length} 个空格需要修改，点击任意空格都能继续填写。`);
+      setFeedback(reviewMode ? `有 ${errors.length} 个空格错误。本次记为需要重学，修正后继续。` : `有 ${errors.length} 个空格需要修改，点击任意空格都能继续填写。`);
     }
   }
 

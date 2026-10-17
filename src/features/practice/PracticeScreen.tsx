@@ -105,6 +105,11 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             onChange={(event) => { setAnswer(event.target.value); if (verdict === "incorrect") setVerdict(null); }}
             onCompositionStart={() => { isComposing.current = true; }}
             onCompositionEnd={() => { isComposing.current = false; }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && (event.nativeEvent.isComposing || isComposing.current || event.keyCode === 229)) {
+                event.preventDefault();
+              }
+            }}
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}

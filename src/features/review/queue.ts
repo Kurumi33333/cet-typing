@@ -6,6 +6,7 @@ export interface ReviewOverview {
   due: number;
   later: number;
   total: number;
+  nextDue: number | null;
 }
 
 /**
@@ -34,7 +35,11 @@ export function reviewOverview(
   const due = getDueReviewIds(mistakes, schedules, now).length;
   const future = schedules.filter((x) =>
     x.due > now && mistakes.some((m) => m.id === x.id)).length;
-  return { due, later: future, total: due + future };
+  const nextDue = schedules.filter((x) => x.due > now &&
+    mistakes.some((m) => m.id === x.id))
+    .reduce<number | null>((earliest, item) =>
+      earliest === null || item.due < earliest ? item.due : earliest, null);
+  return { due, later: future, total: due + future, nextDue };
 }
 
 async function readLevel(level: CetLevel) {

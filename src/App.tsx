@@ -15,8 +15,8 @@ export default function App() {
   const [lexiconLevel, setLexiconLevel] = useState<CetLevel | null>(null);
   const [positions, setPositions] = useState<Partial<Record<CetLevel, StudyProgress>>>({});
   const [reviewOverview, setReviewOverview] = useState<Record<CetLevel, ReviewOverview>>({
-    CET4: { due: 0, later: 0, total: 0 },
-    CET6: { due: 0, later: 0, total: 0 },
+    CET4: { due: 0, later: 0, total: 0, nextDue: null },
+    CET6: { due: 0, later: 0, total: 0, nextDue: null },
   });
   const [busy, setBusy] = useState<CetLevel | null>(null);
   const [notice, setNotice] = useState("");
@@ -95,6 +95,14 @@ export default function App() {
     }
   }
 
+  function nextReviewLabel(level: CetLevel): string {
+    const due = reviewOverview[level].nextDue;
+    if (due === null) return "暂无预约";
+    return new Intl.DateTimeFormat("zh-CN", {
+      month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit",
+    }).format(new Date(due));
+  }
+
   function resumeLabel(level: CetLevel): string {
     const position = positions[level];
     if (!position) return "从基础单词开始";
@@ -167,7 +175,14 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <p className="review-future">待下次复习：四级 {reviewOverview.CET4.later} · 六级 {reviewOverview.CET6.later}</p>
+            <p className="review-future">
+              待下次复习：四级 {reviewOverview.CET4.later} · 六级 {reviewOverview.CET6.later}
+            </p>
+            {(reviewOverview.CET4.nextDue !== null || reviewOverview.CET6.nextDue !== null) && (
+              <p className="review-future" aria-label="预计下次复习时间">
+                下次时间：四级 {nextReviewLabel("CET4")} · 六级 {nextReviewLabel("CET6")}
+              </p>
+            )}
           </div>
           <div className="lexicon-entry" aria-label="开源参考词库">
             <div className="lexicon-entry-copy">

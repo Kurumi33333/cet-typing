@@ -22,7 +22,13 @@ describe("FSRS due-date filtering and upgrade compatibility",()=>{
     const items=[makeMistake("now",true),makeMistake("tomorrow",true)];
     const dates=[makeSchedule("now",900),makeSchedule("tomorrow",1500)];
     expect(getDueReviewIds(items,dates,1000)).toEqual(["now"]);
-    expect(reviewOverview(items,dates,1000)).toEqual({due:1,later:1,total:2});
+    expect(reviewOverview(items,dates,1000)).toEqual({due:1,later:1,total:2,nextDue:1500});
+  });
+  it("reports the nearest future review without confusing it with due work",()=>{
+    const items=[makeMistake("a",true),makeMistake("b",true)];
+    const dates=[makeSchedule("a",9000),makeSchedule("b",5000)];
+    expect(reviewOverview(items,dates,1000)).toEqual({due:0,later:2,total:2,nextDue:5000});
+    expect(reviewOverview([],[],1000).nextDue).toBeNull();
   });
   it("does not surface orphaned schedule IDs after content cleanup",()=>{
     expect(getDueReviewIds([], [makeSchedule("orphan",900)],1000)).toEqual([]);

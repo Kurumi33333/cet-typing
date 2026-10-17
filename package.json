@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run test && tsc --noEmit && vite build",
+    "build": "npm run test && npm run validate:vocab && tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "validate:vocab": "node scripts/check-lexicon.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

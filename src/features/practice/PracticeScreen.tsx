@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { getLessons } from "../../data/curriculum";
+import { playFeedback, readSoundPreference, writeSoundPreference } from "./sounds";
 import type { CetLevel } from "../course/types";
 import {
   draftToSlotValues,
@@ -38,6 +39,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   const [finished, setFinished] = useState(false);
   const [feedback, setFeedback] = useState("按空格切换到下一格，按 Enter 检查答案");
   const [focused, setFocused] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
@@ -97,6 +99,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     setAttempts((previous) => previous + 1);
     setValues(candidate);
     const errors = incorrectSlots(candidate, slots);
+    if (soundEnabled) playFeedback(errors.length ? "error" : "success");
     if (errors.length === 0) {
       setPhase("passed");
       setCompleted((previous) => previous + 1);
@@ -277,7 +280,23 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
       <div className="practice-topline">
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
         <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 渐进课程</span>
-        <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
+        <div className="practice-top-actions">
+          <button type="button" className="sound-toggle"
+            aria-pressed={soundEnabled}
+            aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
+            title={soundEnabled ? "提示音效：开" : "提示音效：关"}
+            onClick={() => {
+              const next = !soundEnabled;
+              setSoundEnabled(next);
+              writeSoundPreference(next);
+              if (next) playFeedback("success");
+              focusInput();
+            }}>
+            <span aria-hidden="true">{soundEnabled ? "♫" : "♪"}</span>
+            <span>{soundEnabled ? "音效开" : "音效关"}</span>
+          </button>
+          <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
+        </div>
       </div>
       <div className="progress-track" role="progressbar" aria-label="练习进度"
         aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>

@@ -127,3 +127,10 @@ h1 em { color: #7ba995; font-style: normal; }
 .lesson-option-copy strong { font-size: 13px; }
 .lesson-option-copy small { font-size: 11px; line-height: 1.55; color: #849187; }
 .lesson-navigation + .question-body { padding-top: clamp(34px, 6vw, 72px); }
+
+/* Persisted, user-controlled feedback sound. */
+.practice-top-actions { display: inline-flex; align-items: center; gap: 18px; }
+.sound-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 999px; border: 1px solid #d9e6da; color: #557361; background: #edf4ed; cursor: pointer; font-size: 12px; }
+.sound-toggle[aria-pressed="false"] { color: #929e94; background: transparent; border-color: #e3e9e3; }
+.sound-toggle span:first-child { font-size: 17px; }
+@media(max-width:560px) { .practice-top-actions { gap: 7px; } }

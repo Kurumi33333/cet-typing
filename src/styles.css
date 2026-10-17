@@ -168,3 +168,16 @@ h1 em { color: #7ba995; font-style: normal; }
   .sound-toggle { padding: 6px 8px; font-size: 11px; }
   .slot-actions { gap: 10px 17px; }
 }
+
+/* Study v0.4 · quiet saved progress and error review entrance */
+.review-entry { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; max-width: 540px; margin: 27px 0 22px; padding: 19px 0 2px; border-top: 1px solid #dde7df; }
+.review-entry-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; color: #456453; }
+.review-entry-heading strong { font-size: 14px; font-weight: 650; }
+.review-entry-heading span { color: #86938b; font-size: 12px; line-height: 1.7; }
+.review-entry-actions { display: flex; gap: 10px; }
+.review-entry-button { border: 1px solid #d7e5da; background: #edf4ee; color: #456e56; border-radius: 12px; padding: 10px 13px; display: inline-flex; gap: 13px; align-items: center; font-size: 13px; cursor: pointer; }
+.review-entry-button:hover:not(:disabled) { background: #e1eee3; }
+.review-entry-button:disabled { opacity: .5; cursor: not-allowed; }
+.review-count { min-width: 24px; padding: 2px 6px; text-align: center; background: #dce9df; border-radius: 8px; font-variant-numeric: tabular-nums; font-size: 12px; }
+.storage-warning { margin: 12px auto; padding: 11px 14px; max-width: 570px; background: #fbf0e6; color: #9b5c35; border-radius: 10px; font-size: 13px; line-height: 1.7; }
+@media (max-width: 560px) { .review-entry { margin-top: 22px; }.review-entry-heading span { display: block; } }

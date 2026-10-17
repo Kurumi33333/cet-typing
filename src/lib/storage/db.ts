@@ -1,6 +1,7 @@
 import { Dexie, type EntityTable } from "dexie";
 import type { CetLevel } from "../../features/course/types";
 import type { Card } from "ts-fsrs";
+import { initialReviewCard } from "../../features/review/scheduler";
 
 export interface StudyProgress {
   level: CetLevel;
@@ -59,15 +60,28 @@ export async function saveProgress(
 export async function recordMistake(
   level: CetLevel, lessonId: string, exerciseId: string, lastAttempt: string,
 ): Promise<void> {
-  await db.transaction("rw", db.mistakes, async () => {
+  await db.transaction("rw", db.mistakes, db.reviews, async () => {
     const previous = await db.mistakes.get(exerciseId);
+    const now = Date.now();
     await db.mistakes.put({
       id: exerciseId, level, lessonId,
       wrongCount: (previous?.wrongCount ?? 0) + 1,
       lastAttempt,
-      updatedAt: Date.now(),
+      updatedAt: now,
       resolved: false,
     });
+    const scheduled = await db.reviews.get(exerciseId);
+    if (!scheduled) {
+      await db.reviews.put({
+        id: exerciseId, level, card: initialReviewCard(new Date(now)),
+        due: now, updatedAt: now,
+      });
+    } else if (scheduled.due > now) {
+      // A fresh failure in regular practice makes the forgotten word due now.
+      await db.reviews.put({
+        ...scheduled, due: now, card: { ...scheduled.card, due: new Date(now) }, updatedAt: now,
+      });
+    }
   });
 }
 

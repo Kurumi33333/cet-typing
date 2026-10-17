@@ -139,6 +139,18 @@ export const lessons: Lesson[] = [
     ["sentence", "每位成员都应该对结果负责。", "Every member should be responsible for the outcome."],
   ]),
 
+  lesson("cet4-07", "CET4", "保护我们的环境", "把常见词汇组合成讨论环保的小句子。", [
+    ["word", "保护", "protect"],
+    ["word", "环境", "environment"],
+    ["phrase", "保护环境", "protect the environment"],
+    ["sentence", "我们应该保护环境。", "We should protect the environment."],
+    ["word", "能源", "energy"],
+    ["phrase", "节约能源", "save energy"],
+    ["sentence", "我们可以在家节约能源。", "We can save energy at home."],
+    ["word", "减少", "reduce"],
+    ["phrase", "减少污染", "reduce pollution"],
+    ["sentence", "节约能源有助于减少污染。", "Saving energy helps reduce pollution."],
+  ]),
 ];
 
 export function getLessons(level: CetLevel): Lesson[] {

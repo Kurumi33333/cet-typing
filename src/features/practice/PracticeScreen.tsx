@@ -161,7 +161,10 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) {
+      if (event.key === "Enter") event.preventDefault();
+      return;
+    }
 
     if (phase === "passed") {
       if (event.key === "Enter" || event.key === " ") {

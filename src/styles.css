@@ -141,3 +141,19 @@ h1 em { color: #7ba995; font-style: normal; }
 .success-emphasis { pointer-events: none; color: #61997a; letter-spacing: .08em; font-family: Georgia, serif; font-size: 18px; margin: 0 auto; font-weight: 600; }
 .success-emphasis span { font-size: 14px; margin-right: 6px; }
 @media (prefers-reduced-motion: reduce) { .slot-word, .slot-list, .progress-fill { transition-duration: 0ms !important; } }
+
+/* S3e keyboard UX: selection ONLY recolors the underline; no ink/ripple/tap motion. */
+.slot-unit { transition: none; background: transparent; outline: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.slot-unit:active { transform: none; background: transparent; }
+.slot-word { transition: none; }
+.slot-active { color: #54615a; border-color: #8b9dc5; border-bottom-width: 2px; background: transparent; text-shadow: none; }
+.slot-unit:focus-visible .slot-word { outline: 2px solid #88a3c3; outline-offset: 3px; }
+.slot-list { -webkit-user-select: none; user-select: none; }
+.slot-stage { -webkit-tap-highlight-color: transparent; }
+.slot-capture { -webkit-tap-highlight-color: transparent; }
+.question-prompt { min-height: 155px; }
+.question-prompt .instruction { margin-bottom: 30px; }
+@media (max-width: 560px) {
+  .question-prompt { min-height: 135px; }
+  .slot-stage { min-height: 100px; }
+}

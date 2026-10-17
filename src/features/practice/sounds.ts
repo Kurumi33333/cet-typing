@@ -1,46 +1,95 @@
 /**
- * Tiny local Web Audio feedback: no third-party files, requests or accounts.
- * Called from a keyboard/tap gesture to respect browser autoplay restrictions.
+ * Local Web Audio sound palette (no files/network).
+ * Designed to be quiet, tactile, and distinct: typing, delete, navigation,
+ * selecting a blank, correcting mistakes, succeeding, entering the next step.
+ * AudioContext is opened lazily from a real key/tap gesture.
  */
-type FeedbackSound = "success" | "error";
-let sharedContext: AudioContext | null = null;
+export type FeedbackSound = "typing" | "delete" | "navigate" | "select" | "success" | "error" | "advance";
 const KEY = "cet-typing:feedback-sounds";
+let context: AudioContext | null = null;
+let noiseBuffer: AudioBuffer | null = null;
 
 export function readSoundPreference(): boolean {
-  try { return window.localStorage.getItem(KEY) !== "off"; }
+  try { return typeof window === "undefined" || window.localStorage.getItem(KEY) !== "off"; }
   catch { return true; }
 }
 
 export function writeSoundPreference(enabled: boolean): void {
   try { window.localStorage.setItem(KEY, enabled ? "on" : "off"); }
-  catch { /* Private browsing can disable localStorage. */ }
+  catch { /* Some privacy modes disallow persistent settings. */ }
 }
 
-export function playFeedback(type: FeedbackSound): void {
-  if (typeof window === "undefined" || !window.AudioContext) return;
+function tone(ctx: AudioContext, start: number, hz: number, duration: number, volume: number,
+  shape: OscillatorType = "sine", endHz = hz): void {
+  const osc = ctx.createOscillator();
+  const envelope = ctx.createGain();
+  osc.type = shape;
+  osc.frequency.setValueAtTime(hz, start);
+  if (hz !== endHz) osc.frequency.exponentialRampToValueAtTime(endHz, start + duration);
+  envelope.gain.setValueAtTime(0.0001, start);
+  envelope.gain.exponentialRampToValueAtTime(volume, start + Math.min(0.008, duration * 0.35));
+  envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(envelope);
+  envelope.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.005);
+}
+
+function tap(ctx: AudioContext, now: number, volume: number, duration: number): void {
+  if (!noiseBuffer) {
+    noiseBuffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.05), ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = 1600;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(volume, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  src.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  src.start(now);
+  src.stop(now + duration);
+}
+
+export function playFeedback(kind: FeedbackSound): void {
+  if (typeof window === "undefined") return;
+  const Audio = window.AudioContext ??
+    (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Audio) return;
   try {
-    const context = sharedContext ?? (sharedContext = new window.AudioContext());
-    if (context.state === "suspended") void context.resume().catch(() => {});
-    const now = context.currentTime;
-    // Success = quiet ascending major triad. Error = short, muted downward pair.
-    const notes = type === "success" ? [523.25, 659.25, 783.99] : [330, 261.63];
-    const duration = type === "success" ? 0.105 : 0.12;
-    notes.forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = type === "success" ? "sine" : "triangle";
-      oscillator.frequency.value = frequency;
-      const start = now + index * (type === "success" ? 0.074 : 0.095);
-      const end = start + duration;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(type === "success" ? 0.06 : 0.038, start + 0.014);
-      gain.gain.exponentialRampToValueAtTime(0.0001, end);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(start);
-      oscillator.stop(end + 0.01);
-    });
+    const ctx = context ?? (context = new Audio());
+    if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+    const at = ctx.currentTime + 0.006;
+    if (kind === "typing") {
+      tap(ctx, at, 0.032, 0.019);
+      tone(ctx, at, 770, 0.025, 0.008, "triangle", 610);
+    } else if (kind === "delete") {
+      tap(ctx, at, 0.022, 0.025);
+      tone(ctx, at, 340, 0.042, 0.013, "sine", 265);
+    } else if (kind === "navigate") {
+      tone(ctx, at, 510, 0.055, 0.024, "sine", 690);
+      tone(ctx, at + 0.018, 870, 0.035, 0.009);
+    } else if (kind === "select") {
+      tone(ctx, at, 640, 0.036, 0.022, "sine", 760);
+      tap(ctx, at, 0.009, 0.011);
+    } else if (kind === "advance") {
+      tone(ctx, at, 490, 0.088, 0.04);
+      tone(ctx, at + 0.056, 735, 0.12, 0.036);
+    } else if (kind === "success") {
+      tone(ctx, at, 523.25, 0.115, 0.052);
+      tone(ctx, at + 0.065, 659.25, 0.14, 0.05);
+      tone(ctx, at + 0.13, 783.99, 0.20, 0.045);
+    } else {
+      // Soft double dissonance, present without an obnoxious alarm.
+      tone(ctx, at, 352, 0.085, 0.034, "triangle", 310);
+      tone(ctx, at + 0.065, 247, 0.115, 0.028, "triangle", 215);
+    }
   } catch {
-    // No sound support should never block the typing experience.
+    // Failure to play never blocks typing (iOS mute, privacy modes, etc).
   }
 }

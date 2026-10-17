@@ -181,3 +181,11 @@ h1 em { color: #7ba995; font-style: normal; }
 .review-count { min-width: 24px; padding: 2px 6px; text-align: center; background: #dce9df; border-radius: 8px; font-variant-numeric: tabular-nums; font-size: 12px; }
 .storage-warning { margin: 12px auto; padding: 11px 14px; max-width: 570px; background: #fbf0e6; color: #9b5c35; border-radius: 10px; font-size: 13px; line-height: 1.7; }
 @media (max-width: 560px) { .review-entry { margin-top: 22px; }.review-entry-heading span { display: block; } }
+
+/* Explicit, local-only data portability tools. */
+.data-tools { display:flex; flex-wrap:wrap; gap:12px 15px; align-items:center; max-width:570px; padding-top:14px; border-top:1px solid #e2e9e3; }
+.data-tools span { font-size:12px; font-weight:650; color:#63786a; margin-right:4px; }
+.data-tools button { padding:6px 0; border:0; background:transparent; font-size:12px; cursor:pointer; color:#52765e; }
+.data-tools button:hover:not(:disabled) { text-decoration:underline; text-underline-offset:4px; }
+.data-tools button:disabled { opacity:.4; cursor:wait; }
+.data-tools .danger-text { color:#ad7770; }

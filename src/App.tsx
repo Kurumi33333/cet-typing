@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { CetLevel, Exercise } from "./features/course/types";
 import { getLessons } from "./data/curriculum";
-import { loadMistakes, loadProgress, type StudyProgress } from "./lib/storage/db";
+import { loadProgress, type StudyProgress } from "./lib/storage/db";
+import { loadReviewOverview, loadDueReviewIds, type ReviewOverview } from "./features/review/queue";
 import { clearStudyRecords, createStudyBackup, importStudyBackup, parseStudyBackup } from "./lib/storage/backup";
 import { PracticeScreen } from "./features/practice/PracticeScreen";
 
@@ -11,7 +12,10 @@ const LEVELS: CetLevel[] = ["CET4", "CET6"];
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [positions, setPositions] = useState<Partial<Record<CetLevel, StudyProgress>>>({});
-  const [mistakeCounts, setMistakeCounts] = useState<Record<CetLevel, number>>({ CET4: 0, CET6: 0 });
+  const [reviewOverview, setReviewOverview] = useState<Record<CetLevel, ReviewOverview>>({
+    CET4: { due: 0, later: 0, total: 0 },
+    CET6: { due: 0, later: 0, total: 0 },
+  });
   const [busy, setBusy] = useState<CetLevel | null>(null);
   const [notice, setNotice] = useState("");
   const [maintenance, setMaintenance] = useState(false);
@@ -24,11 +28,11 @@ export default function App() {
     let active = true;
     Promise.all([
       loadProgress("CET4"), loadProgress("CET6"),
-      loadMistakes("CET4"), loadMistakes("CET6"),
+      loadReviewOverview("CET4"), loadReviewOverview("CET6"),
     ]).then(([p4, p6, m4, m6]) => {
       if (!active) return;
       setPositions({ CET4: p4, CET6: p6 });
-      setMistakeCounts({ CET4: m4.length, CET6: m6.length });
+      setReviewOverview({ CET4: m4, CET6: m6 });
     }).catch(() => {
       if (active) setNotice("当前浏览器的本地学习记录不可用；仍然可以练习。");
     });
@@ -100,15 +104,15 @@ export default function App() {
     setNotice("");
     setBusy(level);
     try {
-      const records = await loadMistakes(level);
+      const ids = await loadDueReviewIds(level);
       const byId = new Map(getLessons(level).flatMap((lesson) =>
         lesson.exercises.map((exercise) => [exercise.id, exercise] as const)));
-      const exercises = records.flatMap((entry) => {
-        const exercise = byId.get(entry.id);
+      const exercises = ids.flatMap((id) => {
+        const exercise = byId.get(id);
         return exercise ? [exercise] : [];
       });
       if (!exercises.length) {
-        setNotice("这个等级暂时没有待复习的错题。先练几道题吧。");
+        setNotice("这个等级当前没有到期的错题。未来的复习会在到期时自动出现。");
         return;
       }
       setSession({ level, reviewExercises: exercises });
@@ -142,21 +146,22 @@ export default function App() {
               六级 · {resumeLabel("CET6")} <span aria-hidden="true">↗</span>
             </button>
           </div>
-          <div className="review-entry" aria-label="本机错题复习">
+          <div className="review-entry" aria-label="FSRS 本机间隔复习">
             <div className="review-entry-heading">
-              <strong>错题回顾</strong>
-              <span>写错的题留在这里，复习答对后移出待复习列表。</span>
+              <strong>间隔复习</strong>
+              <span>FSRS 安排下次练习。答对后不会永久消失，而是在该复习时再出现。</span>
             </div>
             <div className="review-entry-actions">
               {LEVELS.map((level) => (
                 <button type="button" key={level} className="review-entry-button"
-                  disabled={busy !== null || mistakeCounts[level] === 0}
+                  disabled={busy !== null || reviewOverview[level].due === 0}
                   onClick={() => void startReview(level)}>
-                  {level === "CET4" ? "四级" : "六级"}错题
-                  <span className="review-count">{mistakeCounts[level]}</span>
+                  {level === "CET4" ? "四级" : "六级"}到期
+                  <span className="review-count">{reviewOverview[level].due}</span>
                 </button>
               ))}
             </div>
+            <p className="review-future">待下次复习：四级 {reviewOverview.CET4.later} · 六级 {reviewOverview.CET6.later}</p>
           </div>
           <div className="data-tools" aria-label="学习记录管理">
             <span>本地记录</span>

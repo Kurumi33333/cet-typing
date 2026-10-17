@@ -78,3 +78,38 @@ h1 em { color: #7ba995; font-style: normal; }
 .review-correct { background: #dcefe3; color: #326e51; }
 .review-replace, .review-extra { background: #f9e4e0; color: #a3403a; text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
 .review-missing { color: #a3403a; border: 1px dashed #d89e94; }
+
+/* S2: keyboard-first, underlined word slots (no boxed textarea). */
+.centered-practice { text-align: center; padding-top: clamp(70px, 11vw, 126px); }
+.centered-practice .eyebrow { justify-content: center; letter-spacing: .13em; font-size: 11px; }
+.centered-practice .chinese-sentence { margin: 32px auto 12px; max-width: 850px; }
+.centered-practice .instruction { margin: 0 auto 55px; }
+.slot-form { width: 100%; }
+.slot-stage { position: relative; width: 100%; min-height: 112px; display: flex; align-items: flex-start; justify-content: center; cursor: text; padding: 9px 0; }
+.slot-capture { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; padding: 0; margin: 0; border: none; background: transparent; opacity: 0; color: transparent; font-size: 16px; outline: none; caret-color: transparent; }
+.slot-list { position: relative; z-index: 2; display: flex; justify-content: center; flex-wrap: wrap; align-items: flex-end; gap: 13px 12px; width: 100%; pointer-events: none; }
+.slot-unit { display: inline-flex; align-items: flex-end; position: relative; cursor: text; pointer-events: auto; transition: transform .15s ease; }
+.slot-word { box-sizing: border-box; display: inline-flex; justify-content: center; align-items: flex-end; min-height: 53px; padding: 4px 4px 9px; font-size: clamp(21px, 3.4vw, 34px); line-height: 1.08; font-weight: 500; color: #5d6b64; border-bottom: 2px solid #cfd8d1; border-radius: 1px; white-space: pre; transition: border-color 140ms ease, color 140ms ease, background 140ms ease; }
+.slot-punctuation { padding: 0 0 10px 1px; font-size: clamp(21px, 3.4vw, 34px); line-height: 1.08; color: #718078; }
+.slot-active { color: #8354a8; border-color: #ae83cc; border-bottom-width: 3px; }
+.slot-idle { color: #54615a; }
+.slot-verified { border-color: #bdc8bf; color: #52645a; }
+.slot-incorrect { color: #db4f56; border-color: #db4f56; border-bottom-width: 3px; animation: slot-shake 320ms ease; }
+.slot-correct { color: #43836b; border-color: #69a68a; }
+.slot-needs-fix { cursor: pointer; }
+.slot-feedback { color: #8a978f; min-height: 27px; font-size: 13px; margin: 30px auto 0; line-height: 1.75; }
+.feedback-error { color: #bd5357; }
+.feedback-success { color: #4f9575; }
+.slot-actions { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 28px; margin-top: 26px; }
+.submit-minimal { background: #e6efe9; color: #42775d; border: 1px solid #d4e4da; padding: 12px 20px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 650; transition: background 150ms ease; }
+.submit-minimal:hover { background: #d6e7dc; }
+.slot-form .revealed-answer { margin: 16px auto 0; max-width: 500px; text-align: left; }
+@keyframes slot-shake { 0%,100% { transform: translateX(0); } 22% { transform: translateX(-4px); } 46% { transform: translateX(4px); } 68% { transform: translateX(-2px); } }
+@media (max-width: 560px) {
+  .centered-practice { padding-top: 60px; }
+  .centered-practice .instruction { margin-bottom: 35px; }
+  .slot-list { gap: 11px 8px; }
+  .slot-word { min-height: 45px; padding: 5px 2px 7px; }
+  .slot-stage { min-height: 95px; }
+}
+@media (prefers-reduced-motion: reduce) { .slot-incorrect { animation: none; } }

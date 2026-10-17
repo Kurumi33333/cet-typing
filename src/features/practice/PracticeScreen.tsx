@@ -1,69 +1,242 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { starterExercises } from "../../data/starter";
 import type { CetLevel } from "../course/types";
-import { isCorrectAnswer } from "./answer";
-import { diffWords } from "./wordDiff";
+import {
+  draftToSlotValues,
+  getActiveSlot,
+  incorrectSlots,
+  matchesSlot,
+  sentenceToSlots,
+} from "./slots";
 
-type Verdict = "correct" | "incorrect" | null;
+type Phase = "typing" | "review" | "fix" | "passed";
 
 interface PracticeScreenProps {
   level: CetLevel;
   onBack: () => void;
 }
 
+/**
+ * One keyboard stream, many visible underlined word slots.
+ * The input stays visually transparent; the slot UI is the only visible typing surface.
+ */
 export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
-  const exercises = starterExercises.filter((exercise) => exercise.level === level);
+  const exercises = starterExercises.filter((item) => item.level === level);
   const [index, setIndex] = useState(0);
-  const [answer, setAnswer] = useState("");
-  const [verdict, setVerdict] = useState<Verdict>(null);
+  const [draft, setDraft] = useState("");
+  const [values, setValues] = useState<string[]>([]);
+  const [phase, setPhase] = useState<Phase>("typing");
+  const [fixIndex, setFixIndex] = useState(0);
+  const [fixValue, setFixValue] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [completed, setCompleted] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [feedback, setFeedback] = useState("按空格切换到下一格，按 Enter 检查答案");
+  const [focused, setFocused] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const isComposing = useRef(false);
+  const composing = useRef(false);
+  const exercise = exercises[index];
+  const slots = sentenceToSlots(exercise.english);
+  const displayValues = phase === "typing" ? draftToSlotValues(draft, slots.length) : values;
+  const wrong = phase === "typing" || phase === "passed" ? [] : incorrectSlots(displayValues, slots);
+  const activeIndex = phase === "typing" ? getActiveSlot(draft, slots.length) : fixIndex;
 
   useEffect(() => {
     if (!finished) inputRef.current?.focus();
   }, [index, finished]);
 
+  useEffect(() => {
+    if (phase !== "passed") return;
+    const timer = window.setTimeout(() => {
+      if (index + 1 === exercises.length) {
+        setFinished(true);
+      } else {
+        setIndex((previous) => previous + 1);
+        setDraft("");
+        setValues([]);
+        setPhase("typing");
+        setFixValue("");
+        setFixIndex(0);
+        setRevealed(false);
+        setFeedback("按空格切换到下一格，按 Enter 检查答案");
+      }
+    }, 850);
+    return () => window.clearTimeout(timer);
+  }, [phase, index, exercises.length]);
+
+  function focusInput() {
+    inputRef.current?.focus();
+    if (phase === "typing") {
+      const el = inputRef.current;
+      el?.setSelectionRange(el.value.length, el.value.length);
+    }
+  }
+
   function nextQuestion() {
-    if (index + 1 >= exercises.length) {
+    if (index + 1 === exercises.length) {
       setFinished(true);
       return;
     }
     setIndex((previous) => previous + 1);
-    setAnswer("");
-    setVerdict(null);
+    setDraft("");
+    setValues([]);
+    setPhase("typing");
+    setFixValue("");
+    setFixIndex(0);
     setRevealed(false);
+    setFeedback("按空格切换到下一格，按 Enter 检查答案");
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (isComposing.current) return;
-    if (verdict === "correct") {
-      nextQuestion();
+  function check(candidate: string[]) {
+    setAttempts((previous) => previous + 1);
+    setValues(candidate);
+    const errors = incorrectSlots(candidate, slots);
+    if (errors.length === 0) {
+      setPhase("passed");
+      setCompleted((previous) => previous + 1);
+      setFeedback("正确！即将进入下一题");
+    } else {
+      setPhase("review");
+      setFeedback(`有 ${errors.length} 个单词需要修正。直接打字，或点一下红色单词。`);
+    }
+  }
+
+  function startFix(at: number, initial = "") {
+    if (phase !== "review" && phase !== "fix") return;
+    if (phase === "review" && !wrong.includes(at)) return;
+    setFixIndex(at);
+    setFixValue(initial);
+    setValues((previous) => previous.map((word, i) => i === at ? initial : word));
+    setPhase("fix");
+    setFeedback("重新输入标出的单词，按空格继续修复");
+    inputRef.current?.focus();
+  }
+
+  function advanceFix(candidate: string[]) {
+    if (!matchesSlot(candidate[fixIndex] ?? "", slots[fixIndex])) {
+      setFeedback("这个单词还不正确，继续修改，或按 Enter 再检查");
       return;
     }
-    if (!answer.trim()) return;
-
-    setAttempts((previous) => previous + 1);
-    if (isCorrectAnswer(answer, exercises[index].english)) {
-      setVerdict("correct");
-      setCompleted((previous) => previous + 1);
-    } else {
-      setVerdict("incorrect");
+    const following = incorrectSlots(candidate, slots).find((at) => at > fixIndex);
+    if (following !== undefined) {
+      setFixIndex(following);
+      setFixValue("");
+      setValues(candidate.map((word, i) => i === following ? "" : word));
+      setFeedback("很好，继续修复下一个单词");
+      return;
     }
+    if (incorrectSlots(candidate, slots).length === 0) {
+      check(candidate);
+    } else {
+      setValues(candidate);
+      setPhase("review");
+      setFeedback("还有单词需要修复，可以点击红色下划线重新输入");
+    }
+  }
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const next = event.target.value;
+    if (phase === "typing") {
+      setDraft(next.replace(/[\r\n]/gu, " "));
+    } else if (phase === "review") {
+      if (next.length > 0) {
+        const first = wrong[0];
+        if (first !== undefined) startFix(first, next);
+      }
+    } else if (phase === "fix") {
+      if (/\s/u.test(next) && !composing.current) {
+        const firstWord = next.trim().split(/\s+/u)[0] ?? "";
+        const candidate = [...values];
+        candidate[fixIndex] = firstWord;
+        setValues(candidate);
+        setFixValue(firstWord);
+        advanceFix(candidate);
+      } else {
+        setFixValue(next);
+        setValues((previous) => previous.map((word, i) => i === fixIndex ? next : word));
+      }
+    }
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+
+    if (phase === "passed") {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        nextQuestion();
+      }
+      return;
+    }
+
+    if (phase === "typing") {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (draft.trim()) check(draftToSlotValues(draft, slots.length));
+      }
+      // Normal spaces/backspace edit the invisible sentence input naturally.
+      return;
+    }
+
+    if (phase === "review") {
+      const first = wrong[0];
+      if (first === undefined) return;
+      if (event.key === "Enter" || event.key === " " || event.key === "Backspace") {
+        event.preventDefault();
+        startFix(first);
+      } else if (event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        startFix(first, event.key);
+      }
+      return;
+    }
+
+    if (phase === "fix") {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        check(values);
+      } else if (event.key === " ") {
+        event.preventDefault();
+        advanceFix(values);
+      } else if (event.key === "Backspace" && fixValue.length === 0) {
+        const before = incorrectSlots(values, slots).filter((at) => at < fixIndex).pop();
+        if (before !== undefined) {
+          event.preventDefault();
+          startFix(before);
+        }
+      }
+    }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (composing.current) return;
+    if (phase === "typing" && draft.trim()) {
+      check(draftToSlotValues(draft, slots.length));
+    } else if (phase === "fix") {
+      check(values);
+    } else if (phase === "review") {
+      if (wrong[0] !== undefined) startFix(wrong[0]);
+    } else if (phase === "passed") {
+      nextQuestion();
+    }
+    focusInput();
   }
 
   function restart() {
     setIndex(0);
-    setAnswer("");
-    setVerdict(null);
+    setDraft("");
+    setValues([]);
+    setPhase("typing");
+    setFixIndex(0);
+    setFixValue("");
     setRevealed(false);
     setAttempts(0);
     setCompleted(0);
     setFinished(false);
+    setFeedback("按空格切换到下一格，按 Enter 检查答案");
   }
 
   if (finished) {
@@ -80,7 +253,6 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     );
   }
 
-  const exercise = exercises[index];
   return (
     <section className="practice-area" aria-label={level === "CET4" ? "四级训练" : "六级训练"}>
       <div className="practice-topline">
@@ -88,61 +260,87 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
         <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 演示题</span>
         <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
       </div>
-      <div className="progress-track" role="progressbar" aria-label="练习进度" aria-valuenow={index + 1} aria-valuemin={0} aria-valuemax={exercises.length}>
-        <div className="progress-fill" style={{ width: `${((index + 1) / exercises.length) * 100}%` }} />
+      <div className="progress-track" role="progressbar" aria-label="练习进度"
+        aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>
+        <div className="progress-fill" style={{ width: `${(index / exercises.length) * 100}%` }} />
       </div>
-      <div className="question-body">
-        <div className="eyebrow"><span className="status-dot" /> 根据中文写出完整英文</div>
+      <div className="question-body centered-practice">
+        <div className="eyebrow"><span className="status-dot" /> TRANSLATE INTO ENGLISH</div>
         <h2 className="chinese-sentence">{exercise.chinese}</h2>
-        <p className="instruction">在下方输入英文句子，按 Enter 提交。大小写和句末标点不影响判定。</p>
-        <form onSubmit={submit} className="answer-form">
-          <label htmlFor="english-answer" className="input-label">你的英文表达</label>
-          <input
-            ref={inputRef}
-            id="english-answer"
-            className={`answer-input ${verdict === "incorrect" ? "input-error" : ""} ${verdict === "correct" ? "input-success" : ""}`}
-            value={answer}
-            onChange={(event) => { setAnswer(event.target.value); if (verdict === "incorrect") setVerdict(null); }}
-            onCompositionStart={() => { isComposing.current = true; }}
-            onCompositionEnd={() => { isComposing.current = false; }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.nativeEvent.isComposing || isComposing.current || event.keyCode === 229)) {
-                event.preventDefault();
-              }
-            }}
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            readOnly={verdict === "correct"}
-            placeholder="Type the English sentence..."
-            aria-describedby="answer-feedback"
-          />
-          <div className="feedback" id="answer-feedback" role="status" aria-live="polite">
-            {verdict === "correct" ? <span className="correct-text">✓ 回答正确，进入下一句吧。</span> : null}
-            {verdict === "incorrect" ? <span className="error-text">还不正确，可以修改后重新提交。</span> : null}
-            {verdict === null ? <span>你可以随时修改输入。</span> : null}
-          </div>
-          {verdict === "incorrect" && (
-            <div className="word-review" aria-label="逐词错误提示">
-              <p className="word-review-label">逐词检查 · 绿色正确，红色需要修改</p>
-              <div className="word-review-list">
-                {diffWords(answer, exercise.english).map((word, position) => (
-                  <span key={position} className={`review-token review-${word.status}`}
-                    title={word.status === "correct" ? "正确" : word.status === "missing" ? "缺少单词" : word.status === "extra" ? "多余单词" : "该词需要修改"}>
-                    {word.actual ?? "＋缺词"}
-                  </span>
-                ))}
-              </div>
+        <p className="instruction">记起这句话的英文，然后直接打字。</p>
+
+        <form className="slot-form" onSubmit={handleSubmit}>
+          <div className={`slot-stage ${focused ? "stage-focused" : ""}`}
+            onClick={focusInput} aria-label="逐词下划线填空区域">
+            <input
+              ref={inputRef}
+              id="english-answer"
+              className="slot-capture"
+              type="text"
+              aria-label="键盘输入英文句子，空格换词，回车检查"
+              aria-describedby="practice-feedback"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              inputMode="text"
+              value={phase === "typing" ? draft : phase === "fix" ? fixValue : ""}
+              onChange={handleChange}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onCompositionStart={() => { composing.current = true; }}
+              onCompositionEnd={() => { composing.current = false; }}
+              onKeyDown={handleKeyDown}
+            />
+            <div className="slot-list">
+              {slots.map((slot, at) => {
+                const value = displayValues[at] ?? "";
+                const visible = value.replace(/[.,!?;:]+$/gu, "");
+                const incorrect = wrong.includes(at);
+                const isActive = focused && (phase === "typing" || phase === "fix") && at === activeIndex;
+                const appearance = phase === "passed" ? "slot-correct" :
+                  isActive ? "slot-active" :
+                  incorrect ? "slot-incorrect" :
+                  phase === "review" || phase === "fix" ? "slot-verified" : "slot-idle";
+
+                return (
+                  <div className={`slot-unit ${incorrect ? "slot-needs-fix" : ""}`} key={at}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (phase === "review" && incorrect) startFix(at);
+                      else if (phase === "fix" && incorrect) startFix(at);
+                      else focusInput();
+                    }}
+                    title={phase === "review" && incorrect ? "点击修改这个单词" : undefined}>
+                    <span className={`slot-word ${appearance}`}
+                      style={{ minWidth: `${slot.widthCh}ch` }}>
+                      {visible || "\u00a0"}
+                    </span>
+                    {slot.punctuation && <span className="slot-punctuation">{slot.punctuation}</span>}
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+
+          <p id="practice-feedback" className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`} role="status" aria-live="polite">
+            {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
+          </p>
+
           {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
-          <div className="answer-actions">
-            <button className="primary-button" type="submit" disabled={!answer.trim() && verdict !== "correct"}>
-              {verdict === "correct" ? (index + 1 === exercises.length ? "完成练习 ↗" : "下一句 →") : "提交答案 ↗"}
+
+          <div className="slot-actions">
+            <button className="submit-minimal" type="submit">
+              {phase === "review" ? "开始修正 ↗" : phase === "fix" ? "再次检查 ↗" :
+                phase === "passed" ? "下一句 →" : "Enter · 检查答案"}
             </button>
-            {verdict !== "correct" && <button className="text-button" type="button" onClick={() => setRevealed((value) => !value)}>
-              {revealed ? "隐藏参考答案" : "查看参考答案"}
-            </button>}
+            {phase !== "passed" && (
+              <button className="text-button" type="button" onClick={() => {
+                setRevealed((value) => !value);
+                focusInput();
+              }}>{revealed ? "隐藏答案" : "显示答案"}</button>
+            )}
           </div>
         </form>
       </div>

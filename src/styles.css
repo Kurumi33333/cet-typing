@@ -157,3 +157,14 @@ h1 em { color: #7ba995; font-style: normal; }
   .question-prompt { min-height: 135px; }
   .slot-stage { min-height: 100px; }
 }
+
+/* V0.3 · native English TTS, separate from playful keyboard sound effects. */
+.speech-toggle { white-space: nowrap; }
+.speech-toggle span:first-child { font-size: 13px; }
+.replay-button { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.replay-button:disabled { opacity: .4; cursor: not-allowed; }
+@media (max-width: 560px) {
+  .practice-top-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .sound-toggle { padding: 6px 8px; font-size: 11px; }
+  .slot-actions { gap: 10px 17px; }
+}

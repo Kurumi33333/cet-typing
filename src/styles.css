@@ -69,3 +69,12 @@ h1 em { color: #7ba995; font-style: normal; }
 .finished-screen h2 em { color: #77a993; font-style: normal; }
 .finished-screen p { color: #6e8074; }
 @media(max-width: 560px) { .practice-topline { flex-wrap: wrap; } .level-label { display: none; } .question-body { padding-top: 70px; } .instruction { margin-bottom: 30px; } .answer-input { padding: 17px 15px; } }
+
+/* S2b · non-revealing word level hints */
+.word-review { margin-top: 13px; background: #f0f3ee; border: 1px solid #e2e9e0; padding: 15px 17px; border-radius: 12px; }
+.word-review-label { color: #748478; font-size: 12px; margin: 0 0 11px; }
+.word-review-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.review-token { border: 1px solid transparent; border-radius: 7px; padding: 5px 9px; font-size: 15px; line-height: 1.3; }
+.review-correct { background: #dcefe3; color: #326e51; }
+.review-replace, .review-extra { background: #f9e4e0; color: #a3403a; text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; }
+.review-missing { color: #a3403a; border: 1px dashed #d89e94; }

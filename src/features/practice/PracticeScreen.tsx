@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { starterExercises } from "../../data/starter";
 import type { CetLevel } from "../course/types";
 import { isCorrectAnswer } from "./answer";
+import { diffWords } from "./wordDiff";
 
 type Verdict = "correct" | "incorrect" | null;
 
@@ -116,6 +117,19 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             {verdict === "incorrect" ? <span className="error-text">还不正确，可以修改后重新提交。</span> : null}
             {verdict === null ? <span>你可以随时修改输入。</span> : null}
           </div>
+          {verdict === "incorrect" && (
+            <div className="word-review" aria-label="逐词错误提示">
+              <p className="word-review-label">逐词检查 · 绿色正确，红色需要修改</p>
+              <div className="word-review-list">
+                {diffWords(answer, exercise.english).map((word, position) => (
+                  <span key={position} className={`review-token review-${word.status}`}
+                    title={word.status === "correct" ? "正确" : word.status === "missing" ? "缺少单词" : word.status === "extra" ? "多余单词" : "该词需要修改"}>
+                    {word.actual ?? "＋缺词"}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
           <div className="answer-actions">
             <button className="primary-button" type="submit" disabled={!answer.trim() && verdict !== "correct"}>

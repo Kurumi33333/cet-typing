@@ -19,7 +19,7 @@ export function validateLexicon(input: unknown, expected: CetLevel): LexiconData
   if (!input || typeof input !== "object") throw Error("词库格式错误");
   const data = input as Partial<LexiconData>;
   if (data.schema !== 1 || data.level !== expected || data.license !== "BSD-3-Clause" ||
-    !Array.isArray(data.words) || !Number.isInteger(data.rawRows) ||
+    !Array.isArray(data.words) || typeof data.rawRows !== "number" || !Number.isInteger(data.rawRows) ||
     data.uniqueWords !== data.words.length) throw Error("词库版本或数据不匹配");
   if (!data.words.every((e) => typeof e?.word === "string" &&
     /^[a-z][a-z' -]*$/u.test(e.word) && Array.isArray(e.glosses) &&

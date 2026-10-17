@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CetLevel, Exercise } from "./features/course/types";
 import { getLessons } from "./data/curriculum";
 import { loadMistakes, loadProgress, type StudyProgress } from "./lib/storage/db";
+import { clearStudyRecords, createStudyBackup, importStudyBackup, parseStudyBackup } from "./lib/storage/backup";
 import { PracticeScreen } from "./features/practice/PracticeScreen";
 
 type Session = { level: CetLevel; reviewExercises?: Exercise[] };
@@ -13,6 +14,9 @@ export default function App() {
   const [mistakeCounts, setMistakeCounts] = useState<Record<CetLevel, number>>({ CET4: 0, CET6: 0 });
   const [busy, setBusy] = useState<CetLevel | null>(null);
   const [notice, setNotice] = useState("");
+  const [maintenance, setMaintenance] = useState(false);
+  const [dataRevision, setDataRevision] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Refresh the home summary after practice is closed. No online account.
   useEffect(() => {
@@ -29,7 +33,61 @@ export default function App() {
       if (active) setNotice("当前浏览器的本地学习记录不可用；仍然可以练习。");
     });
     return () => { active = false; };
-  }, [session]);
+  }, [session, dataRevision]);
+
+  async function exportRecords() {
+    setMaintenance(true);
+    setNotice("");
+    try {
+      const backup = await createStudyBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "cet-typing-backup.json";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      setNotice("已准备好本地学习记录备份文件，请妥善保存。");
+    } catch {
+      setNotice("导出失败：浏览器可能不允许访问本地学习记录。");
+    } finally {
+      setMaintenance(false);
+    }
+  }
+
+  async function importRecords(file?: File) {
+    if (!file) return;
+    setMaintenance(true);
+    setNotice("");
+    try {
+      if (file.size > 1024 * 1024) throw Error("备份文件超过 1MB，已拒绝导入");
+      const parsed = parseStudyBackup(JSON.parse(await file.text()) as unknown);
+      await importStudyBackup(parsed);
+      setDataRevision((value) => value + 1);
+      setNotice("记录导入完成：同一条记录保留更新时间较新的版本。");
+    } catch (error) {
+      setNotice(error instanceof Error ? `导入失败：${error.message}` : "导入失败：备份文件无效。");
+    } finally {
+      setMaintenance(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function resetRecords() {
+    if (!window.confirm("确定清空此浏览器的所有课程进度和错题记录吗？建议先导出备份。")) return;
+    setMaintenance(true);
+    try {
+      await clearStudyRecords();
+      setDataRevision((value) => value + 1);
+      setNotice("本机学习进度和错题记录已清空。");
+    } catch {
+      setNotice("清空失败，可能是本地存储暂不可用。");
+    } finally {
+      setMaintenance(false);
+    }
+  }
 
   function resumeLabel(level: CetLevel): string {
     const position = positions[level];
@@ -99,6 +157,15 @@ export default function App() {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="data-tools" aria-label="学习记录管理">
+            <span>本地记录</span>
+            <button type="button" disabled={maintenance} onClick={() => void exportRecords()}>导出备份 ↗</button>
+            <button type="button" disabled={maintenance} onClick={() => fileInputRef.current?.click()}>导入备份</button>
+            <button type="button" className="danger-text" disabled={maintenance} onClick={() => void resetRecords()}>清空记录</button>
+            <input ref={fileInputRef} type="file" accept="application/json,.json" hidden
+              aria-label="选择 CET Typing 学习备份"
+              onChange={(event) => void importRecords(event.target.files?.[0])} />
           </div>
           {notice && <p className="storage-warning" role="status">{notice}</p>}
           <p className="demo-note">目前含 70 个原创渐进练习步骤，非官方四六级真题。进度与错题只保存在此浏览器。</p>

@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
+import { loadProgress, saveProgress, recordMistake, resolveMistake } from "../../lib/storage/db";
+import { resolveSavedPosition } from "../course/position";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "./sounds";
 import {
   readPronunciationPreference, writePronunciationPreference,
   shouldPronounceWord, speakEnglish, stopPronunciation,
 } from "./speech";
 import { editSlot, moveSlot } from "./slotEditing";
-import type { CetLevel } from "../course/types";
+import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
 type Phase = "typing" | "review" | "passed";
@@ -16,6 +18,7 @@ const DEFAULT_HINT = "点击任意下划线填词 · 空格或方向键换格 ·
 interface PracticeScreenProps {
   level: CetLevel;
   onBack: () => void;
+  reviewExercises?: Exercise[];
 }
 
 /**
@@ -23,9 +26,16 @@ interface PracticeScreenProps {
  * This preserves the focused native element across questions (mobile IME).
  * Slots can always be selected, regardless of the correctness of other words.
  */
-export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
-  const courseList = getLessons(level);
+export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScreenProps) {
+  const reviewMode = reviewExercises !== undefined;
+  const reviewLesson: Lesson = {
+    id: `review-${level}`, level, title: "错题复习", description: "回顾容易拼错的单词与句子",
+    exercises: reviewExercises ?? [],
+  };
+  const courseList = reviewMode ? [reviewLesson] : getLessons(level);
   const [lessonIndex, setLessonIndex] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [storageNotice, setStorageNotice] = useState("");
   const [showLessonPicker, setShowLessonPicker] = useState(false);
   const lesson = courseList[lessonIndex];
   const exercises = lesson.exercises;
@@ -59,6 +69,33 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   };
 
   useEffect(() => () => stopPronunciation(), []);
+
+  useEffect(() => {
+    let alive = true;
+    if (reviewMode) {
+      setReady(true);
+      return () => { alive = false; };
+    }
+    loadProgress(level).then((saved) => {
+      if (!alive) return;
+      const restored = resolveSavedPosition(getLessons(level), saved);
+      setLessonIndex(restored.lessonIndex);
+      setIndex(restored.exerciseIndex);
+      setReady(true);
+    }).catch(() => {
+      if (!alive) return;
+      setStorageNotice("此浏览器无法读取本地进度，本次练习可能不会保存。");
+      setReady(true);
+    });
+    return () => { alive = false; };
+  }, [level, reviewMode]);
+
+  useEffect(() => {
+    if (!ready || finished || reviewMode) return;
+    void saveProgress(level, lesson.id, exercise.id).catch(() => {
+      setStorageNotice("当前浏览器无法保存进度，请检查无痕浏览/存储权限。");
+    });
+  }, [ready, level, lesson.id, exercise.id, finished, reviewMode]);
 
   useEffect(() => {
     if (!finished) inputRef.current?.focus({ preventScroll: true });
@@ -100,6 +137,10 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
 
   function advanceQuestion() {
     if (index + 1 >= exercises.length) {
+      if (!reviewMode && lessonIndex + 1 < courseList.length) {
+        const following = courseList[lessonIndex + 1];
+        void saveProgress(level, following.id, following.exercises[0].id).catch(() => {});
+      }
       setFinished(true);
       return;
     }
@@ -114,11 +155,17 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     const errors = incorrectSlots(displayValues, slots);
     setAttempts((previous) => previous + 1);
     if (errors.length === 0) {
+      if (reviewMode) {
+        void resolveMistake(exercise.id).catch(() => setStorageNotice("错题状态保存失败"));
+      }
       ping("success");
       setPhase("passed");
       setCompleted((previous) => previous + 1);
       setFeedback("答对了！按 Enter 立即下一题");
     } else {
+      void recordMistake(level, lesson.id, exercise.id, displayValues.join(" ")).catch(() => {
+        setStorageNotice("错题记录失败，请检查本地存储权限。");
+      });
       ping("error");
       setPhase("review");
       setActiveIndex(errors[0]);
@@ -215,6 +262,10 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     setShowLessonPicker(false);
   }
 
+  if (!ready) {
+    return <section className="finished-screen" role="status" aria-live="polite">正在恢复本地学习进度…</section>;
+  }
+
   if (finished) {
     return (
       <section className="finished-screen" aria-labelledby="finish-title">
@@ -222,7 +273,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
         <h2 id="finish-title">很棒，<br /><em>继续保持。</em></h2>
         <p>你已完成「{lesson.title}」的 <strong>{completed}</strong> 个练习步骤，共提交 <strong>{attempts}</strong> 次。</p>
         <div className="choice-group">
-          {lessonIndex + 1 < courseList.length && (
+          {!reviewMode && lessonIndex + 1 < courseList.length && (
             <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>进入下一单元 →</button>
           )}
           <button className="secondary-button" type="button" onClick={restart}>再练一次 ↗</button>
@@ -236,7 +287,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     <section className="practice-area" aria-label={level === "CET4" ? "四级训练" : "六级训练"}>
       <div className="practice-topline">
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
-        <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 渐进课程</span>
+        <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · {reviewMode ? "错题复习" : "渐进课程"}</span>
         <div className="practice-top-actions">
           <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
             aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
@@ -276,7 +327,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
           transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 27 }} />
       </div>
 
-      <div className="lesson-navigation">
+      {!reviewMode && <div className="lesson-navigation">
         <button className="lesson-toggle" type="button" aria-expanded={showLessonPicker}
           aria-controls="lesson-options" onClick={() => setShowLessonPicker((value) => !value)}>
           <span className="lesson-toggle-index">{String(lessonIndex + 1).padStart(2, "0")} / {String(courseList.length).padStart(2, "0")}</span>
@@ -299,8 +350,9 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             ))}
           </motion.div>}
         </AnimatePresence>
-      </div>
+      </div>}
 
+      {storageNotice && <p className="storage-warning" role="alert">{storageNotice}</p>}
       <div className="question-body centered-practice">
         {/* ONLY the prompt is keyed. The input + slots below keep their DOM identity. */}
         <AnimatePresence mode="wait" initial={false}>

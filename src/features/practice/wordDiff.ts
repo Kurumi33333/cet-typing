@@ -13,7 +13,7 @@ function splitWords(text: string): string[] {
 }
 
 function normalizedWord(word: string): string {
-  return normalizeAnswer(word).replace(/^[\"“”]+|[,;:]+$/gu, "");
+  return normalizeAnswer(word).replace(/^["“”]+|[,;:]+$/gu, "");
 }
 
 /**

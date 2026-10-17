@@ -168,7 +168,7 @@ export default function App() {
               onChange={(event) => void importRecords(event.target.files?.[0])} />
           </div>
           {notice && <p className="storage-warning" role="status">{notice}</p>}
-          <p className="demo-note">目前含 70 个原创渐进练习步骤，非官方四六级真题。进度与错题只保存在此浏览器。</p>
+          <p className="demo-note">目前含 100 个原创渐进练习步骤，非官方四六级真题。进度与错题只保存在此浏览器。</p>
         </main>
       ) : (
         <main className="practice-main">

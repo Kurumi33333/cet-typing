@@ -6,7 +6,7 @@ describe("pilot question-bank quality gates", () => {
   it("all exercises have unique stable IDs, valid texts and sensible per-word blanks", () => {
     const all = lessons.flatMap((lesson) => lesson.exercises);
     expect(new Set(all.map((e) => e.id)).size).toBe(all.length);
-    expect(all).toHaveLength(70);
+    expect(all).toHaveLength(100);
     for (const e of all) {
       expect(e.chinese.trim()).toBe(e.chinese);
       expect(e.english.trim()).toBe(e.english);

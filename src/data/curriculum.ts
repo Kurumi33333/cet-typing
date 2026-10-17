@@ -102,6 +102,43 @@ export const lessons: Lesson[] = [
     ["phrase", "克服困难", "overcome difficulties"],
     ["sentence", "我们能够克服困难。", "We can overcome difficulties."],
   ]),
+  lesson("cet4-05", "CET4", "表达需求", "学会礼貌地表达需要，慢慢组合成具体请求。", [
+    ["word", "需要", "need"],
+    ["word", "帮助", "help"],
+    ["phrase", "需要帮助", "need help"],
+    ["sentence", "我需要帮助。", "I need help."],
+    ["word", "时间", "time"],
+    ["phrase", "更多时间", "more time"],
+    ["sentence", "我需要更多时间。", "I need more time."],
+    ["word", "理解", "understand"],
+    ["phrase", "理解这个问题", "understand this question"],
+    ["sentence", "我需要帮助来理解这个问题。", "I need help understanding this question."],
+  ]),
+  lesson("cet4-06", "CET4", "时间与安排", "从简单时间词入手，描述计划和考试安排。", [
+    ["word", "明天", "tomorrow"],
+    ["word", "计划", "plan"],
+    ["phrase", "明天的计划", "a plan for tomorrow"],
+    ["sentence", "我有一个计划。", "I have a plan."],
+    ["word", "准备", "prepare"],
+    ["phrase", "为考试做准备", "prepare for the exam"],
+    ["sentence", "我正在为考试做准备。", "I am preparing for the exam."],
+    ["phrase", "下周", "next week"],
+    ["sentence", "下周有一场考试。", "There is an exam next week."],
+    ["sentence", "我需要为下周的考试做准备。", "I need to prepare for the exam next week."],
+  ]),
+  lesson("cet6-04", "CET6", "合作与责任", "把学术表达与团队合作的真实情境连接起来。", [
+    ["word", "责任", "responsibility"],
+    ["word", "合作", "cooperation"],
+    ["phrase", "承担责任", "take responsibility"],
+    ["phrase", "共同的目标", "a shared goal"],
+    ["sentence", "团队需要一个共同的目标。", "A team needs a shared goal."],
+    ["phrase", "有效的沟通", "effective communication"],
+    ["phrase", "促进合作", "promote cooperation"],
+    ["sentence", "有效的沟通可以促进合作。", "Effective communication can promote cooperation."],
+    ["phrase", "对结果负责", "be responsible for the outcome"],
+    ["sentence", "每位成员都应该对结果负责。", "Every member should be responsible for the outcome."],
+  ]),
+
 ];
 
 export function getLessons(level: CetLevel): Lesson[] {

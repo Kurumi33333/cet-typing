@@ -2,16 +2,12 @@ import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "./sounds";
+import { editSlot, moveSlot } from "./slotEditing";
 import type { CetLevel } from "../course/types";
-import {
-  draftToSlotValues,
-  getActiveSlot,
-  incorrectSlots,
-  matchesSlot,
-  sentenceToSlots,
-} from "./slots";
+import { incorrectSlots, sentenceToSlots } from "./slots";
 
-type Phase = "typing" | "review" | "fix" | "passed";
+type Phase = "typing" | "review" | "passed";
+const DEFAULT_HINT = "点击任意下划线填词 · 空格或方向键换格 · Enter 检查";
 
 interface PracticeScreenProps {
   level: CetLevel;
@@ -19,8 +15,9 @@ interface PracticeScreenProps {
 }
 
 /**
- * One keyboard stream, many visible underlined word slots.
- * The input stays visually transparent; the slot UI is the only visible typing surface.
+ * The single invisible input is NEVER inside a keyed Motion subtree.
+ * This preserves the focused native element across questions (mobile IME).
+ * Slots can always be selected, regardless of the correctness of other words.
  */
 export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   const courseList = getLessons(level);
@@ -29,214 +26,169 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
   const lesson = courseList[lessonIndex];
   const exercises = lesson.exercises;
   const [index, setIndex] = useState(0);
-  const [draft, setDraft] = useState("");
   const [values, setValues] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("typing");
-  const [fixIndex, setFixIndex] = useState(0);
-  const [fixValue, setFixValue] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [completed, setCompleted] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [feedback, setFeedback] = useState("按空格切换到下一格，按 Enter 检查答案");
+  const [feedback, setFeedback] = useState(DEFAULT_HINT);
   const [focused, setFocused] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
   const [errorPulse, setErrorPulse] = useState(0);
   const reducedMotion = useReducedMotion();
-
   const inputRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
+
   const exercise = exercises[index];
   const slots = sentenceToSlots(exercise.english);
-  const displayValues = phase === "typing" ? draftToSlotValues(draft, slots.length) : values;
-  const wrong = phase === "typing" || phase === "passed" ? [] : incorrectSlots(displayValues, slots);
-  const activeIndex = phase === "typing" ? getActiveSlot(draft, slots.length) : fixIndex;
+  const displayValues = slots.map((_, at) => values[at] ?? "");
+  const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
+  const entered = displayValues[activeIndex] ?? "";
+
+  const ping = (type: Parameters<typeof playFeedback>[0]) => {
+    if (soundEnabled) playFeedback(type);
+  };
 
   useEffect(() => {
-    if (!finished) inputRef.current?.focus();
-  }, [index, finished]);
+    if (!finished) inputRef.current?.focus({ preventScroll: true });
+  }, [index, lessonIndex, finished]);
 
   useEffect(() => {
     if (phase !== "passed") return;
-    const timer = window.setTimeout(() => {
-      if (index + 1 === exercises.length) {
-        setFinished(true);
-      } else {
-        setIndex((previous) => previous + 1);
-        setDraft("");
-        setValues([]);
-        setPhase("typing");
-        setFixValue("");
-        setFixIndex(0);
-        setRevealed(false);
-        setFeedback("按空格切换到下一格，按 Enter 检查答案");
-      }
-    }, 850);
+    // Enter can advance instantly; timer only helps hands-free learners.
+    const timer = window.setTimeout(() => advanceQuestion(), 1250);
     return () => window.clearTimeout(timer);
-  }, [phase, index, exercises.length]);
+  }, [phase, index, lessonIndex]);
+
+  useEffect(() => {
+    if (phase === "review") inputRef.current?.select();
+  }, [phase, errorPulse]);
 
   function focusInput() {
-    inputRef.current?.focus();
-    if (phase === "typing") {
-      const el = inputRef.current;
-      el?.setSelectionRange(el.value.length, el.value.length);
-    }
+    inputRef.current?.focus({ preventScroll: true });
   }
 
-  function nextQuestion() {
-    if (index + 1 === exercises.length) {
+  function chooseSlot(to: number, type: "navigate" | "select" = "select") {
+    if (phase === "passed") return;
+    setActiveIndex(Math.max(0, Math.min(slots.length - 1, to)));
+    ping(type);
+    // Selection makes it easy to overwrite a misspelling, not a requirement.
+    focusInput();
+    window.requestAnimationFrame(() => inputRef.current?.select());
+  }
+
+  function clearQuestion() {
+    setValues([]);
+    setActiveIndex(0);
+    setPhase("typing");
+    setRevealed(false);
+    setFeedback(DEFAULT_HINT);
+  }
+
+  function advanceQuestion() {
+    if (index + 1 >= exercises.length) {
       setFinished(true);
       return;
     }
+    ping("advance");
     setIndex((previous) => previous + 1);
-    setDraft("");
-    setValues([]);
-    setPhase("typing");
-    setFixValue("");
-    setFixIndex(0);
-    setRevealed(false);
-    setFeedback("按空格切换到下一格，按 Enter 检查答案");
+    clearQuestion();
+    // No blur, no new input, no keyboard dismissal.
   }
 
-  function check(candidate: string[]) {
+  function checkAnswer() {
+    if (phase === "passed") return;
+    const errors = incorrectSlots(displayValues, slots);
     setAttempts((previous) => previous + 1);
-    setValues(candidate);
-    const errors = incorrectSlots(candidate, slots);
-    if (soundEnabled) playFeedback(errors.length ? "error" : "success");
     if (errors.length === 0) {
+      ping("success");
       setPhase("passed");
       setCompleted((previous) => previous + 1);
-      setFeedback("正确！即将进入下一题");
+      setFeedback("答对了！按 Enter 立即下一题");
     } else {
+      ping("error");
+      setPhase("review");
+      setActiveIndex(errors[0]);
       setErrorPulse((n) => n + 1);
-      setPhase("review");
-      setFeedback(`有 ${errors.length} 个单词需要修正。直接打字，或点一下红色单词。`);
+      setFeedback(`有 ${errors.length} 个空格需要修改，点击任意空格都能继续填写。`);
     }
   }
 
-  function startFix(at: number, initial = "") {
-    if (phase !== "review" && phase !== "fix") return;
-    if (phase === "review" && !wrong.includes(at)) return;
-    setFixIndex(at);
-    setFixValue(initial);
-    setValues((previous) => previous.map((word, i) => i === at ? initial : word));
-    setPhase("fix");
-    setFeedback("重新输入标出的单词，按空格继续修复");
-    inputRef.current?.focus();
-  }
-
-  function advanceFix(candidate: string[]) {
-    if (!matchesSlot(candidate[fixIndex] ?? "", slots[fixIndex])) {
-      setFeedback("这个单词还不正确，继续修改，或按 Enter 再检查");
-      return;
-    }
-    const following = incorrectSlots(candidate, slots).find((at) => at > fixIndex);
-    if (following !== undefined) {
-      setFixIndex(following);
-      setFixValue("");
-      setValues(candidate.map((word, i) => i === following ? "" : word));
-      setFeedback("很好，继续修复下一个单词");
-      return;
-    }
-    if (incorrectSlots(candidate, slots).length === 0) {
-      check(candidate);
-    } else {
-      setValues(candidate);
-      setPhase("review");
-      setFeedback("还有单词需要修复，可以点击红色下划线重新输入");
+  function applyText(text: string) {
+    if (phase === "passed") return;
+    const result = editSlot(displayValues, activeIndex, text, slots.length);
+    setValues(result.values);
+    setActiveIndex(result.active);
+    if (result.moved) {
+      ping("navigate");
+    } else if (text.length > entered.length) {
+      ping("typing");
+    } else if (text.length < entered.length) {
+      ping("delete");
     }
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const next = event.target.value;
-    if (phase === "typing") {
-      setDraft(next.replace(/[\r\n]/gu, " "));
-    } else if (phase === "review") {
-      if (next.length > 0) {
-        const first = wrong[0];
-        if (first !== undefined) startFix(first, next);
-      }
-    } else if (phase === "fix") {
-      if (/\s/u.test(next) && !composing.current) {
-        const firstWord = next.trim().split(/\s+/u)[0] ?? "";
-        const candidate = [...values];
-        candidate[fixIndex] = firstWord;
-        setValues(candidate);
-        setFixValue(firstWord);
-        advanceFix(candidate);
-      } else {
-        setFixValue(next);
-        setValues((previous) => previous.map((word, i) => i === fixIndex ? next : word));
-      }
+    if (phase === "passed") return;
+    // Let the native IME compose its candidate without splitting interim spaces.
+    if (composing.current) {
+      setValues((previous) => {
+        const next = [...previous];
+        next[activeIndex] = event.target.value;
+        return next;
+      });
+      return;
     }
+    applyText(event.target.value);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) {
-      if (event.key === "Enter") event.preventDefault();
-      return;
-    }
-
+    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
     if (phase === "passed") {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        nextQuestion();
+        advanceQuestion();
       }
       return;
     }
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
 
-    if (phase === "typing") {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        if (draft.trim()) check(draftToSlotValues(draft, slots.length));
-      }
-      // Normal spaces/backspace edit the invisible sentence input naturally.
-      return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      checkAnswer();
+    } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      chooseSlot(moveSlot(activeIndex, 1, slots.length), "navigate");
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      chooseSlot(moveSlot(activeIndex, -1, slots.length), "navigate");
+    } else if (event.key === " ") {
+      event.preventDefault();
+      if (activeIndex + 1 < slots.length) chooseSlot(activeIndex + 1, "navigate");
+      else if (displayValues.some((word) => word.trim())) checkAnswer();
+    } else if (event.key === "Backspace" && !entered) {
+      event.preventDefault();
+      chooseSlot(moveSlot(activeIndex, -1, slots.length), "navigate");
     }
-
-    if (phase === "review") {
-      const first = wrong[0];
-      if (first === undefined) return;
-      if (event.key === "Enter" || event.key === " " || event.key === "Backspace") {
-        event.preventDefault();
-        startFix(first);
-      } else if (event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey) {
-        event.preventDefault();
-        startFix(first, event.key);
-      }
-      return;
-    }
-
-    if (phase === "fix") {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        check(values);
-      } else if (event.key === " ") {
-        event.preventDefault();
-        advanceFix(values);
-      } else if (event.key === "Backspace" && fixValue.length === 0) {
-        const before = incorrectSlots(values, slots).filter((at) => at < fixIndex).pop();
-        if (before !== undefined) {
-          event.preventDefault();
-          startFix(before);
-        }
-      }
-    }
+    // All normal letters/backspace are applied via onChange, on desktop and iOS.
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (composing.current) return;
-    if (phase === "typing" && draft.trim()) {
-      check(draftToSlotValues(draft, slots.length));
-    } else if (phase === "fix") {
-      check(values);
-    } else if (phase === "review") {
-      if (wrong[0] !== undefined) startFix(wrong[0]);
-    } else if (phase === "passed") {
-      nextQuestion();
-    }
+    if (phase === "passed") advanceQuestion();
+    else checkAnswer();
     focusInput();
+  }
+
+  function restart() {
+    setIndex(0);
+    clearQuestion();
+    setAttempts(0);
+    setCompleted(0);
+    setFinished(false);
   }
 
   function switchLesson(to: number) {
@@ -244,20 +196,6 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     restart();
     setLessonIndex(to);
     setShowLessonPicker(false);
-  }
-
-  function restart() {
-    setIndex(0);
-    setDraft("");
-    setValues([]);
-    setPhase("typing");
-    setFixIndex(0);
-    setFixValue("");
-    setRevealed(false);
-    setAttempts(0);
-    setCompleted(0);
-    setFinished(false);
-    setFeedback("按空格切换到下一格，按 Enter 检查答案");
   }
 
   if (finished) {
@@ -268,9 +206,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
         <p>你已完成「{lesson.title}」的 <strong>{completed}</strong> 个练习步骤，共提交 <strong>{attempts}</strong> 次。</p>
         <div className="choice-group">
           {lessonIndex + 1 < courseList.length && (
-            <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>
-              进入下一单元 →
-            </button>
+            <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>进入下一单元 →</button>
           )}
           <button className="secondary-button" type="button" onClick={restart}>再练一次 ↗</button>
           <button className="text-button" type="button" onClick={onBack}>返回首页</button>
@@ -285,15 +221,14 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
         <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 渐进课程</span>
         <div className="practice-top-actions">
-          <button type="button" className="sound-toggle"
-            aria-pressed={soundEnabled}
+          <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
             aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
             title={soundEnabled ? "提示音效：开" : "提示音效：关"}
             onClick={() => {
               const next = !soundEnabled;
               setSoundEnabled(next);
               writeSoundPreference(next);
-              if (next) playFeedback("success");
+              if (next) playFeedback("select");
               focusInput();
             }}>
             <span aria-hidden="true">{soundEnabled ? "♫" : "♪"}</span>
@@ -302,101 +237,98 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
           <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
         </div>
       </div>
+
       <div className="progress-track" role="progressbar" aria-label="练习进度"
         aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>
         <motion.div className="progress-fill" initial={false}
           animate={{ width: `${(index / exercises.length) * 100}%` }}
           transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 27 }} />
       </div>
+
       <div className="lesson-navigation">
-        <button className="lesson-toggle" type="button"
-          aria-expanded={showLessonPicker} aria-controls="lesson-options"
-          onClick={() => setShowLessonPicker((v) => !v)}>
+        <button className="lesson-toggle" type="button" aria-expanded={showLessonPicker}
+          aria-controls="lesson-options" onClick={() => setShowLessonPicker((value) => !value)}>
           <span className="lesson-toggle-index">{String(lessonIndex + 1).padStart(2, "0")} / {String(courseList.length).padStart(2, "0")}</span>
           <span className="lesson-toggle-title">{lesson.title}</span>
           <span aria-hidden="true">{showLessonPicker ? "⌃" : "⌄"}</span>
         </button>
         <AnimatePresence initial={false}>
-        {showLessonPicker && <motion.div id="lesson-options" className="lesson-options" aria-label="选择训练单元"
-          initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.985 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={reducedMotion ? undefined : { opacity: 0, y: -6, scale: 0.99 }}
-          transition={{ duration: reducedMotion ? 0 : 0.18 }}>
-          {courseList.map((entry, at) => (
-            <button key={entry.id} type="button"
-              className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
-              onClick={() => switchLesson(at)}>
-              <span className="lesson-option-number">{String(at + 1).padStart(2, "0")}</span>
-              <span className="lesson-option-copy"><strong>{entry.title}</strong><small>{entry.description}</small></span>
-              <span aria-hidden="true">{at === lessonIndex ? "✓" : "↗"}</span>
-            </button>
-          ))}
-        </motion.div>}
+          {showLessonPicker && <motion.div id="lesson-options" className="lesson-options" aria-label="选择训练单元"
+            initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -6, scale: 0.99 }}
+            transition={{ duration: reducedMotion ? 0 : 0.18 }}>
+            {courseList.map((entry, at) => (
+              <button key={entry.id} type="button" className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
+                onClick={() => switchLesson(at)}>
+                <span className="lesson-option-number">{String(at + 1).padStart(2, "0")}</span>
+                <span className="lesson-option-copy"><strong>{entry.title}</strong><small>{entry.description}</small></span>
+                <span aria-hidden="true">{at === lessonIndex ? "✓" : "↗"}</span>
+              </button>
+            ))}
+          </motion.div>}
         </AnimatePresence>
       </div>
-      <AnimatePresence mode="wait" initial={false}>
-      <motion.div key={exercise.id} className="question-body centered-practice"
-        initial={reducedMotion ? false : { opacity: 0, y: 17 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={reducedMotion ? undefined : { opacity: 0, y: -13 }}
-        transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-        onAnimationComplete={() => { if (!finished) inputRef.current?.focus(); }}>
-        <div className="eyebrow"><span className="status-dot" /> {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}</div>
-        <h2 className="chinese-sentence">{exercise.chinese}</h2>
-        <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" : exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>
+
+      <div className="question-body centered-practice">
+        {/* ONLY the prompt is keyed. The input + slots below keep their DOM identity. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div className="question-prompt" key={exercise.id}
+            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
+            transition={{ duration: reducedMotion ? 0 : 0.25, ease: "easeOut" }}>
+            <div className="eyebrow"><span className="status-dot" />
+              {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}
+            </div>
+            <h2 className="chinese-sentence">{exercise.chinese}</h2>
+            <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" :
+              exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>
+          </motion.div>
+        </AnimatePresence>
 
         <form className="slot-form" onSubmit={handleSubmit}>
-          <div className={`slot-stage ${focused ? "stage-focused" : ""}`}
-            onClick={focusInput} aria-label="逐词下划线填空区域">
-            <input
-              ref={inputRef}
-              id="english-answer"
-              className="slot-capture"
-              type="text"
-              aria-label="键盘输入英文句子，空格换词，回车检查"
+          <div className={`slot-stage ${focused ? "stage-focused" : ""}`} onClick={focusInput}
+            aria-label="逐词下划线填空区域">
+            <input ref={inputRef} id="english-answer" className="slot-capture" type="text"
+              aria-label="输入当前选中的英文词，左右方向键或空格切换词，Enter 检查或进入下一题"
               aria-describedby="practice-feedback"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              inputMode="text"
-              value={phase === "typing" ? draft : phase === "fix" ? fixValue : ""}
+              autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
+              inputMode="text" enterKeyHint="go" value={entered}
               onChange={handleChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               onCompositionStart={() => { composing.current = true; }}
-              onCompositionEnd={() => { composing.current = false; }}
+              onCompositionEnd={(event) => {
+                composing.current = false;
+                applyText(event.currentTarget.value);
+              }}
               onKeyDown={handleKeyDown}
             />
             <div className="slot-list">
               {slots.map((slot, at) => {
-                const value = displayValues[at] ?? "";
-                const visible = value.replace(/[.,!?;:]+$/gu, "");
+                const visible = (displayValues[at] ?? "").replace(/[.,!?;:]+$/gu, "");
                 const incorrect = wrong.includes(at);
-                const isActive = focused && (phase === "typing" || phase === "fix") && at === activeIndex;
+                const active = focused && phase !== "passed" && at === activeIndex;
                 const appearance = phase === "passed" ? "slot-correct" :
-                  isActive ? "slot-active" :
-                  incorrect ? "slot-incorrect" :
-                  phase === "review" || phase === "fix" ? "slot-verified" : "slot-idle";
-
+                  incorrect ? "slot-incorrect" : active ? "slot-active" : phase === "review" ? "slot-verified" : "slot-idle";
                 return (
-                  <div className={`slot-unit ${incorrect ? "slot-needs-fix" : ""}`} key={at}
+                  <div role="button" tabIndex={-1}
+                    aria-label={`第${at + 1}个空，${displayValues[at] ? "已填 " + displayValues[at] : "未填"}，点击可选中`}
+                    aria-current={active ? "true" : undefined}
+                    className={`slot-unit ${incorrect ? "slot-needs-fix" : ""}`} key={at}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={(event) => {
                       event.stopPropagation();
-                      if (phase === "review" && incorrect) startFix(at);
-                      else if (phase === "fix" && incorrect) startFix(at);
-                      else focusInput();
-                    }}
-                    title={phase === "review" && incorrect ? "点击修改这个单词" : undefined}>
+                      chooseSlot(at);
+                    }}>
                     <motion.span key={`${exercise.id}-${at}-${phase === "review" && incorrect ? errorPulse : 0}`}
                       className={`slot-word ${appearance}`}
                       style={{ minWidth: `${slot.widthCh}ch` }}
                       initial={false}
                       animate={phase === "review" && incorrect && !reducedMotion
-                        ? { x: [0, -10, 8, -5, 3, 0], scale: [1, 1.055, 1] }
-                        : { x: 0, scale: 1 }}
-                      transition={{ duration: phase === "review" && incorrect ? 0.48 : 0.14, ease: "easeOut" }}>
+                        ? { x: [0, -9, 7, -5, 3, 0], scale: [1, 1.045, 1] } : { x: 0, scale: 1 }}
+                      transition={{ duration: phase === "review" && incorrect ? 0.45 : 0, ease: "easeOut" }}>
                       {visible || "\u00a0"}
                     </motion.span>
                     {slot.punctuation && <span className="slot-punctuation">{slot.punctuation}</span>}
@@ -405,13 +337,10 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
               })}
             </div>
           </div>
-
-          <motion.p key={`${exercise.id}-${phase}-${errorPulse}`}
-            id="practice-feedback" className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`}
-            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.2 }}
-            role="status" aria-live="polite">
+          <motion.p key={`${exercise.id}-${phase}-${errorPulse}`} id="practice-feedback"
+            className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`}
+            initial={reducedMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.2 }} role="status" aria-live="polite">
             {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
           <AnimatePresence>
@@ -423,24 +352,18 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
               <span aria-hidden="true">✦</span> Nice!
             </motion.div>}
           </AnimatePresence>
-
           {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
-
           <div className="slot-actions">
             <button className="submit-minimal" type="submit">
-              {phase === "review" ? "开始修正 ↗" : phase === "fix" ? "再次检查 ↗" :
-                phase === "passed" ? "下一句 →" : "Enter · 检查答案"}
+              {phase === "passed" ? "Enter · 下一句 →" : "Enter · 检查答案"}
             </button>
-            {phase !== "passed" && (
-              <button className="text-button" type="button" onClick={() => {
-                setRevealed((value) => !value);
-                focusInput();
-              }}>{revealed ? "隐藏答案" : "显示答案"}</button>
-            )}
+            {phase !== "passed" && <button className="text-button" type="button" onClick={() => {
+              setRevealed((value) => !value);
+              focusInput();
+            }}>{revealed ? "隐藏答案" : "显示答案"}</button>}
           </div>
         </form>
-      </motion.div>
-      </AnimatePresence>
+      </div>
     </section>
   );
 }

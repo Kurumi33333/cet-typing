@@ -294,7 +294,7 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
               aria-label="输入当前选中的英文词，左右方向键或空格切换词，Enter 检查或进入下一题"
               aria-describedby="practice-feedback"
               autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
-              inputMode="text" enterKeyHint="go" value={entered}
+              inputMode="text" enterKeyHint="enter" value={entered}
               onChange={handleChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}

@@ -8,7 +8,7 @@ import {
 } from "./speech";
 import { editSlot, moveSlot } from "./slotEditing";
 import type { CetLevel } from "../course/types";
-import { incorrectSlots, sentenceToSlots } from "./slots";
+import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "点击任意下划线填词 · 空格或方向键换格 · Enter 检查";
@@ -260,12 +260,9 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
               setPronunciationEnabled(next);
               writePronunciationPreference(next);
               if (!next) stopPronunciation();
-              else if (slots[activeIndex] && entered.trim()) {
-                speakEnglish(entered, "word");
-              }
               focusInput();
             }}>
-            <span aria-hidden="true">{pronunciationEnabled ? "◖))" : "◖"}</span>
+            <span aria-hidden="true">{pronunciationEnabled ? "🔊" : "🔇"}</span>
             <span>{pronunciationEnabled ? "发音开" : "发音关"}</span>
           </button>
           <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
@@ -401,13 +398,13 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
             )}
             {phase !== "passed" && (
               <button className="text-button replay-button" type="button"
-                disabled={!displayValues[activeIndex]?.trim()}
+                disabled={!matchesSlot(displayValues[activeIndex] ?? "", slots[activeIndex])}
                 onClick={() => {
                   const word = displayValues[activeIndex] ?? "";
-                  if (word) speakEnglish(word, "word");
+                  if (matchesSlot(word, slots[activeIndex])) speakEnglish(slots[activeIndex].word, "word");
                   focusInput();
                 }}
-                aria-label="重播当前选中单词">◖)) 重播单词</button>
+                aria-label="重播当前选中单词">🔉 重播单词</button>
             )}
             <button className="submit-minimal" type="submit">
               {phase === "passed" ? "Enter · 下一句 →" : "Enter · 检查答案"}

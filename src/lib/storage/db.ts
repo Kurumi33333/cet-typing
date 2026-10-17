@@ -1,5 +1,6 @@
 import { Dexie, type EntityTable } from "dexie";
 import type { CetLevel } from "../../features/course/types";
+import type { Card } from "ts-fsrs";
 
 export interface StudyProgress {
   level: CetLevel;
@@ -17,15 +18,30 @@ export interface MistakeRecord {
   resolved: boolean;
 }
 
+export interface ReviewSchedule {
+  id: string; // Exercise.id
+  level: CetLevel;
+  card: Card; // Dexie stores the Card Date fields with structured clone.
+  due: number; // Indexed timestamp for query/sorting.
+  updatedAt: number;
+}
+
 // Device-local only. Separate from browser settings kept in localStorage.
 export const db = new Dexie("cet-typing-study") as Dexie & {
   progress: EntityTable<StudyProgress, "level">;
   mistakes: EntityTable<MistakeRecord, "id">;
+  reviews: EntityTable<ReviewSchedule, "id">;
 };
 
 db.version(1).stores({
   progress: "level, updatedAt",
   mistakes: "id, level, lessonId, updatedAt",
+});
+// Adding a new store is non-destructive: old progress/mistakes remain intact.
+db.version(2).stores({
+  progress: "level, updatedAt",
+  mistakes: "id, level, lessonId, updatedAt",
+  reviews: "id, level, due, updatedAt",
 });
 
 export async function loadProgress(level: CetLevel): Promise<StudyProgress | undefined> {

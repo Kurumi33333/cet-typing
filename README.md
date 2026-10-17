@@ -21,7 +21,8 @@ npm run dev
 
 ```bash
 npm run typecheck
+npm test
 npm run build
 ```
 
-当前 S0：React 工程骨架（尚无练习逻辑）；请参阅 ROADMAP。
+当前 S1：已提交两级各 5 道原创演示题及中译英练习闭环。**题目不是官方四六级真题**；依赖安装、编译和浏览器实测尚未完成，请参阅 ROADMAP 的验收清单。

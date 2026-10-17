@@ -339,7 +339,8 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
         initial={reducedMotion ? false : { opacity: 0, y: 17 }}
         animate={{ opacity: 1, y: 0 }}
         exit={reducedMotion ? undefined : { opacity: 0, y: -13 }}
-        transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}>
+        transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
+        onAnimationComplete={() => { if (!finished) inputRef.current?.focus(); }}>
         <div className="eyebrow"><span className="status-dot" /> {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}</div>
         <h2 className="chinese-sentence">{exercise.chinese}</h2>
         <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" : exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>

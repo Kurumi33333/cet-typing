@@ -28,7 +28,7 @@ export default function App() {
               六级练习 <span aria-hidden="true">↗</span>
             </button>
           </div>
-          <p className="demo-note">目前每级 5 道原创演示题。正式四六级题库尚未接入。</p>
+          <p className="demo-note">先从一个单词开始，逐步组成语块和完整句子。现有 70 个原创渐进练习，非官方真题。</p>
         </main>
       ) : (
         <main className="practice-main">

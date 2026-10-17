@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
-import { starterExercises } from "../../data/starter";
+import { getLessons } from "../../data/curriculum";
 import type { CetLevel } from "../course/types";
 import {
   draftToSlotValues,
@@ -21,7 +21,11 @@ interface PracticeScreenProps {
  * The input stays visually transparent; the slot UI is the only visible typing surface.
  */
 export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
-  const exercises = starterExercises.filter((item) => item.level === level);
+  const courseList = getLessons(level);
+  const [lessonIndex, setLessonIndex] = useState(0);
+  const [showLessonPicker, setShowLessonPicker] = useState(false);
+  const lesson = courseList[lessonIndex];
+  const exercises = lesson.exercises;
   const [index, setIndex] = useState(0);
   const [draft, setDraft] = useState("");
   const [values, setValues] = useState<string[]>([]);
@@ -228,6 +232,13 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     focusInput();
   }
 
+  function switchLesson(to: number) {
+    if (to === lessonIndex) { setShowLessonPicker(false); return; }
+    restart();
+    setLessonIndex(to);
+    setShowLessonPicker(false);
+  }
+
   function restart() {
     setIndex(0);
     setDraft("");
@@ -247,10 +258,15 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
       <section className="finished-screen" aria-labelledby="finish-title">
         <div className="eyebrow"><span className="status-dot" /> 本轮练习完成</div>
         <h2 id="finish-title">很棒，<br /><em>继续保持。</em></h2>
-        <p>本轮完成 <strong>{completed}</strong> 句，共提交 <strong>{attempts}</strong> 次。</p>
+        <p>你已完成「{lesson.title}」的 <strong>{completed}</strong> 个练习步骤，共提交 <strong>{attempts}</strong> 次。</p>
         <div className="choice-group">
-          <button className="primary-button" type="button" onClick={restart}>再练一次 ↗</button>
-          <button className="secondary-button" type="button" onClick={onBack}>返回首页</button>
+          {lessonIndex + 1 < courseList.length && (
+            <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>
+              进入下一单元 →
+            </button>
+          )}
+          <button className="secondary-button" type="button" onClick={restart}>再练一次 ↗</button>
+          <button className="text-button" type="button" onClick={onBack}>返回首页</button>
         </div>
       </section>
     );
@@ -260,17 +276,37 @@ export function PracticeScreen({ level, onBack }: PracticeScreenProps) {
     <section className="practice-area" aria-label={level === "CET4" ? "四级训练" : "六级训练"}>
       <div className="practice-topline">
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
-        <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 演示题</span>
+        <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · 渐进课程</span>
         <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
       </div>
       <div className="progress-track" role="progressbar" aria-label="练习进度"
         aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>
         <div className="progress-fill" style={{ width: `${(index / exercises.length) * 100}%` }} />
       </div>
+      <div className="lesson-navigation">
+        <button className="lesson-toggle" type="button"
+          aria-expanded={showLessonPicker} aria-controls="lesson-options"
+          onClick={() => setShowLessonPicker((v) => !v)}>
+          <span className="lesson-toggle-index">{String(lessonIndex + 1).padStart(2, "0")} / {String(courseList.length).padStart(2, "0")}</span>
+          <span className="lesson-toggle-title">{lesson.title}</span>
+          <span aria-hidden="true">{showLessonPicker ? "⌃" : "⌄"}</span>
+        </button>
+        {showLessonPicker && <div id="lesson-options" className="lesson-options" aria-label="选择训练单元">
+          {courseList.map((entry, at) => (
+            <button key={entry.id} type="button"
+              className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
+              onClick={() => switchLesson(at)}>
+              <span className="lesson-option-number">{String(at + 1).padStart(2, "0")}</span>
+              <span className="lesson-option-copy"><strong>{entry.title}</strong><small>{entry.description}</small></span>
+              <span aria-hidden="true">{at === lessonIndex ? "✓" : "↗"}</span>
+            </button>
+          ))}
+        </div>}
+      </div>
       <div className="question-body centered-practice">
-        <div className="eyebrow"><span className="status-dot" /> TRANSLATE INTO ENGLISH</div>
+        <div className="eyebrow"><span className="status-dot" /> {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}</div>
         <h2 className="chinese-sentence">{exercise.chinese}</h2>
-        <p className="instruction">记起这句话的英文，然后直接打字。</p>
+        <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" : exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>
 
         <form className="slot-form" onSubmit={handleSubmit}>
           <div className={`slot-stage ${focused ? "stage-focused" : ""}`}

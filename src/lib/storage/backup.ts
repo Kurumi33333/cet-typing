@@ -1,4 +1,5 @@
 import { db, type MistakeRecord, type StudyProgress } from "./db";
+import type { CetLevel } from "../../features/course/types";
 
 export interface StudyBackup {
   format: "cet-typing-backup";
@@ -7,7 +8,7 @@ export interface StudyBackup {
   progress: StudyProgress[];
   mistakes: MistakeRecord[];
 }
-const validLevel = (x: unknown) => x === "CET4" || x === "CET6";
+const validLevel = (x: unknown): x is CetLevel => x === "CET4" || x === "CET6";
 const validId = (x: unknown) => typeof x === "string" && x.length > 0 && x.length <= 160;
 const validTime = (x: unknown) => typeof x === "number" && Number.isFinite(x) && x >= 0;
 

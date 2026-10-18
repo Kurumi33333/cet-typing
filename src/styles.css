@@ -381,3 +381,180 @@ h1 em { color: #7ba995; font-style: normal; }
 @media (prefers-reduced-motion: reduce) {
   .site-key:active { transform: none; }
 }
+
+
+/* V0.7 · One-viewport workspace. Allocate actual screen height; never hide
+ * required practice content beneath a decorative page scrollbar. */
+html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+.page-shell { height: 100dvh; height: 100svh; min-height: 0; overflow: hidden; }
+.site-header {
+  flex-shrink: 0;
+  padding: clamp(9px, 1.8svh, 19px) 0;
+}
+.site-footer { display: none; }
+.practice-main {
+  flex: 1;
+  min-height: 0;
+  padding: clamp(3px, .8svh, 10px) 0;
+  overflow: hidden;
+}
+.practice-area {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.practice-topline, .progress-track, .lesson-navigation { flex-shrink: 0; }
+.progress-track { margin-top: clamp(4px, .8svh, 10px); }
+.lesson-navigation {
+  position: relative;
+  z-index: 12;
+  margin-top: clamp(3px, .7svh, 10px);
+}
+.lesson-toggle { padding: clamp(4px, .8svh, 8px) 11px; }
+.lesson-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 650px);
+  max-height: min(74svh, 570px);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  padding: 9px;
+  background: #fbfdfb;
+  border: 1px solid #dfe7df;
+  border-radius: 14px;
+}
+.lesson-option { min-width: 0; text-align: left; }
+.lesson-option-copy { min-width: 0; }
+.lesson-option-copy small { display: none; }
+.question-body.centered-practice {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: clamp(4px, 1svh, 15px) 0 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.question-prompt {
+  min-height: 0;
+  flex-shrink: 0;
+  width: 100%;
+}
+.centered-practice .eyebrow { justify-content: center; }
+.centered-practice .chinese-sentence {
+  font-size: clamp(21px, 3.8svh, 37px);
+  line-height: 1.38;
+  margin: clamp(5px, 1svh, 12px) auto clamp(6px, 1.2svh, 15px);
+}
+.slot-form { flex: 0 0 auto; max-width: 100%; }
+.slot-stage {
+  min-height: clamp(38px, 7svh, 64px);
+  align-items: center;
+  padding: clamp(2px, .7svh, 7px) 0;
+}
+.slot-list { gap: clamp(4px, .8svh, 9px) clamp(3px, 1vw, 8px); }
+.slot-word {
+  font-size: clamp(14px, 2.35svh, 22px);
+  min-height: clamp(24px, 4.1svh, 38px);
+  padding: 2px 2px 5px;
+}
+.slot-feedback {
+  min-height: 20px;
+  margin: clamp(5px, 1.1svh, 12px) auto 0;
+  line-height: 1.45;
+  font-size: clamp(11px, 1.7svh, 12px);
+}
+.slot-actions {
+  min-height: 29px;
+  margin-top: clamp(3px, .8svh, 10px);
+  gap: 8px 14px;
+}
+.submit-minimal { padding: 7px 15px; }
+.keyboard-panel {
+  flex-shrink: 0;
+  width: min(100%, 630px);
+  margin: clamp(2px, .7svh, 9px) auto 0;
+}
+.keyboard-mode-bar { padding: 2px 1px clamp(4px, .7svh, 8px); }
+.site-english-keyboard {
+  gap: clamp(3px, .65svh, 7px);
+  padding: clamp(5px, .85svh, 9px) 5px max(6px, env(safe-area-inset-bottom));
+}
+.site-key { height: clamp(30px, 4.9svh, 43px); }
+.main-content {
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(10px, 2.8svh, 27px) 0;
+  justify-content: center;
+}
+.main-content h1 { font-size: clamp(48px, 8svh, 96px); line-height: 1.16; margin: 11px 0 7px; }
+.main-content .intro { line-height: 1.6; }
+.main-content .choice-group { margin-top: clamp(13px, 2.6svh, 27px); }
+.main-content .review-entry { margin-top: clamp(14px, 2.7svh, 27px); padding-top: clamp(9px, 1.6svh, 15px); }
+.home-tools { margin-top: clamp(9px, 1.5svh, 18px); position: relative; }
+.home-tools-inner {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  width: min(100%, 570px);
+  padding: 9px 15px 15px;
+  border: 1px solid #dfe8e0;
+  border-radius: 13px;
+  background: #fbfdfb;
+  box-shadow: 0 12px 30px #30473912;
+}
+.main-content .demo-note { margin-top: clamp(6px, 1.4svh, 14px); }
+
+@media (max-width: 560px) {
+  .page-shell { padding-inline: clamp(12px, 5vw, 24px); }
+  .site-header { padding: clamp(8px, 1.35svh, 14px) 0; }
+  .practice-main { padding: clamp(1px, .5svh, 5px) 0; }
+  .practice-topline .text-button { padding: 5px 0; }
+  .practice-topline { font-size: 11px; }
+  .practice-settings > summary { padding: 4px 0; }
+  .lesson-toggle { max-width: 94%; }
+  .lesson-toggle-title { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lesson-options { width: 100%; max-height: 67svh; padding: 5px; gap: 1px; }
+  .lesson-option { padding: 8px 5px; gap: 5px; font-size: 11px; }
+  .lesson-option-number { font-size: 10px; }
+  .lesson-option-copy strong { font-size: 11px; }
+  .question-body.centered-practice { padding: clamp(2px, .6svh, 8px) 0 2px; }
+  .centered-practice .chinese-sentence { font-size: clamp(20px, 3.4svh, 30px); }
+  .slot-stage { min-height: clamp(31px, 6svh, 52px); }
+  .slot-word { font-size: clamp(13px, 2.3svh, 18px); min-height: clamp(23px, 3.7svh, 32px); }
+  .keyboard-panel { margin-top: clamp(3px, .6svh, 7px); }
+  .site-key { height: clamp(28px, 4.6svh, 41px); }
+  .site-key-row { gap: 3px; }
+  .site-key-space, .site-key-enter { font-size: 11px; }
+  .main-content { padding: clamp(7px, 1.8svh, 16px) 0; }
+  .main-content h1 { font-size: clamp(40px, 7.7svh, 65px); margin: 7px 0 5px; }
+  .main-content .intro { font-size: 13px; line-height: 1.5; }
+  .main-content .choice-group { margin-top: clamp(8px, 1.7svh, 15px); gap: 7px; }
+  .home-course { min-height: clamp(49px, 8.3svh, 68px); padding: 9px 14px; }
+  .home-course-copy { gap: 3px; }
+  .home-course-copy strong { font-size: 13px; }
+  .main-content .review-entry { margin-top: clamp(9px, 1.5svh, 16px); gap: 6px; }
+  .home-tools { margin-top: clamp(5px, 1svh, 11px); }
+}
+@media (max-height: 690px) {
+  .site-header { padding: 7px 0; }
+  .question-body.centered-practice { padding: 2px 0; }
+  .centered-practice .chinese-sentence { font-size: clamp(17px, 3.35svh, 27px); }
+  .slot-stage { min-height: 27px; padding: 1px 0; }
+  .slot-list { gap: 2px 4px; }
+  .slot-word { font-size: clamp(12px, 2.25svh, 16px); min-height: 22px; padding: 1px 1px 3px; }
+  .site-key { height: clamp(25px, 4.7svh, 34px); }
+  .site-english-keyboard { gap: 3px; padding: 4px 4px max(4px, env(safe-area-inset-bottom)); }
+  .slot-feedback { min-height: 15px; margin-top: 2px; }
+  .slot-actions { min-height: 20px; margin-top: 2px; }
+  .keyboard-panel { margin-top: 2px; }
+  .main-content h1 { font-size: clamp(37px, 7svh, 54px); }
+  .main-content .intro { font-size: 12px; }
+  .home-course { min-height: 46px; }
+}

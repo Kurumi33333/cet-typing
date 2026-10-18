@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
 import { motion, useReducedMotion } from "motion/react";
 import Magnet from "./components/reactbits/Magnet";
+import Aurora from "./components/reactbits/Aurora";
+import Particles from "./components/reactbits/Particles";
 import type { CetLevel, Exercise } from "./features/course/types";
 import { getLessons } from "./data/curriculum";
 import { loadProgress, type StudyProgress } from "./lib/storage/db";
@@ -26,6 +29,26 @@ export default function App() {
   const [maintenance, setMaintenance] = useState(false);
   const [dataRevision, setDataRevision] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const homeRef = useRef<HTMLElement>(null);
+
+  // GSAP owns the home entrance; no competing Motion transforms on these elements.
+  useLayoutEffect(() => {
+    const root = homeRef.current;
+    if (!root || session || lexiconLevel || reducedMotion) return;
+    const scope = gsap.context(() => {
+      const sequence = gsap.timeline({ defaults: { ease: "power3.out" } });
+      sequence.fromTo(".home-kicker", { opacity: 0, y: 13 }, { opacity: 1, y: 0, duration: 0.48 })
+        .fromTo(".hero-line", { opacity: 0, yPercent: 92, rotateX: -20 },
+          { opacity: 1, yPercent: 0, rotateX: 0, duration: 0.85, ease: "back.out(1.45)", stagger: 0.115 }, "-=0.22")
+        .fromTo(".intro", { opacity: 0, y: 20, filter: "blur(6px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55 }, "-=0.55")
+        .fromTo(".home-magnet", { opacity: 0, y: 30, scale: 0.93 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.68, ease: "back.out(1.65)", stagger: 0.1 }, "-=0.40")
+        .fromTo(".home-start-over, .review-entry, .home-tools, .demo-note",
+          { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.46, stagger: 0.055 }, "-=0.47");
+    }, root);
+    return () => scope.revert();
+  }, [session, lexiconLevel, reducedMotion]);
 
   // Refresh the home summary after practice is closed. No online account.
   useEffect(() => {
@@ -154,27 +177,20 @@ export default function App() {
           <VocabularyScreen level={lexiconLevel} onBack={() => setLexiconLevel(null)} />
         </main>
       ) : session === null ? (
-        <main className="main-content">
-          <motion.div className="home-ambient" aria-hidden="true"
-            initial={false}
-            animate={reducedMotion ? undefined : { x: [0, 16, 0], y: [0, -11, 0], scale: [1, 1.035, 1] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
-          <motion.p className="home-kicker"
-            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.25 }}>每天进步一点</motion.p>
-          <motion.h1 initial={reducedMotion ? false : { opacity: 0, y: 14, filter: "blur(5px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={reducedMotion ? { duration: 0 } : {
-              y: { type: "spring", stiffness: 230, damping: 23, mass: 0.8 },
-              opacity: { duration: 0.28 }, filter: { duration: 0.3 },
-            }}>把英语<br /><em>打出来。</em></motion.h1>
-          <motion.p className="intro"
-            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.29, delay: reducedMotion ? 0 : 0.07 }}>
-            从一个单词开始，慢慢说出完整的句子。
-          </motion.p>
+        <main className="main-content" ref={homeRef}>
+          <div className="hero-webgl" aria-hidden="true">
+            <Aurora colorStops={["#c3f4d7", "#6db7bd", "#9fb0ec", "#c4f6bd"]}
+              lightMode amplitude={1.6} blend={0.65} speed={1.15} height={0.85}
+              scale={1.15} glow={1.1} brightness={1.05} layers={3}
+              mouseInteraction opacity={0.83} dpr={1.25} />
+          </div>
+          <div className="hero-webgl-tint" aria-hidden="true" />
+          <p className="home-kicker">每天进步一点</p>
+          <h1 className="kinetic-hero">
+            <span className="hero-line">把英语</span>
+            <em className="hero-line">打出来。</em>
+          </h1>
+          <p className="intro">从一个单词开始，慢慢说出完整的句子。</p>
           <div className="choice-group" aria-label="选择练习等级">
             {LEVELS.map((level) => (
               <Magnet key={level} wrapperClassName="home-magnet" innerClassName="home-magnet-inner"
@@ -255,7 +271,18 @@ export default function App() {
           <p className="demo-note">110 个原创试验练习 + 10 个开源语料精选 · 非官方真题 · 数据仅存本机</p>
         </main>
       ) : (
-        <main className="practice-main">
+        <main className="practice-main practice-stage">
+          <div className="practice-webgl" aria-hidden="true">
+            <Particles particleCount={220} particleSpread={12} speed={0.12}
+              particleColors={["#3b9b78", "#7caca4", "#829ed7", "#8ad1a9"]}
+              moveParticlesOnHover particleHoverFactor={0.8} alphaParticles
+              particleBaseSize={86} sizeRandomness={1.6} cameraDistance={20}
+              disableRotation={false} pixelRatio={1.15} shape="circle"
+              glow={0.7} twinkle={0.5} depthOfField={0.25}
+              connections connectionDistance={130} hoverEffect="parallax"
+              hoverRadius={210} clickBurst drift="up" driftSpeed={0.22}
+              opacity={0.56} lightMode />
+          </div>
           <PracticeScreen key={session.level + (session.reviewExercises ? "-review" : "-course")}
             level={session.level} reviewExercises={session.reviewExercises}
             startFromBeginning={session.startFromBeginning}

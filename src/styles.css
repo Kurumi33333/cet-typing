@@ -706,3 +706,64 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .slot-focus-marker { transition: none; }
 }
+
+
+/* V0.10 Motion × React Bits · soft depth without changing the one-screen layout. */
+.main-content { position: relative; isolation: isolate; }
+.main-content > :not(.home-ambient) { position: relative; z-index: 1; }
+.home-ambient {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: clamp(220px, 44vw, 520px);
+  height: clamp(220px, 32vw, 420px);
+  top: 3%;
+  right: -7%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(169, 207, 180, .25), rgba(193, 217, 202, .08) 48%, transparent 72%);
+  filter: blur(26px);
+}
+.main-content .choice-group > .home-magnet {
+  flex: 0 0 clamp(218px, 24vw, 260px);
+  width: clamp(218px, 24vw, 260px);
+  min-width: 0;
+}
+.home-magnet-inner { width: 100%; }
+.home-magnet .home-course {
+  width: 100%;
+  transition: box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
+}
+.home-magnet:hover .home-course {
+  box-shadow: 0 13px 30px -20px rgba(31, 74, 48, .34), 0 4px 11px -8px rgba(38, 73, 48, .17);
+}
+.home-magnet .home-course > span:last-child { transition: translate 200ms ease; }
+.home-magnet:hover .home-course > span:last-child { translate: 2px -2px; }
+.home-magnet:focus-within .home-course { outline: 2px solid #80a993; outline-offset: 3px; }
+.lesson-spark { display: inline-flex; flex: 0 0 auto; max-width: 95%; }
+.lesson-spark > .lesson-toggle { max-width: 100%; }
+.lesson-spark:focus-within { border-radius: 999px; }
+.lesson-toggle {
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.lesson-toggle:hover {
+  background-color: #e6f0e7;
+  border-color: #c4dac9;
+  box-shadow: 0 7px 19px -12px rgba(40, 78, 50, .24);
+}
+.lesson-options .lesson-option {
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+@media (max-width: 560px) {
+  .main-content .choice-group > .home-magnet { width: 100%; flex-basis: auto; }
+  .home-ambient { top: 10%; right: -22%; opacity: .65; }
+  .home-magnet .home-course { width: 100%; }
+}
+@media (hover: none), (pointer: coarse) {
+  .home-magnet:hover .home-course { box-shadow: none; }
+  .lesson-toggle:hover { box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-ambient { transform: none !important; }
+  .home-magnet .home-course, .lesson-toggle, .lesson-options .lesson-option,
+  .home-magnet .home-course > span:last-child { transition: none !important; }
+}

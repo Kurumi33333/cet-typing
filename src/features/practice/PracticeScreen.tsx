@@ -62,7 +62,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const [shiftEnabled, setShiftEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
   const [pronunciationEnabled, setPronunciationEnabled] = useState(readPronunciationPreference);
-  const [sentencePlayback, setSentencePlayback] = useState(false);
+  const [lastCorrectEnglish, setLastCorrectEnglish] = useState("");
   const [errorPulse, setErrorPulse] = useState(0);
   const [reviewGraded, setReviewGraded] = useState(false);
   const reducedMotion = useReducedMotion();
@@ -81,6 +81,8 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const displayValues = slots.map((_, at) => values[at] ?? "");
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";
+
+  useEffect(() => { completedExerciseRef.current = null; }, [exercise.id]);
 
   const ping = (type: Parameters<typeof playFeedback>[0]) => {
     if (soundEnabled) playFeedback(type);
@@ -142,13 +144,11 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
 
   function clearQuestion(preserveSpeech = false) {
     if (!preserveSpeech) stopPronunciation();
-    setSentencePlayback(false);
     valuesRef.current = [];
     activeRef.current = 0;
     setValues([]);
     setActiveIndex(0);
     setReviewGraded(false);
-    completedExerciseRef.current = null;
     setPhase("typing");
     setRevealed(false);
     setFeedback(DEFAULT_HINT);
@@ -181,6 +181,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
         .catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
     }
     ping("success");
+    setLastCorrectEnglish(exercise.english);
     setCompleted((previous) => previous + 1);
     // No success screen, no animation delay, and preserve the last word's TTS.
     advanceQuestion(true);
@@ -388,6 +389,8 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     setAttempts(0);
     setCompleted(0);
     setFinished(false);
+    completedExerciseRef.current = null;
+    setLastCorrectEnglish("");
   }
 
   function switchLesson(to: number) {
@@ -407,6 +410,8 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
         <div className="eyebrow"><span className="status-dot" /> 本轮练习完成</div>
         <h2 id="finish-title">很棒，<br /><em>继续保持。</em></h2>
         <p>你已完成「{lesson.title}」的 <strong>{completed}</strong> 个练习步骤，共提交 <strong>{attempts}</strong> 次。</p>
+        {lastCorrectEnglish && <button className="text-button" type="button"
+          onClick={() => speakEnglish(lastCorrectEnglish, "sentence")}>🔊 重听最后一句</button>}
         <div className="choice-group">
           {!reviewMode && lessonIndex + 1 < courseList.length && (
             <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>进入下一单元 →</button>
@@ -452,6 +457,11 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
                 }}>
                 <span aria-hidden="true">{pronunciationEnabled ? "🔊" : "🔇"}</span>
                 <span>{pronunciationEnabled ? "单词朗读 · 开" : "单词朗读 · 关"}</span>
+              </button>
+              <button type="button" className="sound-toggle" disabled={!lastCorrectEnglish}
+                onClick={() => { if (lastCorrectEnglish) speakEnglish(lastCorrectEnglish, "sentence"); focusInput(); }}>
+                <span aria-hidden="true">↻</span>
+                <span>重听上一句</span>
               </button>
             </div>
           </details>
@@ -578,14 +588,6 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
           </motion.p>
           {revealed && <div className="revealed-answer"><span>本题目标表达</span><strong>{exercise.english}</strong></div>}
           <div className="slot-actions">
-            {phase === "passed" && (
-              <button className="text-button replay-button" type="button"
-                onClick={() => {
-                  if (speakEnglish(exercise.english, "sentence")) setSentencePlayback(true);
-                  focusInput();
-                }}
-                aria-label="朗读本句的完整英文发音">🔊 朗读整句</button>
-            )}
             {phase !== "passed" && matchesSlot(displayValues[activeIndex] ?? "", slots[activeIndex]) && (
               <button className="text-button replay-button" type="button"
                 onClick={() => {

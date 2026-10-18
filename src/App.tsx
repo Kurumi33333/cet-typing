@@ -137,10 +137,9 @@ export default function App() {
     <div className="page-shell">
       <header className="site-header">
         <button className="brand brand-button" type="button" onClick={() => { setSession(null); setLexiconLevel(null); }} aria-label="返回首页">
-          <span className="brand-mark" aria-hidden="true">⌘</span>
           CET Typing
         </button>
-        <span className="header-note">中译英 · 主动输出</span>
+        <span className="header-note">中译英练习</span>
       </header>
 
       {lexiconLevel ? (
@@ -149,62 +148,71 @@ export default function App() {
         </main>
       ) : session === null ? (
         <main className="main-content">
-          <div className="eyebrow"><span className="status-dot" /> 四六级英语训练</div>
+          <p className="home-kicker">每天进步一点</p>
           <h1>把英语<br /><em>打出来。</em></h1>
-          <p className="intro">每天练几分钟。从一个单词开始，逐渐组成短语和句子；拼错的内容会留在本机，方便下次复习。</p>
+          <p className="intro">从一个单词开始，慢慢说出完整的句子。</p>
           <div className="choice-group" aria-label="选择练习等级">
-            <button className="primary-button" type="button" onClick={() => setSession({ level: "CET4" })}>
-              四级 · {resumeLabel("CET4")} <span aria-hidden="true">↗</span>
-            </button>
-            <button className="secondary-button" type="button" onClick={() => setSession({ level: "CET6" })}>
-              六级 · {resumeLabel("CET6")} <span aria-hidden="true">↗</span>
-            </button>
+            {LEVELS.map((level) => (
+              <button key={level} className={level === "CET4" ? "primary-button home-course" : "secondary-button home-course"}
+                type="button" onClick={() => setSession({ level })}>
+                <span className="home-course-copy">
+                  <strong>{level === "CET4" ? "大学英语四级" : "大学英语六级"}</strong>
+                  <small>{resumeLabel(level)}</small>
+                </span>
+                <span aria-hidden="true">↗</span>
+              </button>
+            ))}
           </div>
-          <div className="review-entry" aria-label="FSRS 本机间隔复习">
+          <section className="review-entry" aria-label="FSRS 间隔复习">
             <div className="review-entry-heading">
-              <strong>间隔复习</strong>
-              <span>FSRS 安排下次练习。答对后不会永久消失，而是在该复习时再出现。</span>
+              <strong>到期复习</strong>
+              <span>{reviewOverview.CET4.due + reviewOverview.CET6.due === 0
+                ? "今天没有待复习的题目" : "挑一个等级，继续巩固"}</span>
             </div>
-            <div className="review-entry-actions">
-              {LEVELS.map((level) => (
-                <button type="button" key={level} className="review-entry-button"
-                  disabled={busy !== null || reviewOverview[level].due === 0}
-                  onClick={() => void startReview(level)}>
-                  {level === "CET4" ? "四级" : "六级"}到期
-                  <span className="review-count">{reviewOverview[level].due}</span>
-                </button>
-              ))}
-            </div>
-            <p className="review-future">
-              待下次复习：四级 {reviewOverview.CET4.later} · 六级 {reviewOverview.CET6.later}
-            </p>
+            {reviewOverview.CET4.due + reviewOverview.CET6.due > 0 && (
+              <div className="review-entry-actions">
+                {LEVELS.filter((level) => reviewOverview[level].due > 0).map((level) => (
+                  <button type="button" key={level} className="review-entry-button"
+                    disabled={busy !== null} onClick={() => void startReview(level)}>
+                    {level === "CET4" ? "四级" : "六级"}
+                    <span className="review-count">{reviewOverview[level].due}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             {(reviewOverview.CET4.nextDue !== null || reviewOverview.CET6.nextDue !== null) && (
               <p className="review-future" aria-label="预计下次复习时间">
-                下次时间：四级 {nextReviewLabel("CET4")} · 六级 {nextReviewLabel("CET6")}
+                下次复习 · {LEVELS.filter((level) => reviewOverview[level].nextDue !== null)
+                  .map((level) => `${level === "CET4" ? "四级" : "六级"} ${nextReviewLabel(level)}`).join(" · ")}
               </p>
             )}
-          </div>
-          <div className="lexicon-entry" aria-label="开源参考词库">
-            <div className="lexicon-entry-copy">
-              <strong>词汇检索</strong>
-              <span>独立开源词表 · 可查释义及试听发音，非正式渐进练习题</span>
+          </section>
+          <details className="home-tools">
+            <summary>词汇检索与数据管理 <span aria-hidden="true">⌄</span></summary>
+            <div className="home-tools-inner">
+              <div className="lexicon-entry" aria-label="开源参考词库">
+                <div className="lexicon-entry-copy">
+                  <strong>参考词库</strong>
+                  <span>查词、释义与发音</span>
+                </div>
+                <div className="lexicon-entry-actions">
+                  <button type="button" onClick={() => setLexiconLevel("CET4")}>四级词库 ↗</button>
+                  <button type="button" onClick={() => setLexiconLevel("CET6")}>六级词库 ↗</button>
+                </div>
+              </div>
+              <div className="data-tools" aria-label="学习记录管理">
+                <span>本地数据</span>
+                <button type="button" disabled={maintenance} onClick={() => void exportRecords()}>导出备份</button>
+                <button type="button" disabled={maintenance} onClick={() => fileInputRef.current?.click()}>导入备份</button>
+                <button type="button" className="danger-text" disabled={maintenance} onClick={() => void resetRecords()}>清空</button>
+                <input ref={fileInputRef} type="file" accept="application/json,.json" hidden
+                  aria-label="选择 CET Typing 学习备份"
+                  onChange={(event) => void importRecords(event.target.files?.[0])} />
+              </div>
             </div>
-            <div className="lexicon-entry-actions">
-              <button type="button" onClick={() => setLexiconLevel("CET4")}>四级参考词库 ↗</button>
-              <button type="button" onClick={() => setLexiconLevel("CET6")}>六级参考词库 ↗</button>
-            </div>
-          </div>
-          <div className="data-tools" aria-label="学习记录管理">
-            <span>本地记录</span>
-            <button type="button" disabled={maintenance} onClick={() => void exportRecords()}>导出备份 ↗</button>
-            <button type="button" disabled={maintenance} onClick={() => fileInputRef.current?.click()}>导入备份</button>
-            <button type="button" className="danger-text" disabled={maintenance} onClick={() => void resetRecords()}>清空记录</button>
-            <input ref={fileInputRef} type="file" accept="application/json,.json" hidden
-              aria-label="选择 CET Typing 学习备份"
-              onChange={(event) => void importRecords(event.target.files?.[0])} />
-          </div>
+          </details>
           {notice && <p className="storage-warning" role="status">{notice}</p>}
-          <p className="demo-note">目前含 110 个原创渐进练习步骤，非官方四六级真题。进度与错题只保存在此浏览器。</p>
+          <p className="demo-note">110 个原创练习 · 非官方真题 · 学习记录仅存于本机</p>
         </main>
       ) : (
         <main className="practice-main">
@@ -215,8 +223,8 @@ export default function App() {
       )}
 
       <footer className="site-footer">
-        <span>Local-first · IndexedDB · 无账号</span>
-        <span>CET-4 / CET-6</span>
+        <span>CET Typing</span>
+        <span>轻一点，记得更牢。</span>
       </footer>
     </div>
   );

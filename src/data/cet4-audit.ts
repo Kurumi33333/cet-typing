@@ -414,3 +414,16 @@ export const cet4Audit: Cet4AuditRow[] = [
     ]
   }
 ];
+
+/**
+ * A fixed answer cannot fairly score free translation when alternatives or
+ * missing context have been explicitly flagged. Practice may still show the
+ * target spelling; do not treat a mismatch as a learning failure in FSRS.
+ */
+const uncertainTargets = new Set(cet4Audit.filter((row) =>
+  row.flags.includes("alternative_translation") || row.flags.includes("context_needed"),
+).map((row) => row.id));
+
+export function isCET4PilotFreeTranslationRisk(level: string, exerciseId: string): boolean {
+  return level === "CET4" && uncertainTargets.has(exerciseId);
+}

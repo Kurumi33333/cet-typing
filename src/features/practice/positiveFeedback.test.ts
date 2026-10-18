@@ -12,6 +12,13 @@ describe("positive feedback visual cadence", () => {
     expect(sentenceEnergyTiming(1).stepMs).toBe(0);
     expect(sentenceEnergyTiming(0).stepMs).toBe(0);
   });
+  it("finishes the final underline glint before the next question", () => {
+    for (const count of [2, 3, 11, 20]) {
+      const timing = sentenceEnergyTiming(count);
+      // Last node begins at flowMs; its 75ms glow and 110ms fade must finish.
+      expect(timing.flowMs + 75 + 110).toBeLessThan(SUCCESS_HOLD_MS);
+    }
+  });
   it("does not extend the existing hold even for twenty-word answers", () => {
     const x = sentenceEnergyTiming(20);
     expect(Number.isFinite(x.stepMs)).toBe(true);

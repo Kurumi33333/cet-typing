@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
 import { isCET4PilotFreeTranslationRisk } from "../../data/cet4-audit";
+import { acceptedAnswerTexts, matchingAcceptedAnswer, selectDisplayAnswer } from "../../data/acceptedAnswers";
 import { loadProgress, saveProgress, recordMistake } from "../../lib/storage/db";
 import { gradeReviewAttempt } from "../review/queue";
 import { resolveSavedPosition } from "../course/position";
@@ -13,7 +14,7 @@ import {
 import { editSlot, moveSlot, nextSlotIndex } from "./slotEditing";
 import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult, inputRouting } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
-import { allSlotsCorrect, incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
+import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
@@ -85,9 +86,17 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   const successTimerRef = useRef<number | null>(null);
 
   const exercise = exercises[index];
-  const targetOnly = isCET4PilotFreeTranslationRisk(level, exercise.id) && !reviewMode;
-  const slots = sentenceToSlots(exercise.english);
+  const targetOnly = !reviewMode && (
+    isCET4PilotFreeTranslationRisk(level, exercise.id) ||
+    (level === "CET6" && exercise.kind !== "word")
+  );
+  const acceptedAnswers = acceptedAnswerTexts(exercise);
+  const displayAnswer = selectDisplayAnswer(values, acceptedAnswers);
+  const slots = sentenceToSlots(displayAnswer);
   const displayValues = slots.map((_, at) => values[at] ?? "");
+  // Event handlers read valuesRef so rapid physical key events can adopt
+  // an alternative with a different number of word slots immediately.
+  const liveSlots = () => sentenceToSlots(selectDisplayAnswer(valuesRef.current, acceptedAnswers));
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";
   const routing = inputRouting(isTouchDevice, useSiteKeyboard, desktopNativeInput);
@@ -147,7 +156,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
 
   function chooseSlot(to: number, type: "navigate" | "select" = "select") {
     if (phase === "passed") return;
-    const selected = Math.max(0, Math.min(slots.length - 1, to));
+    const selected = Math.max(0, Math.min(liveSlots().length - 1, to));
     activeRef.current = selected;
     replaceSelectedSlotRef.current = true;
     setActiveIndex(selected);
@@ -189,7 +198,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     // No blur, no new input, no keyboard dismissal.
   }
 
-  function completeCorrectQuestion() {
+  function completeCorrectQuestion(acceptedEnglish: string) {
     // Physical and touch key events can be batched. Do not count/advance twice.
     if (completedExerciseRef.current === exercise.id) return;
     completedExerciseRef.current = exercise.id;
@@ -201,12 +210,12 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         .catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
     }
     ping("success");
-    setLastCorrectEnglish(exercise.english);
+    setLastCorrectEnglish(acceptedEnglish);
     setCompleted((previous) => previous + 1);
     // Render the last typed letter and green correct state before leaving.
     // Keep the focused input mounted and let its word TTS finish naturally.
     setPhase("passed");
-    setFeedback("正确");
+    setFeedback(acceptedEnglish === exercise.english ? "正确" : "正确 · 另一种自然表达");
     const completedId = exercise.id;
     successTimerRef.current = window.setTimeout(() => {
       successTimerRef.current = null;
@@ -216,12 +225,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
 
   function checkAnswer() {
     if (phase === "passed" || completedExerciseRef.current === exercise.id) return;
-    const currentValues = slots.map((_, at) => valuesRef.current[at] ?? "");
-    const errors = incorrectSlots(currentValues, slots);
-    if (errors.length === 0) {
-      completeCorrectQuestion();
+    const currentValues = valuesRef.current;
+    const accepted = matchingAcceptedAnswer(currentValues, acceptedAnswers);
+    if (accepted) {
+      completeCorrectQuestion(accepted);
       return;
     }
+    const errors = incorrectSlots(currentValues, liveSlots());
     setAttempts((previous) => previous + 1);
     if (reviewMode && !reviewGraded) {
       setReviewGraded(true);
@@ -231,7 +241,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const sourceLessonId = reviewMode
       ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
       : lesson.id;
-    if (!reviewMode && !isCET4PilotFreeTranslationRisk(level, exercise.id)) {
+    if (!reviewMode && !targetOnly) {
       void recordMistake(level, sourceLessonId, exercise.id, currentValues.join(" ")).catch(() => {
         setStorageNotice("错题记录失败，请检查本地存储权限。");
       });
@@ -243,25 +253,29 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     setErrorPulse((n) => n + 1);
     setFeedback(reviewMode
       ? `有 ${errors.length} 个词槽与目标不一致。本次按目标拼写回忆评分，修正后继续。`
-      : isCET4PilotFreeTranslationRisk(level, exercise.id)
-        ? "与本题目标表达不同。其他合理译法不会自动计入错题。"
+      : targetOnly
+        ? "尚未匹配到已审校的表达；合理译法不会自动计入错题。可查看其他答案。"
         : `有 ${errors.length} 个词槽与目标拼写不同，点击对应词槽修改。`);
   }
 
   function applyText(text: string, previousValue?: string) {
     if (phase === "passed" || completedExerciseRef.current === exercise.id) return;
     const at = activeRef.current;
-    const previous = slots.map((_, index) => valuesRef.current[index] ?? "");
+    const beforeSlots = liveSlots();
+    const previous = beforeSlots.map((_, index) => valuesRef.current[index] ?? "");
     const before = previousValue ?? previous[at];
-    const result = editSlot(previous, at, text, slots.length);
+    const result = editSlot(previous, at, text, beforeSlots.length);
     valuesRef.current = result.values;
     activeRef.current = result.active;
     setValues(result.values);
     setActiveIndex(result.active);
 
-    const justCorrect = shouldPronounceWord(before, result.values[at] ?? "", slots[at]);
-    if (justCorrect && pronunciationEnabled) {
-      const spoken = speakEnglish(slots[at].word, "word");
+    const updatedSlots = sentenceToSlots(selectDisplayAnswer(result.values, acceptedAnswers));
+    const updatedWord = updatedSlots[at]?.word;
+    const justCorrect = updatedSlots[at] &&
+      shouldPronounceWord(before, result.values[at] ?? "", updatedSlots[at]);
+    if (justCorrect && updatedWord && pronunciationEnabled) {
+      const spoken = speakEnglish(updatedWord, "word");
       if (!spoken) ping("typing");
     } else if (result.moved) {
       ping("navigate");
@@ -270,7 +284,8 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     } else if (text.length < before.length) {
       ping("delete");
     }
-    if (allSlotsCorrect(result.values, slots)) completeCorrectQuestion();
+    const accepted = matchingAcceptedAnswer(result.values, acceptedAnswers);
+    if (accepted) completeCorrectQuestion(accepted);
   }
 
   function restoreCaret(position: number) {
@@ -308,7 +323,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const at = activeRef.current;
     const current = valuesRef.current[at] ?? "";
     if (!current) {
-      chooseSlot(moveSlot(at, -1, slots.length), "navigate");
+      chooseSlot(moveSlot(at, -1, liveSlots().length), "navigate");
       return;
     }
     if (routing.readOnly && replaceSelectedSlotRef.current) {
@@ -328,10 +343,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   }
 
   function nextSlotOrCheck() {
-    if (slots.length < 2) return;
-    // Space is navigation ONLY. At the last slot, wrap around to the first.
-    // Only exact all-slot matching auto-submits; Enter explicitly checks errors.
-    chooseSlot(nextSlotIndex(activeRef.current, slots.length), "navigate");
+    const count = liveSlots().length;
+    if (count < 2) return;
+    // Space only navigates. Alternative translations may contain more/fewer words.
+    chooseSlot(nextSlotIndex(activeRef.current, count), "navigate");
   }
 
   function handleSiteKey(key: string) {
@@ -422,10 +437,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
       checkAnswer();
     } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      chooseSlot(moveSlot(activeRef.current, 1, slots.length), "navigate");
+      chooseSlot(moveSlot(activeRef.current, 1, liveSlots().length), "navigate");
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      chooseSlot(moveSlot(activeRef.current, -1, slots.length), "navigate");
+      chooseSlot(moveSlot(activeRef.current, -1, liveSlots().length), "navigate");
     } else if (event.key === " " || code === "Space") {
       event.preventDefault();
       nextSlotOrCheck();
@@ -579,6 +594,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
           transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}>
           <div className="eyebrow">
             {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
+            {acceptedAnswers.length > 1 ? " · 多种表达可用" : ""}
           </div>
           <h2 className="chinese-sentence">{exercise.chinese}</h2>
         </motion.div>
@@ -666,7 +682,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
             transition={{ duration: reducedMotion || phase === "passed" ? 0 : 0.2 }} role="status" aria-live="polite">
             {phase === "review" ? (targetOnly ? "◇ " : "● ") : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
-          {revealed && <div className="revealed-answer"><span>本题目标表达</span><strong>{exercise.english}</strong></div>}
+          {revealed && <div className="revealed-answer">
+            <span>本题目标表达</span><strong>{exercise.english}</strong>
+            {acceptedAnswers.length > 1 && <span>也接受：{acceptedAnswers.slice(1).join(" / ")}</span>}
+          </div>}
           <div className="slot-actions">
             {phase !== "passed" && matchesSlot(displayValues[activeIndex] ?? "", slots[activeIndex]) && (
               <button className="text-button replay-button" type="button"

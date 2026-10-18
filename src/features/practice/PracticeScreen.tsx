@@ -11,6 +11,7 @@ import {
   shouldPronounceWord, speakEnglish, stopPronunciation,
 } from "./speech";
 import { editSlot, moveSlot } from "./slotEditing";
+import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
@@ -51,6 +52,14 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const [finished, setFinished] = useState(false);
   const [feedback, setFeedback] = useState(DEFAULT_HINT);
   const [focused, setFocused] = useState(false);
+  const [isTouchDevice] = useState(() =>
+    typeof window !== "undefined" && !!window.matchMedia?.("(pointer: coarse)").matches);
+  const [useSiteKeyboard, setUseSiteKeyboard] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia?.("(pointer: coarse)").matches) return false;
+    try { return window.localStorage.getItem("cet-typing:keyboard-mode") !== "system"; }
+    catch { return true; }
+  });
+  const [shiftEnabled, setShiftEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
   const [pronunciationEnabled, setPronunciationEnabled] = useState(readPronunciationPreference);
   const [sentencePlayback, setSentencePlayback] = useState(false);
@@ -60,6 +69,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const inputRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
   const compositionStart = useRef("");
+  const physicalComposed = useRef(false);
+  // Keep consecutive keydown events in sync even before React re-renders.
+  const valuesRef = useRef<string[]>([]);
+  const activeRef = useRef(0);
 
   const exercise = exercises[index];
   const targetOnly = isCET4PilotFreeTranslationRisk(level, exercise.id) && !reviewMode;
@@ -124,7 +137,9 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
 
   function chooseSlot(to: number, type: "navigate" | "select" = "select") {
     if (phase === "passed") return;
-    setActiveIndex(Math.max(0, Math.min(slots.length - 1, to)));
+    const selected = Math.max(0, Math.min(slots.length - 1, to));
+    activeRef.current = selected;
+    setActiveIndex(selected);
     ping(type);
     // Selection makes it easy to overwrite a misspelling, not a requirement.
     focusInput();
@@ -134,6 +149,8 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   function clearQuestion() {
     stopPronunciation();
     setSentencePlayback(false);
+    valuesRef.current = [];
+    activeRef.current = 0;
     setValues([]);
     setActiveIndex(0);
     setReviewGraded(false);
@@ -159,14 +176,15 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
 
   function checkAnswer() {
     if (phase === "passed") return;
-    const errors = incorrectSlots(displayValues, slots);
+    const currentValues = slots.map((_, at) => valuesRef.current[at] ?? "");
+    const errors = incorrectSlots(currentValues, slots);
     setAttempts((previous) => previous + 1);
     // Grade the FIRST unaided review attempt only. Re-typing after a failed
     // attempt teaches the answer but does not count as a second Good recall.
     if (reviewMode && !reviewGraded) {
       setReviewGraded(true);
       void gradeReviewAttempt(
-        exercise.id, level, errors.length === 0, displayValues.join(" "),
+        exercise.id, level, errors.length === 0, currentValues.join(" "),
       ).catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
     }
     if (errors.length === 0) {
@@ -179,7 +197,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
         ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
         : lesson.id;
       if (!reviewMode && !isCET4PilotFreeTranslationRisk(level, exercise.id)) {
-        void recordMistake(level, sourceLessonId, exercise.id, displayValues.join(" ")).catch(() => {
+        void recordMistake(level, sourceLessonId, exercise.id, currentValues.join(" ")).catch(() => {
           setStorageNotice("错题记录失败，请检查本地存储权限。");
         });
       }
@@ -195,16 +213,20 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     }
   }
 
-  function applyText(text: string, before = entered) {
+  function applyText(text: string, previousValue?: string) {
     if (phase === "passed") return;
-    const currentSlot = slots[activeIndex];
-    const result = editSlot(displayValues, activeIndex, text, slots.length);
+    const at = activeRef.current;
+    const previous = slots.map((_, index) => valuesRef.current[index] ?? "");
+    const before = previousValue ?? previous[at];
+    const result = editSlot(previous, at, text, slots.length);
+    valuesRef.current = result.values;
+    activeRef.current = result.active;
     setValues(result.values);
     setActiveIndex(result.active);
 
-    const justCorrect = shouldPronounceWord(before, result.values[activeIndex] ?? "", currentSlot);
+    const justCorrect = shouldPronounceWord(before, result.values[at] ?? "", slots[at]);
     if (justCorrect && pronunciationEnabled) {
-      const spoken = speakEnglish(currentSlot.word, "word");
+      const spoken = speakEnglish(slots[at].word, "word");
       if (!spoken) ping("typing");
     } else if (result.moved) {
       ping("navigate");
@@ -215,21 +237,95 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     }
   }
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  function restoreCaret(position: number) {
+    window.requestAnimationFrame(() => {
+      const element = inputRef.current;
+      if (!element || element.readOnly) return;
+      try { element.setSelectionRange(position, position); } catch { /* optional */ }
+    });
+  }
+
+  function typeLetter(letter: string) {
     if (phase === "passed") return;
-    // Let the native IME compose its candidate without splitting interim spaces.
-    if (composing.current) {
-      setValues((previous) => {
-        const next = [...previous];
-        next[activeIndex] = event.target.value;
-        return next;
-      });
+    const at = activeRef.current;
+    const current = valuesRef.current[at] ?? "";
+    const input = inputRef.current;
+    // Consecutive keydown events may arrive before controlled DOM has re-rendered.
+    const synced = input?.value === current;
+    const next = insertAtCaret(current, letter,
+      synced ? input?.selectionStart ?? null : null,
+      synced ? input?.selectionEnd ?? null : null);
+    applyText(next.text);
+    restoreCaret(next.caret);
+    focusInput();
+  }
+
+  function backspaceLetter() {
+    if (phase === "passed") return;
+    const at = activeRef.current;
+    const current = valuesRef.current[at] ?? "";
+    if (!current) {
+      chooseSlot(moveSlot(at, -1, slots.length), "navigate");
+      return;
+    }
+    const input = inputRef.current;
+    const synced = input?.value === current;
+    const next = deleteAtCaret(current,
+      synced ? input?.selectionStart ?? null : null,
+      synced ? input?.selectionEnd ?? null : null);
+    applyText(next.text);
+    restoreCaret(next.caret);
+    focusInput();
+  }
+
+  function nextSlotOrCheck() {
+    if (activeRef.current + 1 < slots.length) chooseSlot(activeRef.current + 1, "navigate");
+    else if (valuesRef.current.some((word) => word.trim())) checkAnswer();
+  }
+
+  function handleSiteKey(key: string) {
+    if (key === "Backspace") backspaceLetter();
+    else if (key === "Space") nextSlotOrCheck();
+    else if (key === "Enter") phase === "passed" ? advanceQuestion() : checkAnswer();
+    else if (key === "Shift") { setShiftEnabled((prev) => !prev); return; }
+    else {
+      typeLetter(shiftEnabled ? key.toUpperCase() : key);
+      if (shiftEnabled) setShiftEnabled(false);
+    }
+    focusInput();
+  }
+
+  function setKeyboardMode(site: boolean) {
+    setUseSiteKeyboard(site);
+    try { window.localStorage.setItem("cet-typing:keyboard-mode", site ? "site" : "system"); }
+    catch { /* optional preference */ }
+    focusInput();
+  }
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    if (phase === "passed" || composing.current) return;
+    if (!isEnglishCompositionResult(event.target.value)) {
+      setFeedback("此处只接收英文字母。手机可使用下方网页英文键盘直接输入。");
+      event.target.value = valuesRef.current[activeRef.current] ?? "";
       return;
     }
     applyText(event.target.value);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+    const code = event.nativeEvent.code;
+    // A real hardware keyboard exposes KeyA..KeyZ even while a Chinese pinyin
+    // IME reports event.key="Process", isComposing=true, or keyCode=229.
+    // On a mobile SYSTEM keyboard we must not assume code means a physical key.
+    const interceptPhysical = !isTouchDevice || useSiteKeyboard;
+    const letter = interceptPhysical ? englishPhysicalLetter(event.nativeEvent) : null;
+    if (letter) {
+      event.preventDefault(); // no pinyin pre-edit / browser text insertion
+      if (composing.current || event.nativeEvent.isComposing) physicalComposed.current = true;
+      typeLetter(letter);
+      return;
+    }
     if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
     if (phase === "passed") {
       if (event.key === "Enter" || event.key === " ") {
@@ -238,26 +334,23 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       }
       return;
     }
-    if (event.altKey || event.metaKey || event.ctrlKey) return;
-
     if (event.key === "Enter") {
       event.preventDefault();
       checkAnswer();
     } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      chooseSlot(moveSlot(activeIndex, 1, slots.length), "navigate");
+      chooseSlot(moveSlot(activeRef.current, 1, slots.length), "navigate");
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      chooseSlot(moveSlot(activeIndex, -1, slots.length), "navigate");
+      chooseSlot(moveSlot(activeRef.current, -1, slots.length), "navigate");
     } else if (event.key === " ") {
       event.preventDefault();
-      if (activeIndex + 1 < slots.length) chooseSlot(activeIndex + 1, "navigate");
-      else if (displayValues.some((word) => word.trim())) checkAnswer();
-    } else if (event.key === "Backspace" && !entered) {
+      nextSlotOrCheck();
+    } else if (event.key === "Backspace" && interceptPhysical) {
       event.preventDefault();
-      chooseSlot(moveSlot(activeIndex, -1, slots.length), "navigate");
+      backspaceLetter();
     }
-    // All normal letters/backspace are applied via onChange, on desktop and iOS.
+    // Non-physical system keyboard input and paste still use onChange.
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -399,17 +492,28 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
               aria-label="输入当前选中的英文词，左右方向键或空格切换词，Enter 检查或进入下一题"
               aria-describedby="practice-feedback"
               autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
-              inputMode="text" enterKeyHint="enter" value={entered}
+              lang="en" inputMode={useSiteKeyboard ? "none" : "text"} readOnly={useSiteKeyboard}
+              enterKeyHint="enter" value={entered}
               onChange={handleChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               onCompositionStart={() => {
-                compositionStart.current = entered;
+                compositionStart.current = valuesRef.current[activeRef.current] ?? "";
+                physicalComposed.current = false;
                 composing.current = true;
               }}
               onCompositionEnd={(event) => {
                 composing.current = false;
-                applyText(event.currentTarget.value, compositionStart.current);
+                const committed = event.currentTarget.value;
+                if (!physicalComposed.current && isEnglishCompositionResult(committed)) {
+                  applyText(committed, compositionStart.current);
+                } else if (!physicalComposed.current) {
+                  setFeedback("中文候选词不会写入答案。请使用网页英文键盘直接打字。");
+                  event.currentTarget.value = valuesRef.current[activeRef.current] ?? "";
+                } else {
+                  event.currentTarget.value = valuesRef.current[activeRef.current] ?? "";
+                }
+                physicalComposed.current = false;
               }}
               onKeyDown={handleKeyDown}
             />
@@ -479,6 +583,59 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             }}>{revealed ? "隐藏答案" : "显示答案"}</button>}
           </div>
         </form>
+        {isTouchDevice && (
+          <div className="keyboard-panel">
+            <div className="keyboard-mode-bar">
+              <span>{useSiteKeyboard ? "英文直输 · 无需切换拼音" : "系统输入法 · 可能需要切换英文模式"}</span>
+              <button type="button" onClick={() => setKeyboardMode(!useSiteKeyboard)}>
+                {useSiteKeyboard ? "使用系统键盘" : "使用网页英文键盘"}
+              </button>
+            </div>
+            {useSiteKeyboard && (
+              <div className="site-english-keyboard" role="group" aria-label="英文直接输入键盘">
+                {["qwertyuiop", "asdfghjkl"].map((row) => (
+                  <div className="site-key-row" key={row}>
+                    {[...row].map((letter) => (
+                      <button type="button" className="site-key" key={letter}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleSiteKey(letter)}
+                        aria-label={letter}>{shiftEnabled ? letter.toUpperCase() : letter}</button>
+                    ))}
+                  </div>
+                ))}
+                <div className="site-key-row">
+                  <button type="button" className={`site-key site-key-special ${shiftEnabled ? "site-key-selected" : ""}`}
+                    aria-label="大写切换" aria-pressed={shiftEnabled}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("Shift")}>⇧</button>
+                  {[..."zxcvbnm"].map((letter) => (
+                    <button type="button" className="site-key" key={letter}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleSiteKey(letter)}
+                      aria-label={letter}>{shiftEnabled ? letter.toUpperCase() : letter}</button>
+                  ))}
+                  <button type="button" className="site-key site-key-special"
+                    aria-label="删除" onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("Backspace")}>⌫</button>
+                </div>
+                <div className="site-key-row site-key-controls">
+                  <button type="button" className="site-key site-key-small"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("'")}>{"'"}</button>
+                  <button type="button" className="site-key site-key-small"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("-")}>−</button>
+                  <button type="button" className="site-key site-key-space"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("Space")}>空格 / 下一词</button>
+                  <button type="button" className="site-key site-key-enter"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleSiteKey("Enter")}>Enter ↵</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

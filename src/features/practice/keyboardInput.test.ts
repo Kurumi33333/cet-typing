@@ -10,6 +10,8 @@ describe("IME-independent physical keyboard", () => {
     expect(englishPhysicalLetter(physical("KeyA"))).toBe("a");
     expect(englishPhysicalLetter(physical("KeyI", { shiftKey: true }))).toBe("I");
     expect(englishPhysicalLetter(physical("KeyZ"))).toBe("z");
+    expect(englishPhysicalLetter(physical("Quote"))).toBe("'");
+    expect(englishPhysicalLetter(physical("Minus"))).toBe("-");
   });
   it("never steals shortcuts or non-letters", () => {
     expect(englishPhysicalLetter(physical("KeyC", { ctrlKey: true }))).toBeNull();

@@ -326,7 +326,20 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       typeLetter(letter);
       return;
     }
-    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    // Once a physical English key was captured, also route control keys even
+    // if the desktop IME still marks the event as composing/Process/229.
+    const composingNow = composing.current || event.nativeEvent.isComposing || event.keyCode === 229;
+    if (composingNow && interceptPhysical && physicalComposed.current) {
+      if (code === "Backspace") { event.preventDefault(); backspaceLetter(); return; }
+      if (code === "Space") { event.preventDefault(); nextSlotOrCheck(); return; }
+      if (code === "Enter") {
+        event.preventDefault();
+        if (phase === "passed") advanceQuestion();
+        else checkAnswer();
+        return;
+      }
+    }
+    if (composingNow) return;
     if (phase === "passed") {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();

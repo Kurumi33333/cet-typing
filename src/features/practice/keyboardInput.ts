@@ -13,8 +13,10 @@ export interface PhysicalKey {
 export function englishPhysicalLetter(event: PhysicalKey): string | null {
   if (event.altKey || event.ctrlKey || event.metaKey) return null;
   const match = /^Key([A-Z])$/.exec(event.code);
-  if (!match) return null;
-  return event.shiftKey ? match[1] : match[1].toLowerCase();
+  if (match) return event.shiftKey ? match[1] : match[1].toLowerCase();
+  if (event.code === "Quote" && !event.shiftKey) return "'";
+  if (event.code === "Minus" && !event.shiftKey) return "-";
+  return null;
 }
 
 export function insertAtCaret(

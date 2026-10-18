@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { editSlot, moveSlot } from "./slotEditing";
+import { editSlot, moveSlot, nextSlotIndex } from "./slotEditing";
 
 describe("free-navigation slot editor", () => {
   it("can jump directly to an unfinished later slot", () => {
@@ -17,6 +17,13 @@ describe("free-navigation slot editor", () => {
   it("back and forth navigation stays inside bounds", () => {
     expect(moveSlot(0, -1, 4)).toBe(0);
     expect(moveSlot(3, 1, 4)).toBe(3);
+  });
+  it("cycles all word slots with Space, without validating or submitting", () => {
+    expect(nextSlotIndex(0, 3)).toBe(1);
+    expect(nextSlotIndex(1, 3)).toBe(2);
+    expect(nextSlotIndex(2, 3)).toBe(0);
+    expect(nextSlotIndex(0, 1)).toBe(0);
+    expect(nextSlotIndex(0, 0)).toBe(0);
   });
   it("supports multiword paste while preserving existing earlier slots", () => {
     expect(editSlot(["I", "", "", ""], 1, "really like tea", 4).values).toEqual(["I", "really", "like", "tea"]);

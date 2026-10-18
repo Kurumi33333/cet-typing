@@ -12,6 +12,11 @@ export function moveSlot(index: number, delta: number, count: number): number {
   return Math.max(0, Math.min(count - 1, index + delta));
 }
 
+/** Space navigation is cyclic and never submits a partially typed answer. */
+export function nextSlotIndex(index: number, count: number): number {
+  return count > 1 ? (index + 1) % count : 0;
+}
+
 export function editSlot(
   current: readonly string[],
   active: number,

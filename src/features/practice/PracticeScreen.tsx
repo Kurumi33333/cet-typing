@@ -10,7 +10,7 @@ import {
   readPronunciationPreference, writePronunciationPreference,
   shouldPronounceWord, speakEnglish, stopPronunciation,
 } from "./speech";
-import { editSlot, moveSlot } from "./slotEditing";
+import { editSlot, moveSlot, nextSlotIndex } from "./slotEditing";
 import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { allSlotsCorrect, incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
@@ -292,7 +292,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     if (slots.length < 2) return;
     // Space is navigation ONLY. At the last slot, wrap around to the first.
     // Only exact all-slot matching auto-submits; Enter explicitly checks errors.
-    chooseSlot((activeRef.current + 1) % slots.length, "navigate");
+    chooseSlot(nextSlotIndex(activeRef.current, slots.length), "navigate");
   }
 
   function handleSiteKey(key: string) {
@@ -341,8 +341,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     // Physical Space is a navigation key, even if a Chinese IME reports
     // key="Process", isComposing=true and keyCode=229. Never let the IME
     // consume Space as "select a Chinese candidate".
-    if (interceptPhysical && code === "Space") {
+    if (interceptPhysical && (code === "Space" || event.key === " ")) {
       event.preventDefault();
+      // Do not let compositionend apply an IME candidate to the newly selected
+      // slot after we have handled physical Space ourselves.
+      if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) {
+        physicalComposed.current = true;
+      }
       nextSlotOrCheck();
       return;
     }

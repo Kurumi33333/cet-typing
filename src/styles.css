@@ -261,3 +261,43 @@ h1 em { color: #7ba995; font-style: normal; }
   .home-tools { margin-top: 21px; }
 }
 @media(prefers-reduced-motion:reduce) { .home-tools > summary span { transition: none; } }
+
+
+/* Visual reduction 02 · keep question, blanks and feedback in a single focus path. */
+.practice-topline { position: relative; }
+.practice-top-actions { gap: 17px; }
+.level-label { font-size: 12px; letter-spacing: 0; color: #849488; font-weight: 500; }
+.question-counter { color: #84948a; font-size: 12px; }
+.practice-settings { position: relative; }
+.practice-settings > summary { display: flex; align-items: center; gap: 7px; cursor: pointer; color: #748b7c; font-size: 12px; font-weight: 550; list-style: none; padding: 9px 0; }
+.practice-settings > summary::-webkit-details-marker { display: none; }
+.practice-settings > summary span { color: #9eaea2; font-size: 13px; }
+.practice-settings > summary:focus-visible { outline: 2px solid #8da994; outline-offset: 4px; border-radius: 3px; }
+.practice-settings-options { position: absolute; right: 0; top: calc(100% + 6px); z-index: 15; display: flex; flex-direction: column; min-width: 176px; gap: 4px; padding: 8px; border: 1px solid #dde8df; border-radius: 13px; background: #fbfdfb; box-shadow: 0 12px 30px #273e2d14; }
+.practice-settings-options .sound-toggle { display: flex; justify-content: flex-start; background: transparent; border: none; width: 100%; padding: 10px; border-radius: 8px; color: #586e5f; }
+.practice-settings-options .sound-toggle:hover { background: #edf4ed; }
+.practice-settings-options .sound-toggle[aria-pressed="false"] { color: #97a59b; }
+.progress-track { height: 3px; margin-top: 15px; }
+.lesson-navigation { margin-top: 15px; }
+.lesson-toggle { background: transparent; border-color: transparent; padding: 8px 12px; color: #627b6a; gap: 9px; }
+.lesson-toggle:hover { background: #edf3ed; }
+.lesson-toggle-title { font-weight: 560; }
+.lesson-options { box-shadow: 0 12px 27px #273e2d10; }
+.centered-practice, .lesson-navigation + .question-body { padding-top: clamp(34px, 6vw, 64px); }
+.question-prompt { min-height: 125px; }
+.centered-practice .eyebrow { color: #8a9d8d; letter-spacing: .06em; font-size: 12px; font-weight: 500; }
+.centered-practice .chinese-sentence { margin: 22px auto 24px; line-height: 1.5; }
+.slot-stage { min-height: 98px; }
+.slot-feedback { margin-top: 21px; font-size: 12px; }
+.slot-actions { margin-top: 17px; gap: 12px 23px; }
+.submit-minimal { padding: 11px 19px; }
+@media(max-width:560px) {
+  .practice-topline { flex-wrap: nowrap; gap: 8px; }
+  .practice-topline .level-label { display: inline; }
+  .practice-top-actions { flex-wrap: nowrap; gap: 12px; }
+  .centered-practice, .lesson-navigation + .question-body { padding-top: 37px; }
+  .question-prompt { min-height: 103px; }
+  .centered-practice .chinese-sentence { margin: 18px auto 22px; }
+  .slot-stage { min-height: 83px; }
+  .slot-feedback { margin-top: 18px; }
+}

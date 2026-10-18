@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getLessons } from "./curriculum";
-import { cet4Audit } from "./cet4-audit";
+import { cet4Audit, isCET4PilotFreeTranslationRisk } from "./cet4-audit";
 import lexicon from "../../public/lexicon/cet4.json";
 
 describe("CET4 content release gate", () => {
@@ -23,6 +23,13 @@ describe("CET4 content release gate", () => {
     const flagged = cet4Audit.filter((r) => r.flags.includes("lexicon_gap")).map((r) => r.id).sort();
     expect(flagged).toEqual(uncovered);
     expect(uncovered).toHaveLength(5);
+  });
+  it("does not penalize flagged multi-answer CET4 items in regular practice", () => {
+    expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-01-02")).toBe(true);
+    expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-03-08")).toBe(true);
+    expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-01-01")).toBe(false);
+    expect(isCET4PilotFreeTranslationRisk("CET6", "cet4-01-02")).toBe(false);
+    expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-01-04")).toBe(false);
   });
   it("keeps potential free-translation ambiguities visible for future review", () => {
     expect(cet4Audit.filter((r) => r.flags.includes("alternative_translation")).length)

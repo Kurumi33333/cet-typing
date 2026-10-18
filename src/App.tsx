@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import type { CetLevel, Exercise } from "./features/course/types";
 import { getLessons } from "./data/curriculum";
 import { loadProgress, type StudyProgress } from "./lib/storage/db";
@@ -11,6 +12,7 @@ type Session = { level: CetLevel; reviewExercises?: Exercise[]; startFromBeginni
 const LEVELS: CetLevel[] = ["CET4", "CET6"];
 
 export default function App() {
+  const reducedMotion = useReducedMotion();
   const [session, setSession] = useState<Session | null>(null);
   const [lexiconLevel, setLexiconLevel] = useState<CetLevel | null>(null);
   const [positions, setPositions] = useState<Partial<Record<CetLevel, StudyProgress>>>({});
@@ -157,14 +159,17 @@ export default function App() {
           <p className="intro">从一个单词开始，慢慢说出完整的句子。</p>
           <div className="choice-group" aria-label="选择练习等级">
             {LEVELS.map((level) => (
-              <button key={level} className={level === "CET4" ? "primary-button home-course" : "secondary-button home-course"}
-                type="button" onClick={() => setSession({ level })}>
+              <motion.button key={level} className={level === "CET4" ? "primary-button home-course" : "secondary-button home-course"}
+                type="button" onClick={() => setSession({ level })}
+                whileHover={reducedMotion ? undefined : { y: -2 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.985 }}
+                transition={{ type: "spring", stiffness: 430, damping: 32 }}>
                 <span className="home-course-copy">
                   <strong>{level === "CET4" ? "大学英语四级" : "大学英语六级"}</strong>
                   <small>{resumeLabel(level)}</small>
                 </span>
                 <span aria-hidden="true">↗</span>
-              </button>
+              </motion.button>
             ))}
           </div>
           <div className="home-start-over" aria-label="从基础单词重新开始">

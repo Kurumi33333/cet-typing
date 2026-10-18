@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { getLessons } from "../../data/curriculum";
+import { isCET4PilotFreeTranslationRisk } from "../../data/cet4-audit";
 import { loadProgress, saveProgress, recordMistake } from "../../lib/storage/db";
 import { gradeReviewAttempt } from "../review/queue";
 import { resolveSavedPosition } from "../course/position";
@@ -176,7 +177,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       const sourceLessonId = reviewMode
         ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
         : lesson.id;
-      if (!reviewMode) {
+      if (!reviewMode && !isCET4PilotFreeTranslationRisk(level, exercise.id)) {
         void recordMistake(level, sourceLessonId, exercise.id, displayValues.join(" ")).catch(() => {
           setStorageNotice("错题记录失败，请检查本地存储权限。");
         });
@@ -185,7 +186,11 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       setPhase("review");
       setActiveIndex(errors[0]);
       setErrorPulse((n) => n + 1);
-      setFeedback(reviewMode ? `有 ${errors.length} 个空格错误。本次记为需要重学，修正后继续。` : `有 ${errors.length} 个空格需要修改，点击任意空格都能继续填写。`);
+      setFeedback(reviewMode
+        ? `有 ${errors.length} 个词槽与目标不一致。本次按目标拼写回忆评分，修正后继续。`
+        : isCET4PilotFreeTranslationRisk(level, exercise.id)
+          ? "与本题目标表达不同。其他合理译法不会自动计入错题。"
+          : `有 ${errors.length} 个词槽与目标拼写不同，点击对应词槽修改。`);
     }
   }
 
@@ -445,7 +450,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             transition={{ duration: reducedMotion ? 0 : 0.2 }} role="status" aria-live="polite">
             {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
-          {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
+          {revealed && <div className="revealed-answer"><span>本题目标表达</span><strong>{exercise.english}</strong></div>}
           <div className="slot-actions">
             {phase === "passed" && (
               <button className="text-button replay-button" type="button"

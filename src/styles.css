@@ -301,3 +301,8 @@ h1 em { color: #7ba995; font-style: normal; }
   .slot-stage { min-height: 83px; }
   .slot-feedback { margin-top: 18px; }
 }
+
+
+/* Content safety: a different valid translation is not necessarily a spelling error. */
+.slot-target-diff { color: #647a83; border-color: #7e99a7; background: transparent; text-shadow: none; }
+.feedback-target { color: #667f88; }

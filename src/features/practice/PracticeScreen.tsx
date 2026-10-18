@@ -13,7 +13,7 @@ import {
 import { editSlot, moveSlot } from "./slotEditing";
 import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
-import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
+import { allSlotsCorrect, incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
@@ -73,6 +73,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   // Keep consecutive keydown events in sync even before React re-renders.
   const valuesRef = useRef<string[]>([]);
   const activeRef = useRef(0);
+  const completedExerciseRef = useRef<string | null>(null);
 
   const exercise = exercises[index];
   const targetOnly = isCET4PilotFreeTranslationRisk(level, exercise.id) && !reviewMode;
@@ -121,13 +122,6 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   }, [ready, index, lessonIndex, finished]);
 
   useEffect(() => {
-    if (phase !== "passed" || sentencePlayback) return;
-    // Enter can advance instantly; timer only helps hands-free learners.
-    const timer = window.setTimeout(() => advanceQuestion(), 1250);
-    return () => window.clearTimeout(timer);
-  }, [phase, index, lessonIndex, sentencePlayback]);
-
-  useEffect(() => {
     if (phase === "review") inputRef.current?.select();
   }, [phase, errorPulse]);
 
@@ -146,20 +140,21 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     window.requestAnimationFrame(() => inputRef.current?.select());
   }
 
-  function clearQuestion() {
-    stopPronunciation();
+  function clearQuestion(preserveSpeech = false) {
+    if (!preserveSpeech) stopPronunciation();
     setSentencePlayback(false);
     valuesRef.current = [];
     activeRef.current = 0;
     setValues([]);
     setActiveIndex(0);
     setReviewGraded(false);
+    completedExerciseRef.current = null;
     setPhase("typing");
     setRevealed(false);
     setFeedback(DEFAULT_HINT);
   }
 
-  function advanceQuestion() {
+  function advanceQuestion(instant = false) {
     if (index + 1 >= exercises.length) {
       if (!reviewMode && lessonIndex + 1 < courseList.length) {
         const following = courseList[lessonIndex + 1];
@@ -168,49 +163,61 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       setFinished(true);
       return;
     }
-    ping("advance");
+    if (!instant) ping("advance");
     setIndex((previous) => previous + 1);
-    clearQuestion();
+    clearQuestion(instant);
     // No blur, no new input, no keyboard dismissal.
   }
 
-  function checkAnswer() {
-    if (phase === "passed") return;
-    const currentValues = slots.map((_, at) => valuesRef.current[at] ?? "");
-    const errors = incorrectSlots(currentValues, slots);
+  function completeCorrectQuestion() {
+    // Physical and touch key events can be batched. Do not count/advance twice.
+    if (completedExerciseRef.current === exercise.id) return;
+    completedExerciseRef.current = exercise.id;
     setAttempts((previous) => previous + 1);
-    // Grade the FIRST unaided review attempt only. Re-typing after a failed
-    // attempt teaches the answer but does not count as a second Good recall.
     if (reviewMode && !reviewGraded) {
       setReviewGraded(true);
-      void gradeReviewAttempt(
-        exercise.id, level, errors.length === 0, currentValues.join(" "),
-      ).catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
+      // An answer revealed before recall is not independent recall.
+      void gradeReviewAttempt(exercise.id, level, !revealed, valuesRef.current.join(" "))
+        .catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
     }
+    ping("success");
+    setCompleted((previous) => previous + 1);
+    // No success screen, no animation delay, and preserve the last word's TTS.
+    advanceQuestion(true);
+  }
+
+  function checkAnswer() {
+    if (phase === "passed" || completedExerciseRef.current === exercise.id) return;
+    const currentValues = slots.map((_, at) => valuesRef.current[at] ?? "");
+    const errors = incorrectSlots(currentValues, slots);
     if (errors.length === 0) {
-      ping("success");
-      setPhase("passed");
-      setCompleted((previous) => previous + 1);
-      setFeedback(reviewMode ? (reviewGraded ? "已修正；将按首次回忆结果安排复习。按 Enter 继续" : "答对了！已安排下次复习，按 Enter 继续") : "答对了！按 Enter 立即下一题");
-    } else {
-      const sourceLessonId = reviewMode
-        ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
-        : lesson.id;
-      if (!reviewMode && !isCET4PilotFreeTranslationRisk(level, exercise.id)) {
-        void recordMistake(level, sourceLessonId, exercise.id, currentValues.join(" ")).catch(() => {
-          setStorageNotice("错题记录失败，请检查本地存储权限。");
-        });
-      }
-      ping(targetOnly ? "navigate" : "error");
-      setPhase("review");
-      setActiveIndex(errors[0]);
-      setErrorPulse((n) => n + 1);
-      setFeedback(reviewMode
-        ? `有 ${errors.length} 个词槽与目标不一致。本次按目标拼写回忆评分，修正后继续。`
-        : isCET4PilotFreeTranslationRisk(level, exercise.id)
-          ? "与本题目标表达不同。其他合理译法不会自动计入错题。"
-          : `有 ${errors.length} 个词槽与目标拼写不同，点击对应词槽修改。`);
+      completeCorrectQuestion();
+      return;
     }
+    setAttempts((previous) => previous + 1);
+    if (reviewMode && !reviewGraded) {
+      setReviewGraded(true);
+      void gradeReviewAttempt(exercise.id, level, false, currentValues.join(" "))
+        .catch(() => setStorageNotice("复习日程保存失败，请检查本地存储权限。"));
+    }
+    const sourceLessonId = reviewMode
+      ? getLessons(level).find((entry) => entry.exercises.some((item) => item.id === exercise.id))?.id ?? lesson.id
+      : lesson.id;
+    if (!reviewMode && !isCET4PilotFreeTranslationRisk(level, exercise.id)) {
+      void recordMistake(level, sourceLessonId, exercise.id, currentValues.join(" ")).catch(() => {
+        setStorageNotice("错题记录失败，请检查本地存储权限。");
+      });
+    }
+    ping(targetOnly ? "navigate" : "error");
+    setPhase("review");
+    activeRef.current = errors[0];
+    setActiveIndex(errors[0]);
+    setErrorPulse((n) => n + 1);
+    setFeedback(reviewMode
+      ? `有 ${errors.length} 个词槽与目标不一致。本次按目标拼写回忆评分，修正后继续。`
+      : isCET4PilotFreeTranslationRisk(level, exercise.id)
+        ? "与本题目标表达不同。其他合理译法不会自动计入错题。"
+        : `有 ${errors.length} 个词槽与目标拼写不同，点击对应词槽修改。`);
   }
 
   function applyText(text: string, previousValue?: string) {
@@ -235,6 +242,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     } else if (text.length < before.length) {
       ping("delete");
     }
+    if (allSlotsCorrect(result.values, slots)) completeCorrectQuestion();
   }
 
   function restoreCaret(position: number) {

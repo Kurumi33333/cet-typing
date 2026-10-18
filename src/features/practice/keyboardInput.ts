@@ -40,3 +40,22 @@ export function deleteAtCaret(
 export function isEnglishCompositionResult(text: string): boolean {
   return /^[a-zA-Z' -]*$/u.test(text);
 }
+
+/** Native editable targets can wake up Chinese IME candidate UI.
+ * Use a focusable read-only target in direct physical-keyboard mode.
+ * "System" fallback leaves the input editable for accessibility/paste/IME.
+ */
+export function inputRouting(
+  isTouchDevice: boolean,
+  useSiteKeyboard: boolean,
+  desktopNativeInput: boolean,
+): { readOnly: boolean; interceptPhysical: boolean } {
+  if (isTouchDevice) return {
+    readOnly: useSiteKeyboard,
+    interceptPhysical: useSiteKeyboard,
+  };
+  return {
+    readOnly: !desktopNativeInput,
+    interceptPhysical: !desktopNativeInput,
+  };
+}

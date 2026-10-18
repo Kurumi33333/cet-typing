@@ -558,3 +558,68 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .main-content .intro { font-size: 12px; }
   .home-course { min-height: 46px; }
 }
+
+
+/* V0.7 · fixed one-screen reference dictionary, navigation instead of scroll. */
+.lexicon-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  padding: clamp(5px, 1.5svh, 16px) 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lexicon-page > .text-button { align-self: flex-start; flex-shrink: 0; padding: 5px 0; }
+.lexicon-page .eyebrow { flex-shrink: 0; margin-top: clamp(8px, 1.4svh, 17px); font-size: 11px; }
+.lexicon-page h1 { flex-shrink: 0; margin: 6px 0; font-size: clamp(26px, 4.5svh, 46px); }
+.lexicon-intro { flex-shrink: 0; margin: 2px 0; line-height: 1.55; font-size: 12px; }
+.lexicon-search { flex-shrink: 0; margin-top: clamp(8px, 1.8svh, 17px); padding: 5px 12px; }
+.lexicon-search input { padding: 6px; }
+.lexicon-hint { flex-shrink: 0; margin: 7px 0 2px; font-size: 11px; }
+.lexicon-results {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 5px;
+  overflow: hidden;
+}
+.lexicon-result {
+  padding: clamp(6px, 1.1svh, 11px) 0;
+  gap: 2px 12px;
+  align-items: center;
+}
+.lexicon-result > span { line-height: 1.45; font-size: 11px; }
+.lexicon-wordline strong { font-size: 15px; }
+.lexicon-pagination {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  padding: 6px 0;
+  font-size: 11px;
+  color: #82958a;
+}
+.lexicon-pagination button {
+  color: #52745e;
+  border: 0;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: #eaf1eb;
+  cursor: pointer;
+}
+.lexicon-pagination button:disabled { background: transparent; color: #acb7ae; cursor: default; }
+.lexicon-attribution {
+  flex-shrink: 0;
+  margin: 5px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+@media(max-width:560px) {
+  .lexicon-page .eyebrow { margin-top: 5px; }
+  .lexicon-page h1 { font-size: clamp(25px, 4.2svh, 34px); margin: 4px 0; }
+  .lexicon-result { flex-direction: column; align-items: flex-start; padding: clamp(5px, .85svh, 8px) 0; }
+  .lexicon-result > span { max-width: 100%; }
+  .lexicon-intro { font-size: 11px; }
+  .lexicon-attribution { font-size: 9px; }
+}

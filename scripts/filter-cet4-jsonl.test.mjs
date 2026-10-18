@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { candidateQuality, filterRecord } from "../../scripts/filter-cet4-jsonl.mjs";
+import { candidateQuality, filterRecord } from "./filter-cet4-jsonl.mjs";
 
 describe("CET4 phrase/sentence candidate filter", () => {
   it("keeps short bilingual natural example and dedupes same wording", () => {

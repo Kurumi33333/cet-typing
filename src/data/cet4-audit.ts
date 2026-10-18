@@ -467,7 +467,17 @@ export const cet4Audit: Cet4AuditRow[] = [
     "flags": [
       "alternative_translation"
     ]
-  }
+  },
+  { "id": "cet4-08-01", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-02", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-03", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-04", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-05", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-06", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-07", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-08", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-09", "reviewStage": "pilot", "flags": ["alternative_translation"] },
+  { "id": "cet4-08-10", "reviewStage": "pilot", "flags": ["alternative_translation"] }
 ];
 
 /**

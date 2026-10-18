@@ -13,7 +13,7 @@ describe("pilot progressive curriculum", () => {
     expect(new Set(lessons.map((l) => l.id)).size).toBe(lessons.length);
     const all = lessons.flatMap((l) => l.exercises);
     expect(new Set(all.map((e) => e.id)).size).toBe(all.length);
-    expect(all).toHaveLength(110);
+    expect(all).toHaveLength(120);
   });
   it("contains progressive mixed exercises in every lesson", () => {
     for (const l of lessons) {

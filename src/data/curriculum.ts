@@ -1,4 +1,5 @@
 import type { CetLevel, Exercise, ExerciseKind, Lesson } from "../features/course/types";
+import { cet4CuratedBatch01 } from "./cet4-curated-batch01";
 
 type Step = readonly [ExerciseKind, string, string];
 
@@ -151,6 +152,7 @@ export const lessons: Lesson[] = [
     ["phrase", "减少污染", "reduce pollution"],
     ["sentence", "节约能源有助于减少污染。", "Saving energy helps reduce pollution."],
   ]),
+  cet4CuratedBatch01,
 ];
 
 export function getLessons(level: CetLevel): Lesson[] {

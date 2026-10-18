@@ -212,7 +212,7 @@ export default function App() {
             </div>
           </details>
           {notice && <p className="storage-warning" role="status">{notice}</p>}
-          <p className="demo-note">110 个原创练习 · 非官方真题 · 学习记录仅存于本机</p>
+          <p className="demo-note">110 个原创试验练习 + 10 个开源语料精选 · 非官方真题 · 数据仅存本机</p>
         </main>
       ) : (
         <main className="practice-main">

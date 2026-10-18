@@ -30,6 +30,7 @@ describe("CET4 content release gate", () => {
     expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-01-01")).toBe(false);
     expect(isCET4PilotFreeTranslationRisk("CET6", "cet4-01-02")).toBe(false);
     expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-01-04")).toBe(false);
+    expect(isCET4PilotFreeTranslationRisk("CET4", "cet4-08-10")).toBe(true);
   });
   it("conservatively treats every uncertified multiword CET4 item as target-only", () => {
     const targets = new Map(cet4Audit.map((r) => [r.id, r]));

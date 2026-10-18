@@ -19,6 +19,15 @@ export function englishPhysicalLetter(event: PhysicalKey): string | null {
   return null;
 }
 
+/**
+ * The single physical-key decoder every typing surface in the app calls.
+ * Returns the letter to type, or null when the key is not an English letter.
+ * Alt/Ctrl/Meta are never captured, so browser and system shortcuts still work.
+ */
+export function captureKeys(event: PhysicalKey): string | null {
+  return englishPhysicalLetter(event);
+}
+
 export function insertAtCaret(
   text: string, character: string, start: number | null, end: number | null,
 ): { text: string; caret: number } {

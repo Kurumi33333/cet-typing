@@ -18,6 +18,7 @@ import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositi
 import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 import { sentenceEnergyTiming, SUCCESS_HOLD_MS } from "./positiveFeedback";
+import { SiteKeyboard } from "./useSlotKeys";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
@@ -802,47 +803,16 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
               </button>
             </div>
             {useSiteKeyboard && (
-              <div className="site-english-keyboard" role="group" aria-label="英文直接输入键盘">
-                {["qwertyuiop", "asdfghjkl"].map((row) => (
-                  <div className="site-key-row" key={row}>
-                    {[...row].map((letter) => (
-                      <button type="button" className="site-key" key={letter}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => handleSiteKey(letter)}
-                        aria-label={letter}>{shiftEnabled ? letter.toUpperCase() : letter}</button>
-                    ))}
-                  </div>
-                ))}
-                <div className="site-key-row">
-                  <button type="button" className={`site-key site-key-special ${shiftEnabled ? "site-key-selected" : ""}`}
-                    aria-label="大写切换" aria-pressed={shiftEnabled}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("Shift")}>⇧</button>
-                  {[..."zxcvbnm"].map((letter) => (
-                    <button type="button" className="site-key" key={letter}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => handleSiteKey(letter)}
-                      aria-label={letter}>{shiftEnabled ? letter.toUpperCase() : letter}</button>
-                  ))}
-                  <button type="button" className="site-key site-key-special"
-                    aria-label="删除" onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("Backspace")}>⌫</button>
-                </div>
-                <div className="site-key-row site-key-controls">
-                  <button type="button" className="site-key site-key-small"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("'")}>{"'"}</button>
-                  <button type="button" className="site-key site-key-small"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("-")}>−</button>
-                  <button type="button" className="site-key site-key-space"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("Space")}>空格 / 下一词</button>
-                  <button type="button" className="site-key site-key-enter"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSiteKey("Enter")}>Enter ↵</button>
-                </div>
-              </div>
+              <SiteKeyboard
+                onLetter={(letter) => handleSiteKey(shiftEnabled ? letter.toUpperCase() : letter)}
+                onBackspace={() => handleSiteKey("Backspace")}
+                onSpace={() => handleSiteKey("Space")}
+                onEnter={() => handleSiteKey("Enter")}
+                shift={shiftEnabled}
+                onShift={() => handleSiteKey("Shift")}
+                onApostrophe={() => handleSiteKey("'")}
+                onHyphen={() => handleSiteKey("-")}
+              />
             )}
           </div>
         )}

@@ -1,0 +1,6 @@
+# SPA fallback for Cloudflare Pages.
+# Every route is served by index.html, which then resolves the address with
+# react-router (/app, /app/cet4, /app/cet4/review, /lexicon/cet4, …).
+# Real files keep winning because Pages checks the asset first.
+/*
+  /index.html  200

@@ -386,6 +386,19 @@ h1 em { color: #7ba995; font-style: normal; }
 /* V0.7 · One-viewport workspace. Allocate actual screen height; never hide
  * required practice content beneath a decorative page scrollbar. */
 html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+/* Landing mode is a document and scrolls; the practice shell stays one viewport. */
+/* The landing page is a document: GSAP ScrollSmoother sizes <body> to the real
+   document height and pins its own wrapper fixed. These rules must not force
+   `height: 100%` or `overflow: hidden` on the scroll chain, or the page collapses
+   to one viewport. The practice shell above keeps its fixed viewport. */
+html.landing-mode { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+html.landing-mode body { min-height: 100%; height: auto; overflow: visible; }
+html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
+/* While GSAP ScrollSmoother is active it pins its own wrapper and drives
+   <body>'s height; the document itself must not scroll a second time. */
+/* ScrollSmoother pins its wrapper, hides its own overflow and translates the
+   content; the document must not scroll a second time underneath it. */
+html.landing-mode.landing-smooth { overflow: hidden; }
 .page-shell { height: 100dvh; height: 100svh; min-height: 0; overflow: hidden; }
 .site-header {
   flex-shrink: 0;

@@ -64,12 +64,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-01-09",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-01-10",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-01",
@@ -81,7 +85,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-02-02",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-03",
@@ -100,22 +106,30 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-02-05",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-06",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-08",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-02-09",
@@ -127,7 +141,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-02-10",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-03-01",
@@ -137,12 +153,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-03-02",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-03-03",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-03-04",
@@ -166,13 +186,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-03-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-03-08",
     "reviewStage": "pilot",
     "flags": [
-      "context_needed"
+      "context_needed",
+      "alternative_translation"
     ]
   },
   {
@@ -200,7 +223,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-04-03",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-04-04",
@@ -212,7 +237,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-04-05",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-04-06",
@@ -222,7 +249,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-04-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-04-08",
@@ -234,7 +263,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-04-09",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-04-10",
@@ -256,12 +287,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-05-03",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-05-04",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-05-05",
@@ -273,12 +308,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-05-06",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-05-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-05-08",
@@ -323,7 +362,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-06-04",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-06-05",
@@ -333,17 +374,23 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-06-06",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-06-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-06-08",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-06-09",
@@ -355,7 +402,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-06-10",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-07-01",
@@ -370,12 +419,16 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-07-03",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-07-04",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-07-05",
@@ -392,7 +445,9 @@ export const cet4Audit: Cet4AuditRow[] = [
   {
     "id": "cet4-07-07",
     "reviewStage": "pilot",
-    "flags": []
+    "flags": [
+      "alternative_translation"
+    ]
   },
   {
     "id": "cet4-07-08",

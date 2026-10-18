@@ -767,3 +767,7 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .home-magnet .home-course, .lesson-toggle, .lesson-options .lesson-option,
   .home-magnet .home-course > span:last-child { transition: none !important; }
 }
+
+
+/* Spring confirmation lives inside reserved feedback height; no layout shift. */
+.feedback-glyph { display: inline-block; transform-origin: 50% 70%; color: #52966b; font-weight: 700; }

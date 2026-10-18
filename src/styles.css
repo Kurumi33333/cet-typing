@@ -221,3 +221,43 @@ h1 em { color: #7ba995; font-style: normal; }
 .lexicon-attribution { color:#879688; font-size:11px; line-height:1.8; margin-top:35px; }
 .lexicon-attribution a { text-decoration:underline; text-underline-offset:3px; }
 @media (max-width: 560px) { .lexicon-page { padding-top:18px; } .lexicon-page .eyebrow { margin-top:28px; } .lexicon-result > span { max-width:100%; } }
+
+
+/* Visual reduction 01 · make practice the only primary action on home. */
+.main-content { padding: clamp(46px, 7vw, 84px) 0 52px; }
+.home-kicker { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .11em; color: #779786; }
+.main-content h1 { margin: 21px 0 12px; }
+.main-content .intro { max-width: 460px; font-size: clamp(14px, 1.8vw, 17px); line-height: 1.85; margin: 0; }
+.main-content .choice-group { margin-top: 32px; gap: 12px; }
+.home-course { width: clamp(218px, 24vw, 260px); min-height: 80px; padding: 15px 19px; justify-content: space-between; text-align: left; gap: 14px; border-radius: 14px; }
+.home-course-copy { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.home-course-copy strong { font-size: 15px; line-height: 1.2; font-weight: 660; }
+.home-course-copy small { font-size: 11px; font-weight: 430; opacity: .75; line-height: 1.4; }
+.home-course > span:last-child { font-size: 16px; font-weight: 400; }
+.main-content .review-entry { margin: 32px 0 0; padding: 20px 0 0; border-top: 1px solid #e1e9e2; gap: 11px; }
+.main-content .review-entry-heading strong { color: #415c4b; }
+.main-content .review-entry-heading span { color: #89968b; }
+.main-content .review-entry-button { border: 0; padding: 8px 12px; background: #e7efe8; }
+.main-content .review-count { background: #d4e4d8; }
+.main-content .review-future { margin: 0; color: #8c9a90; }
+.home-tools { margin-top: 28px; width: min(580px, 100%); color: #78897c; }
+.home-tools > summary { display: flex; align-items: center; width: fit-content; gap: 12px; cursor: pointer; list-style: none; padding: 10px 0; font-size: 12px; font-weight: 590; color: #77897d; }
+.home-tools > summary::-webkit-details-marker { display: none; }
+.home-tools > summary span { font-size: 15px; transition: transform .17s ease; }
+.home-tools[open] > summary span { transform: rotate(180deg); }
+.home-tools > summary:focus-visible { outline: 2px solid #8eaa96; outline-offset: 4px; border-radius: 3px; }
+.home-tools-inner { padding: 3px 0 10px; }
+.home-tools .lexicon-entry { margin: 0 0 16px; border-top: 0; padding: 12px 0; }
+.home-tools .data-tools { padding-top: 14px; }
+.home-tools .lexicon-entry-copy span { font-size: 12px; }
+.main-content .demo-note { margin: 18px 0 0; color: #97a49a; font-size: 11px; line-height: 1.7; }
+.site-footer { padding: 18px 0 23px; color: #a0ada4; letter-spacing: 0; }
+@media(max-width:560px) {
+  .main-content { justify-content: flex-start; padding: 54px 0 44px; }
+  .main-content h1 { font-size: clamp(54px, 14vw, 76px); }
+  .main-content .choice-group { width: 100%; flex-direction: column; gap: 10px; margin-top: 28px; }
+  .home-course { width: 100%; min-height: 72px; }
+  .main-content .review-entry { margin-top: 28px; }
+  .home-tools { margin-top: 21px; }
+}
+@media(prefers-reduced-motion:reduce) { .home-tools > summary span { transition: none; } }

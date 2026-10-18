@@ -57,6 +57,14 @@ export function matchesSlot(actual: string, slot: Slot): boolean {
   return clean(actual) === clean(slot.word) && actual.trim().length > 0;
 }
 
+/** Complete only when every word slot matches its target, not merely the active word.
+ * Blank slots, wrong spellings, and reasonable but different free translations
+ * do not auto-advance. No Enter/space is required after the final exact letter.
+ */
+export function allSlotsCorrect(values: readonly string[], slots: readonly Slot[]): boolean {
+  return slots.length > 0 && slots.every((slot, at) => matchesSlot(values[at] ?? "", slot));
+}
+
 export function incorrectSlots(values: readonly string[], slots: readonly Slot[]): number[] {
   return slots.flatMap((slot, index) =>
     matchesSlot(values[index] ?? "", slot) ? [] : [index],

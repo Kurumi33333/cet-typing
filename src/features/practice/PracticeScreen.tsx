@@ -540,7 +540,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         aria-valuenow={index} aria-valuemin={0} aria-valuemax={exercises.length}>
         <motion.div className="progress-fill" initial={false}
           animate={{ width: `${(index / exercises.length) * 100}%` }}
-          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 27 }} />
+          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 210, damping: 34, mass: 0.7 }} />
       </div>
 
       {!reviewMode && <div className="lesson-navigation">
@@ -552,10 +552,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         </button>
         <AnimatePresence initial={false}>
           {showLessonPicker && <motion.div id="lesson-options" className="lesson-options" aria-label="选择训练单元"
-            initial={reducedMotion ? false : { opacity: 0, y: -8, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reducedMotion ? undefined : { opacity: 0, y: -6, scale: 0.99 }}
-            transition={{ duration: reducedMotion ? 0 : 0.18 }}>
+            initial={reducedMotion ? false : { opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -3 }}
+            transition={{ duration: reducedMotion ? 0 : 0.15, ease: "easeOut" }}>
             {courseList.map((entry, at) => (
               <button key={entry.id} type="button" className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
                 onClick={() => switchLesson(at)}>
@@ -573,10 +573,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         {/* ONLY the prompt is keyed. The input + slots below keep their DOM identity. */}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div className="question-prompt" key={exercise.id}
-            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
-            transition={{ duration: reducedMotion ? 0 : 0.25, ease: "easeOut" }}>
+            exit={reducedMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={{ duration: reducedMotion ? 0 : 0.17, ease: "easeOut" }}>
             <div className="eyebrow">
               {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
             </div>
@@ -621,6 +621,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
                 const visible = (displayValues[at] ?? "").replace(/[.,!?;:]+$/gu, "");
                 const incorrect = wrong.includes(at);
                 const active = focused && phase !== "passed" && at === activeIndex;
+                const correctlySpelled = matchesSlot(displayValues[at] ?? "", slot);
                 const appearance = phase === "passed" ? "slot-correct" :
                   incorrect ? (targetOnly ? "slot-target-diff" : "slot-incorrect") : active ? "slot-active" : phase === "review" ? "slot-verified" : "slot-idle";
                 return (
@@ -637,11 +638,23 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
                       className={`slot-word ${appearance}`}
                       style={{ minWidth: `${slot.widthCh}ch` }}
                       initial={false}
-                      animate={phase === "review" && incorrect && !targetOnly && !reducedMotion
-                        ? { x: [0, -9, 7, -5, 3, 0], scale: [1, 1.045, 1] } : { x: 0, scale: 1 }}
-                      transition={{ duration: phase === "review" && incorrect && !targetOnly ? 0.45 : 0, ease: "easeOut" }}>
+                      animate={reducedMotion ? { x: 0, scale: 1 }
+                        : phase === "review" && incorrect && !targetOnly
+                          ? { x: [0, -5, 4, -2, 0], scale: 1 }
+                          : { x: 0, scale: correctlySpelled && phase !== "passed" ? [1, 1.035, 1] : 1 }}
+                      transition={{
+                        duration: reducedMotion ? 0 : phase === "review" && incorrect && !targetOnly ? 0.28 : 0.19,
+                        ease: "easeOut",
+                      }}>
                       {visible || "\u00a0"}
                     </motion.span>
+                    {active && <motion.span
+                      className="slot-focus-marker" aria-hidden="true"
+                      layoutId={reducedMotion ? undefined : "cet-typing-slot-focus"}
+                      initial={false}
+                      transition={reducedMotion ? { duration: 0 }
+                        : { type: "spring", stiffness: 440, damping: 38, mass: 0.55 }}
+                    />}
                     {slot.punctuation && <span className="slot-punctuation">{slot.punctuation}</span>}
                   </div>
                 );

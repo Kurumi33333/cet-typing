@@ -688,3 +688,21 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .home-start-over { gap: 3px 13px; }
   .home-start-over button { font-size: 10px; }
 }
+
+
+/* V0.8 · restrained Motion cues. Absolute marker never changes word geometry. */
+.slot-unit { isolation: isolate; }
+.slot-focus-marker {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: -3px;
+  height: 2px;
+  border-radius: 2px;
+  background: #79a48d;
+  pointer-events: none;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slot-focus-marker { transition: none; }
+}

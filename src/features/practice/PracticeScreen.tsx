@@ -14,7 +14,7 @@ import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
 type Phase = "typing" | "review" | "passed";
-const DEFAULT_HINT = "点击任意下划线填词 · 空格或方向键换格 · Enter 检查";
+const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
 
 interface PracticeScreenProps {
   level: CetLevel;
@@ -300,36 +300,39 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     <section className="practice-area" aria-label={level === "CET4" ? "四级训练" : "六级训练"}>
       <div className="practice-topline">
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
-        <span className="level-label">{level === "CET4" ? "大学英语四级" : "大学英语六级"} · {reviewMode ? "错题复习" : "渐进课程"}</span>
+        <span className="level-label">{level === "CET4" ? "四级" : "六级"} · {reviewMode ? "复习" : "练习"}</span>
         <div className="practice-top-actions">
-          <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
-            aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
-            title={soundEnabled ? "提示音效：开" : "提示音效：关"}
-            onClick={() => {
-              const next = !soundEnabled;
-              setSoundEnabled(next);
-              writeSoundPreference(next);
-              if (next) playFeedback("select");
-              focusInput();
-            }}>
-            <span aria-hidden="true">{soundEnabled ? "♫" : "♪"}</span>
-            <span>{soundEnabled ? "音效开" : "音效关"}</span>
-          </button>
-          <button type="button" className="sound-toggle speech-toggle"
-            aria-pressed={pronunciationEnabled}
-            aria-label={pronunciationEnabled ? "关闭正确单词自动朗读" : "开启正确单词自动朗读"}
-            title={pronunciationEnabled ? "拼对单词自动朗读：开" : "拼对单词自动朗读：关"}
-            onClick={() => {
-              const next = !pronunciationEnabled;
-              setPronunciationEnabled(next);
-              writePronunciationPreference(next);
-              if (!next) stopPronunciation();
-              focusInput();
-            }}>
-            <span aria-hidden="true">{pronunciationEnabled ? "🔊" : "🔇"}</span>
-            <span>{pronunciationEnabled ? "发音开" : "发音关"}</span>
-          </button>
           <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
+          <details className="practice-settings">
+            <summary aria-label="打开声音设置">声音 <span aria-hidden="true">⌄</span></summary>
+            <div className="practice-settings-options">
+              <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
+                aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  writeSoundPreference(next);
+                  if (next) playFeedback("select");
+                  focusInput();
+                }}>
+                <span aria-hidden="true">{soundEnabled ? "♫" : "♪"}</span>
+                <span>{soundEnabled ? "打字音 · 开" : "打字音 · 关"}</span>
+              </button>
+              <button type="button" className="sound-toggle speech-toggle"
+                aria-pressed={pronunciationEnabled}
+                aria-label={pronunciationEnabled ? "关闭正确单词自动朗读" : "开启正确单词自动朗读"}
+                onClick={() => {
+                  const next = !pronunciationEnabled;
+                  setPronunciationEnabled(next);
+                  writePronunciationPreference(next);
+                  if (!next) stopPronunciation();
+                  focusInput();
+                }}>
+                <span aria-hidden="true">{pronunciationEnabled ? "🔊" : "🔇"}</span>
+                <span>{pronunciationEnabled ? "单词朗读 · 开" : "单词朗读 · 关"}</span>
+              </button>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -374,12 +377,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             animate={{ opacity: 1, y: 0 }}
             exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
             transition={{ duration: reducedMotion ? 0 : 0.25, ease: "easeOut" }}>
-            <div className="eyebrow"><span className="status-dot" />
-              {exercise.kind === "word" ? "01 · 词汇" : exercise.kind === "phrase" ? "02 · 语块" : "03 · 造句"} · {lesson.title}
+            <div className="eyebrow">
+              {exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
             </div>
             <h2 className="chinese-sentence">{exercise.chinese}</h2>
-            <p className="instruction">{exercise.kind === "word" ? "只练一个单词，从简单开始。" :
-              exercise.kind === "phrase" ? "将刚学的单词连接起来。" : "用学过的词语，组成一句完整的英语。"} · {index + 1}/{exercises.length}</p>
           </motion.div>
         </AnimatePresence>
 
@@ -442,15 +443,6 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             transition={{ duration: reducedMotion ? 0 : 0.2 }} role="status" aria-live="polite">
             {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
-          <AnimatePresence>
-            {phase === "passed" && <motion.div className="success-emphasis"
-              initial={reducedMotion ? false : { opacity: 0, y: 12, scale: 0.87 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
-              transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 340, damping: 22 }}>
-              <span aria-hidden="true">✦</span> Nice!
-            </motion.div>}
-          </AnimatePresence>
           {revealed && <div className="revealed-answer"><span>参考答案</span><strong>{exercise.english}</strong></div>}
           <div className="slot-actions">
             {phase === "passed" && (
@@ -461,9 +453,8 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
                 }}
                 aria-label="朗读本句的完整英文发音">🔊 朗读整句</button>
             )}
-            {phase !== "passed" && (
+            {phase !== "passed" && matchesSlot(displayValues[activeIndex] ?? "", slots[activeIndex]) && (
               <button className="text-button replay-button" type="button"
-                disabled={!matchesSlot(displayValues[activeIndex] ?? "", slots[activeIndex])}
                 onClick={() => {
                   const word = displayValues[activeIndex] ?? "";
                   if (matchesSlot(word, slots[activeIndex])) speakEnglish(slots[activeIndex].word, "word");
@@ -472,7 +463,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
                 aria-label="重播当前选中单词">🔉 重播单词</button>
             )}
             <button className="submit-minimal" type="submit">
-              {phase === "passed" ? "Enter · 下一句 →" : "Enter · 检查答案"}
+              {phase === "passed" ? "下一句 →" : "检查答案 →"}
             </button>
             {phase !== "passed" && <button className="text-button" type="button" onClick={() => {
               setRevealed((value) => !value);

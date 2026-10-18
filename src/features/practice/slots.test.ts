@@ -6,6 +6,7 @@ import {
   getActiveSlot,
   incorrectSlots,
   matchesSlot,
+  allSlotsCorrect,
 } from "./slots";
 
 describe("underlined typing slots", () => {
@@ -44,4 +45,21 @@ describe("underlined typing slots", () => {
     expect(draftToSlotValues("", 3)).toEqual(["", "", ""]);
     expect(estimateWidthCh("communication")).toBeGreaterThan(estimateWidthCh("an"));
   });
+  it("automatically finishes a one-word question at the exact final letter", () => {
+    const slots = sentenceToSlots("like");
+    expect(allSlotsCorrect(["lik"], slots)).toBe(false);
+    expect(allSlotsCorrect(["like"], slots)).toBe(true);
+    expect(allSlotsCorrect(["likee"], slots)).toBe(false);
+  });
+
+  it("never finishes early when any word is missing, incorrect, or extra", () => {
+    const slots = sentenceToSlots("I like tea.");
+    expect(allSlotsCorrect(["I"], slots)).toBe(false);
+    expect(allSlotsCorrect(["I", "like", ""], slots)).toBe(false);
+    expect(allSlotsCorrect(["I", "like", "tea"], slots)).toBe(true);
+    expect(allSlotsCorrect(["I", "love", "tea"], slots)).toBe(false);
+    expect(allSlotsCorrect(["I", "like", "tea now"], slots)).toBe(false);
+    expect(allSlotsCorrect([], [])).toBe(false);
+  });
+
 });

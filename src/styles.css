@@ -662,3 +662,29 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .finished-screen .choice-group { flex-direction: column; align-items: center; width: 100%; }
   .finished-screen .choice-group button { min-width: 160px; }
 }
+
+
+/* S7 hotfix · explicit restart is secondary to the saved checkpoint. */
+.home-start-over {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: clamp(5px, .9svh, 9px);
+}
+.home-start-over button {
+  background: transparent;
+  border: none;
+  color: #718a7c;
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 3px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: #bfcec4;
+  text-underline-offset: 3px;
+}
+.home-start-over button:hover { color: #345d47; text-decoration-color: currentColor; }
+@media (max-width: 560px) {
+  .home-start-over { gap: 3px 13px; }
+  .home-start-over button { font-size: 10px; }
+}

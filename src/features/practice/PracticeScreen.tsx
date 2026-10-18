@@ -79,6 +79,8 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   // Keep consecutive keydown events in sync even before React re-renders.
   const valuesRef = useRef<string[]>([]);
   const activeRef = useRef(0);
+  // Re-selecting a word in read-only mode should replace it on the next key.
+  const replaceSelectedSlotRef = useRef(false);
   const completedExerciseRef = useRef<string | null>(null);
   const successTimerRef = useRef<number | null>(null);
 
@@ -147,6 +149,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     if (phase === "passed") return;
     const selected = Math.max(0, Math.min(slots.length - 1, to));
     activeRef.current = selected;
+    replaceSelectedSlotRef.current = true;
     setActiveIndex(selected);
     ping(type);
     // Selection makes it easy to overwrite a misspelling, not a requirement.
@@ -162,6 +165,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     if (!preserveSpeech) stopPronunciation();
     valuesRef.current = [];
     activeRef.current = 0;
+    replaceSelectedSlotRef.current = false;
     setValues([]);
     setActiveIndex(0);
     setReviewGraded(false);
@@ -282,7 +286,14 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const at = activeRef.current;
     const current = valuesRef.current[at] ?? "";
     const input = inputRef.current;
-    // Consecutive keydown events may arrive before controlled DOM has re-rendered.
+    // In read-only direct mode a clicked/selected word is replaced on the
+    // first keypress. Subsequent rapid keys append, never overwrite again.
+    if (routing.readOnly && replaceSelectedSlotRef.current) {
+      replaceSelectedSlotRef.current = false;
+      applyText(letter);
+      focusInput();
+      return;
+    }
     const synced = !input?.readOnly && input?.value === current;
     const next = insertAtCaret(current, letter,
       synced ? input?.selectionStart ?? null : null,
@@ -298,6 +309,12 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const current = valuesRef.current[at] ?? "";
     if (!current) {
       chooseSlot(moveSlot(at, -1, slots.length), "navigate");
+      return;
+    }
+    if (routing.readOnly && replaceSelectedSlotRef.current) {
+      replaceSelectedSlotRef.current = false;
+      applyText("");
+      focusInput();
       return;
     }
     const input = inputRef.current;
@@ -341,6 +358,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     setDesktopNativeInput(next);
     composing.current = false;
     physicalComposed.current = false;
+    replaceSelectedSlotRef.current = false;
     try { window.localStorage.setItem("cet-typing:desktop-input-mode", next ? "system" : "direct"); }
     catch { /* optional browser preference */ }
     focusInput();

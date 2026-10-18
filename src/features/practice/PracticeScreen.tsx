@@ -110,7 +110,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const timeline = gsap.timeline();
     timeline.fromTo(ripples, { scale: 0.3, opacity: 0.62, rotate: -18 },
       { scale: 3.1, opacity: 0, rotate: 15, duration: 0.32, stagger: 0.04, ease: "power3.out" });
-    return () => timeline.kill();
+    return () => { timeline.kill(); };
   }, [phase, exercise.id, reducedMotion]);
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";

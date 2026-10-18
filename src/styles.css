@@ -306,3 +306,78 @@ h1 em { color: #7ba995; font-style: normal; }
 /* Content safety: a different valid translation is not necessarily a spelling error. */
 .slot-target-diff { color: #647a83; border-color: #7e99a7; background: transparent; text-shadow: none; }
 .feedback-target { color: #667f88; }
+
+
+/* Input v0.6 · on-page English 26-key keyboard on touch devices. */
+.keyboard-panel {
+  width: min(100%, 630px);
+  margin: 20px auto 2px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.keyboard-mode-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 1px 13px;
+  color: #83948a;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.keyboard-mode-bar button {
+  border: 0;
+  background: none;
+  color: #5b8270;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.site-english-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-radius: 17px;
+  padding: 11px 6px max(12px, env(safe-area-inset-bottom));
+  background: #e6ece8;
+  box-shadow: 0 1px 1px #3047390d inset;
+  touch-action: manipulation;
+}
+.site-key-row { display: flex; justify-content: center; gap: 5px; width: 100%; }
+.site-key {
+  flex: 1;
+  min-width: 0;
+  max-width: 57px;
+  height: 44px;
+  border: 1px solid #d9e0d9;
+  border-bottom-color: #c9d3ca;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #293b31;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1;
+  padding: 0 2px;
+  box-shadow: 0 1px 0 #cdd7cd;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.site-key:active { background: #ccdcd1; transform: translateY(1px); box-shadow: none; }
+.site-key-special { max-width: 53px; flex: 1.35; background: #cfdcd3; }
+.site-key-selected { background: #a8c5b1; }
+.site-key-small { max-width: 43px; }
+.site-key-space { max-width: none; flex: 4; font-size: 12px; }
+.site-key-enter { max-width: 100px; flex: 2; font-size: 12px; background: #bad8c4; color: #2d6044; border-color: #a4c7ae; }
+@media (max-width: 560px) {
+  .keyboard-panel { margin-top: 12px; }
+  .site-english-keyboard { gap: 7px; padding: 8px 5px max(10px, env(safe-area-inset-bottom)); }
+  .site-key-row { gap: 4px; }
+  .site-key { height: 43px; font-size: 16px; }
+  .keyboard-mode-bar { font-size: 10px; }
+  .keyboard-mode-bar button { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-key:active { transform: none; }
+}

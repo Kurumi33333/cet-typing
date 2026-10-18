@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
+import { gsap } from "gsap";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import ClickSpark from "../../components/reactbits/ClickSpark";
 import { getLessons } from "../../data/curriculum";
@@ -75,6 +76,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   const [reviewGraded, setReviewGraded] = useState(false);
   const reducedMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const composing = useRef(false);
   const compositionStart = useRef("");
   const physicalComposed = useRef(false);
@@ -98,6 +100,18 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   // Event handlers read valuesRef so rapid physical key events can adopt
   // an alternative with a different number of word slots immediately.
   const liveSlots = () => sentenceToSlots(selectDisplayAnswer(valuesRef.current, acceptedAnswers));
+
+  // GSAP celebratory energy ring; ends within the 360ms success hold.
+  // Runs on a purely decorative layer, never on input DOM/slot positions.
+  useLayoutEffect(() => {
+    if (phase !== "passed" || reducedMotion || !stageRef.current) return;
+    const ripples = stageRef.current.querySelectorAll(".success-energy-ring");
+    if (!ripples.length) return;
+    const timeline = gsap.timeline();
+    timeline.fromTo(ripples, { scale: 0.3, opacity: 0.62, rotate: -18 },
+      { scale: 3.1, opacity: 0, rotate: 15, duration: 0.32, stagger: 0.04, ease: "power3.out" });
+    return () => timeline.kill();
+  }, [phase, exercise.id, reducedMotion]);
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";
   const routing = inputRouting(isTouchDevice, useSiteKeyboard, desktopNativeInput);
@@ -626,7 +640,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         </motion.div>
 
         <form className="slot-form" onSubmit={handleSubmit}>
-          <div className={`slot-stage ${focused ? "stage-focused" : ""}`} onClick={focusInput}
+          <div ref={stageRef} className={`slot-stage ${focused ? "stage-focused" : ""}`} onClick={focusInput}
             aria-label="逐词下划线填空区域">
             <input ref={inputRef} id="english-answer" className="slot-capture" type="text"
               aria-label="输入当前选中的英文词，左右方向键或空格切换词，Enter 检查或进入下一题"
@@ -657,6 +671,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
               }}
               onKeyDown={handleKeyDown}
             />
+            {phase === "passed" && !reducedMotion && (
+              <div className="success-energy" aria-hidden="true">
+                <span className="success-energy-ring" />
+                <span className="success-energy-ring" />
+                <span className="success-energy-ring" />
+              </div>
+            )}
             <div className="slot-list">
               {slots.map((slot, at) => {
                 const visible = (displayValues[at] ?? "").replace(/[.,!?;:]+$/gu, "");

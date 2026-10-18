@@ -11,7 +11,7 @@ import {
   shouldPronounceWord, speakEnglish, stopPronunciation,
 } from "./speech";
 import { editSlot, moveSlot, nextSlotIndex } from "./slotEditing";
-import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult } from "./keyboardInput";
+import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult, inputRouting } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { allSlotsCorrect, incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 
@@ -61,6 +61,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     try { return window.localStorage.getItem("cet-typing:keyboard-mode") !== "system"; }
     catch { return true; }
   });
+  const [desktopNativeInput, setDesktopNativeInput] = useState(() => {
+    try { return window.localStorage.getItem("cet-typing:desktop-input-mode") === "system"; }
+    catch { return false; }
+  });
   const [shiftEnabled, setShiftEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
   const [pronunciationEnabled, setPronunciationEnabled] = useState(readPronunciationPreference);
@@ -84,6 +88,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   const displayValues = slots.map((_, at) => values[at] ?? "");
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";
+  const routing = inputRouting(isTouchDevice, useSiteKeyboard, desktopNativeInput);
 
   useEffect(() => { completedExerciseRef.current = null; }, [exercise.id]);
 
@@ -278,7 +283,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const current = valuesRef.current[at] ?? "";
     const input = inputRef.current;
     // Consecutive keydown events may arrive before controlled DOM has re-rendered.
-    const synced = input?.value === current;
+    const synced = !input?.readOnly && input?.value === current;
     const next = insertAtCaret(current, letter,
       synced ? input?.selectionStart ?? null : null,
       synced ? input?.selectionEnd ?? null : null);
@@ -331,6 +336,16 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     focusInput();
   }
 
+  function toggleDesktopInputMode() {
+    const next = !desktopNativeInput;
+    setDesktopNativeInput(next);
+    composing.current = false;
+    physicalComposed.current = false;
+    try { window.localStorage.setItem("cet-typing:desktop-input-mode", next ? "system" : "direct"); }
+    catch { /* optional browser preference */ }
+    focusInput();
+  }
+
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     if (phase === "passed" || composing.current) return;
     if (!isEnglishCompositionResult(event.target.value)) {
@@ -347,7 +362,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     // A real hardware keyboard exposes KeyA..KeyZ even while a Chinese pinyin
     // IME reports event.key="Process", isComposing=true, or keyCode=229.
     // On a mobile SYSTEM keyboard we must not assume code means a physical key.
-    const interceptPhysical = !isTouchDevice || useSiteKeyboard;
+    const interceptPhysical = routing.interceptPhysical;
     const letter = interceptPhysical ? englishPhysicalLetter(event.nativeEvent) : null;
     if (letter) {
       event.preventDefault(); // no pinyin pre-edit / browser text insertion
@@ -458,7 +473,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         <div className="practice-top-actions">
           <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
           <details className="practice-settings">
-            <summary aria-label="打开声音设置">声音 <span aria-hidden="true">⌄</span></summary>
+            <summary aria-label="打开输入与声音设置">设置 <span aria-hidden="true">⌄</span></summary>
             <div className="practice-settings-options">
               <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
                 aria-label={soundEnabled ? "关闭提示音效" : "开启提示音效"}
@@ -485,6 +500,14 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
                 <span aria-hidden="true">{pronunciationEnabled ? "🔊" : "🔇"}</span>
                 <span>{pronunciationEnabled ? "单词朗读 · 开" : "单词朗读 · 关"}</span>
               </button>
+              {!isTouchDevice && (
+                <button type="button" className="sound-toggle" aria-pressed={!desktopNativeInput}
+                  aria-label={desktopNativeInput ? "开启物理键盘英文直输，减少中文候选框" : "切换到系统原生输入模式"}
+                  onClick={toggleDesktopInputMode}>
+                  <span aria-hidden="true">⌨</span>
+                  <span>{desktopNativeInput ? "系统输入 · 兼容模式" : "英文直输 · 防拼音候选"}</span>
+                </button>
+              )}
               <button type="button" className="sound-toggle" disabled={!lastCorrectEnglish}
                 onClick={() => { if (lastCorrectEnglish) speakEnglish(lastCorrectEnglish, "sentence"); focusInput(); }}>
                 <span aria-hidden="true">↻</span>
@@ -550,7 +573,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
               aria-label="输入当前选中的英文词，左右方向键或空格切换词，Enter 检查或进入下一题"
               aria-describedby="practice-feedback"
               autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
-              lang="en" inputMode={useSiteKeyboard ? "none" : "text"} readOnly={useSiteKeyboard}
+              lang="en" inputMode={routing.readOnly ? "none" : "text"} readOnly={routing.readOnly}
               enterKeyHint="enter" value={entered}
               onChange={handleChange}
               onFocus={() => setFocused(true)}

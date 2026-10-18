@@ -62,6 +62,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   const compositionStart = useRef("");
 
   const exercise = exercises[index];
+  const targetOnly = isCET4PilotFreeTranslationRisk(level, exercise.id) && !reviewMode;
   const slots = sentenceToSlots(exercise.english);
   const displayValues = slots.map((_, at) => values[at] ?? "");
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
@@ -182,7 +183,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
           setStorageNotice("错题记录失败，请检查本地存储权限。");
         });
       }
-      ping("error");
+      ping(targetOnly ? "navigate" : "error");
       setPhase("review");
       setActiveIndex(errors[0]);
       setErrorPulse((n) => n + 1);
@@ -385,7 +386,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             exit={reducedMotion ? undefined : { opacity: 0, y: -10 }}
             transition={{ duration: reducedMotion ? 0 : 0.25, ease: "easeOut" }}>
             <div className="eyebrow">
-              {exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
+              {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
             </div>
             <h2 className="chinese-sentence">{exercise.chinese}</h2>
           </motion.div>
@@ -418,7 +419,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
                 const incorrect = wrong.includes(at);
                 const active = focused && phase !== "passed" && at === activeIndex;
                 const appearance = phase === "passed" ? "slot-correct" :
-                  incorrect ? "slot-incorrect" : active ? "slot-active" : phase === "review" ? "slot-verified" : "slot-idle";
+                  incorrect ? (targetOnly ? "slot-target-diff" : "slot-incorrect") : active ? "slot-active" : phase === "review" ? "slot-verified" : "slot-idle";
                 return (
                   <div role="button" tabIndex={-1}
                     aria-label={`第${at + 1}个空，${displayValues[at] ? "已填 " + displayValues[at] : "未填"}，点击可选中`}
@@ -433,9 +434,9 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
                       className={`slot-word ${appearance}`}
                       style={{ minWidth: `${slot.widthCh}ch` }}
                       initial={false}
-                      animate={phase === "review" && incorrect && !reducedMotion
+                      animate={phase === "review" && incorrect && !targetOnly && !reducedMotion
                         ? { x: [0, -9, 7, -5, 3, 0], scale: [1, 1.045, 1] } : { x: 0, scale: 1 }}
-                      transition={{ duration: phase === "review" && incorrect ? 0.45 : 0, ease: "easeOut" }}>
+                      transition={{ duration: phase === "review" && incorrect && !targetOnly ? 0.45 : 0, ease: "easeOut" }}>
                       {visible || "\u00a0"}
                     </motion.span>
                     {slot.punctuation && <span className="slot-punctuation">{slot.punctuation}</span>}
@@ -445,10 +446,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
             </div>
           </div>
           <motion.p key={`${exercise.id}-${phase}-${errorPulse}`} id="practice-feedback"
-            className={`slot-feedback ${phase === "review" ? "feedback-error" : phase === "passed" ? "feedback-success" : ""}`}
+            className={`slot-feedback ${phase === "review" ? (targetOnly ? "feedback-target" : "feedback-error") : phase === "passed" ? "feedback-success" : ""}`}
             initial={reducedMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.2 }} role="status" aria-live="polite">
-            {phase === "review" ? "● " : phase === "passed" ? "✓ " : "⌨ "}{feedback}
+            {phase === "review" ? (targetOnly ? "◇ " : "● ") : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
           {revealed && <div className="revealed-answer"><span>本题目标表达</span><strong>{exercise.english}</strong></div>}
           <div className="slot-actions">

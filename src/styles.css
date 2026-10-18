@@ -623,3 +623,9 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .lexicon-intro { font-size: 11px; }
   .lexicon-attribution { font-size: 9px; }
 }
+
+
+/* Small-screen tools open upward so no settings are clipped below viewport. */
+@media (max-height: 850px) {
+  .home-tools-inner { top: auto; bottom: calc(100% + 6px); }
+}

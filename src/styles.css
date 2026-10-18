@@ -899,3 +899,60 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   .viewport-scene-home .aurora-container,
   .viewport-scene-practice .particles-container { opacity: .28; }
 }
+
+
+/* V0.13 · kinetic positive feedback. Never changes slot geometry. */
+.word-lock-light,
+.sentence-energy-node {
+  position: absolute;
+  pointer-events: none;
+  left: 2px;
+  right: 2px;
+  bottom: -3px;
+  height: 3px;
+  z-index: 4;
+  border-radius: 999px;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgba(51,155,107,0), #69d9a0 32%, #a1f4ce 64%, rgba(51,155,107,0));
+  box-shadow: 0 0 10px rgba(65,192,126,.38), 0 0 4px rgba(99,222,163,.42);
+}
+.sentence-energy-node { opacity: 0; transform: scaleX(.06); }
+.sentence-flow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+}
+.sentence-flow-orb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle at 35% 35%, #ffffff 3%, #baf8da 30%, #5ed6a0 69%, rgba(43,145,93,0) 100%);
+  box-shadow: 0 0 10px 4px rgba(90,222,157,.38), 0 0 25px 10px rgba(85,192,141,.17);
+  will-change: transform, opacity;
+}
+.sentence-flow-aura {
+  position: absolute;
+  opacity: 0;
+  width: min(64%, 380px);
+  height: min(150%, 105px);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(ellipse, rgba(104,224,161,.17), rgba(84,194,168,.07) 37%, transparent 73%);
+  filter: blur(10px);
+  will-change: opacity, transform;
+}
+@media (max-width: 560px) {
+  .sentence-flow-orb { width: 10px; height: 10px; }
+  .sentence-flow-aura { width: 70%; height: 70px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .word-lock-light, .sentence-energy-node, .sentence-flow { display: none; }
+}

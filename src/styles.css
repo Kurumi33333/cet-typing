@@ -633,3 +633,32 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
 
 /* Motion owns the selector's transform; horizontal centering must not rely on it. */
 .lesson-options { left: 0; right: 0; margin-inline: auto; transform: none; }
+
+
+/* A completed lesson also stays on one screen instead of reviving tall padding. */
+.finished-screen {
+  min-height: 0;
+  width: 100%;
+  padding: clamp(8px, 2svh, 27px) 0;
+  align-items: center;
+  text-align: center;
+}
+.finished-screen h2 {
+  font-size: clamp(33px, 6.4svh, 69px);
+  line-height: 1.22;
+  margin: clamp(8px, 1.4svh, 17px) 0;
+}
+.finished-screen p { max-width: 500px; line-height: 1.5; margin: 8px 0; font-size: 13px; }
+.finished-screen .choice-group {
+  justify-content: center;
+  gap: clamp(6px, 1svh, 12px);
+  margin-top: clamp(10px, 1.7svh, 20px);
+}
+.finished-screen .primary-button, .finished-screen .secondary-button {
+  min-height: 40px;
+  padding: 9px 17px;
+}
+@media (max-width: 560px) {
+  .finished-screen .choice-group { flex-direction: column; align-items: center; width: 100%; }
+  .finished-screen .choice-group button { min-width: 160px; }
+}

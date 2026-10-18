@@ -17,10 +17,11 @@ import { editSlot, moveSlot, nextSlotIndex } from "./slotEditing";
 import { englishPhysicalLetter, insertAtCaret, deleteAtCaret, isEnglishCompositionResult, inputRouting } from "./keyboardInput";
 import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
+import { sentenceEnergyTiming, SUCCESS_HOLD_MS } from "./positiveFeedback";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
-const SUCCESS_CONFIRM_MS = 360; // Visible final character and green confirmation, no long success page.
+const SUCCESS_CONFIRM_MS = SUCCESS_HOLD_MS; // Do not extend the confirmed typing rhythm.
 
 interface PracticeScreenProps {
   level: CetLevel;
@@ -101,17 +102,40 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   // an alternative with a different number of word slots immediately.
   const liveSlots = () => sentenceToSlots(selectDisplayAnswer(valuesRef.current, acceptedAnswers));
 
-  // GSAP celebratory energy ring; ends within the 360ms success hold.
-  // Runs on a purely decorative layer, never on input DOM/slot positions.
+  // Multiword-only: the positive pulse literally travels between typed word
+  // centers, including wrapped lines. Layout and word targets never move.
   useLayoutEffect(() => {
-    if (phase !== "passed" || reducedMotion || !stageRef.current) return;
-    const ripples = stageRef.current.querySelectorAll(".success-energy-ring");
-    if (!ripples.length) return;
+    if (phase !== "passed" || reducedMotion || !stageRef.current || slots.length < 2) return;
+    const stage = stageRef.current;
+    const words = Array.from(stage.querySelectorAll<HTMLElement>(".slot-unit"));
+    const glints = Array.from(stage.querySelectorAll<HTMLElement>(".sentence-energy-node"));
+    const orb = stage.querySelector<HTMLElement>(".sentence-flow-orb");
+    const aura = stage.querySelector<HTMLElement>(".sentence-flow-aura");
+    if (!orb || !aura || words.length !== glints.length) return;
+
+    const origin = stage.getBoundingClientRect();
+    const centers = words.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.left - origin.left + rect.width / 2 - 6,
+        y: rect.top - origin.top + rect.height / 2 - 6 };
+    });
+    const { flowMs, stepMs, trailMs } = sentenceEnergyTiming(words.length);
     const timeline = gsap.timeline();
-    timeline.fromTo(ripples, { scale: 0.3, opacity: 0.62, rotate: -18 },
-      { scale: 3.1, opacity: 0, rotate: 15, duration: 0.32, stagger: 0.04, ease: "power3.out" });
+    timeline.set(orb, { x: centers[0].x, y: centers[0].y, opacity: 0, scale: 0.55 });
+    timeline.fromTo(aura, { opacity: 0, scale: 0.7 },
+      { opacity: 0.62, scale: 1.2, duration: 0.14, ease: "power2.out" }, 0);
+    centers.forEach((center, at) => {
+      const when = at * stepMs / 1000;
+      timeline.to(orb, { x: center.x, y: center.y, opacity: 0.92, scale: 1,
+        duration: Math.min(0.09, stepMs / 1000 + 0.018), ease: "sine.inOut" }, when);
+      timeline.fromTo(glints[at], { scaleX: 0.06, opacity: 0 },
+        { scaleX: 1, opacity: 0.97, duration: 0.08, ease: "power2.out" }, when);
+      timeline.to(glints[at], { opacity: 0, duration: 0.11, ease: "power2.in" }, when + 0.075);
+    });
+    timeline.to(orb, { opacity: 0, scale: 2.3, duration: trailMs / 1000 }, flowMs / 1000);
+    timeline.to(aura, { opacity: 0, scale: 1.48, duration: 0.18 }, 0.15);
     return () => { timeline.kill(); };
-  }, [phase, exercise.id, reducedMotion]);
+  }, [phase, exercise.id, reducedMotion, slots.length]);
   const wrong = phase === "review" ? incorrectSlots(displayValues, slots) : [];
   const entered = displayValues[activeIndex] ?? "";
   const routing = inputRouting(isTouchDevice, useSiteKeyboard, desktopNativeInput);
@@ -671,11 +695,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
               }}
               onKeyDown={handleKeyDown}
             />
-            {phase === "passed" && !reducedMotion && (
-              <div className="success-energy" aria-hidden="true">
-                <span className="success-energy-ring" />
-                <span className="success-energy-ring" />
-                <span className="success-energy-ring" />
+            {phase === "passed" && !reducedMotion && slots.length > 1 && (
+              <div className="sentence-flow" aria-hidden="true">
+                <span className="sentence-flow-aura" />
+                <span className="sentence-flow-orb" />
               </div>
             )}
             <div className="slot-list">
@@ -700,16 +723,28 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
                       className={`slot-word ${appearance}`}
                       style={{ minWidth: `${slot.widthCh}ch` }}
                       initial={false}
-                      animate={reducedMotion ? { x: 0, scale: 1 }
+                      animate={reducedMotion ? { x: 0, y: 0, scale: 1 }
                         : phase === "review" && incorrect && !targetOnly
-                          ? { x: [0, -5, 4, -2, 0], scale: 1 }
-                          : { x: 0, scale: correctlySpelled && phase !== "passed" ? [1, 1.035, 1] : 1 }}
+                          ? { x: [0, -5, 4, -2, 0], y: 0, scale: 1 }
+                          : correctlySpelled
+                            ? { x: 0, y: [0, -4, 1, 0], scale: [1, 1.075, 0.995, 1] }
+                            : { x: 0, y: 0, scale: 1 }}
                       transition={{
-                        duration: reducedMotion ? 0 : phase === "review" && incorrect && !targetOnly ? 0.28 : 0.19,
-                        ease: "easeOut",
+                        duration: reducedMotion ? 0 : phase === "review" && incorrect && !targetOnly ? 0.28 : 0.24,
+                        ease: [0.22, 1, 0.36, 1],
                       }}>
                       {visible || "\u00a0"}
                     </motion.span>
+                    {correctlySpelled && !reducedMotion && <motion.span
+                      className="word-lock-light" aria-hidden="true"
+                      key={`lock-${exercise.id}-${at}-${displayAnswer}`}
+                      initial={{ opacity: 0, scaleX: 0.04 }}
+                      animate={{ opacity: [0, 0.94, 0], scaleX: [0.04, 1, 1] }}
+                      transition={{ duration: 0.28, times: [0, 0.52, 1], ease: "easeOut" }}
+                    />}
+                    {phase === "passed" && slots.length > 1 && !reducedMotion && (
+                      <span className="sentence-energy-node" aria-hidden="true" />
+                    )}
                     {active && <motion.span
                       className="slot-focus-marker" aria-hidden="true"
                       layoutId={reducedMotion ? undefined : "cet-typing-slot-focus"}

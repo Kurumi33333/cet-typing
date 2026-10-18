@@ -81,9 +81,9 @@ export function playFeedback(kind: FeedbackSound): void {
       tone(ctx, at, 490, 0.088, 0.04);
       tone(ctx, at + 0.056, 735, 0.12, 0.036);
     } else if (kind === "success") {
-      tone(ctx, at, 523.25, 0.115, 0.052);
-      tone(ctx, at + 0.065, 659.25, 0.14, 0.05);
-      tone(ctx, at + 0.13, 783.99, 0.20, 0.045);
+      // Short and soft: built-in English TTS remains the primary audio signal.
+      tone(ctx, at, 659.25, 0.078, 0.021, "sine");
+      tone(ctx, at + 0.043, 783.99, 0.106, 0.017, "sine");
     } else {
       // Soft double dissonance, present without an obnoxious alarm.
       tone(ctx, at, 352, 0.085, 0.034, "triangle", 310);

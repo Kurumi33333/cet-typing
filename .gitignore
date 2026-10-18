@@ -6,3 +6,27 @@ dist
 .DS_Store
 *.local
 coverage
+
+# --- tooling artefacts -------------------------------------------------------
+# The design-review toolkit's own reports and screenshots; not part of the app.
+.taste-skill/
+
+# Python caches from the crop/prepare scripts.
+.venv/
+__pycache__/
+*.pyc
+
+# --- downloaded source media -------------------------------------------------
+# The archive scans and footage the landing page is cropped from: ~4.5 MB, all
+# reproducible from the Wikimedia Commons page recorded in assets/credits.json.
+# The crops the site actually serves live in public/landing/ and ARE committed,
+# so a fresh clone renders without downloading anything.
+#
+# Only the extensions are ignored, never the folder, so the provenance files in
+# it stay tracked (a blanket `assets/` would hide them).
+assets/*.jpg
+assets/*.jpeg
+assets/*.png
+assets/*.webm
+assets/*.mp4
+assets/*.ogv

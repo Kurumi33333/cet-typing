@@ -777,22 +777,7 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
 .main-content { position: relative; isolation: isolate; }
 .main-content > .hero-webgl,
 .main-content > .hero-webgl-tint { position: absolute; z-index: 0; pointer-events: none; }
-.main-content > :not(.hero-webgl):not(.hero-webgl-tint) { position: relative; z-index: 2; }
-.hero-webgl {
-  inset: 0 -6% 0 -6%;
-  height: 100%;
-  width: 112%;
-  overflow: hidden;
-  border-radius: 24px;
-  opacity: .96;
-  mask-image: radial-gradient(ellipse 100% 84% at 52% 44%, #000 28%, transparent 100%);
-}
-.hero-webgl-tint {
-  inset: -2% -8%;
-  background: linear-gradient(90deg, rgba(249,251,248,.78) 0%, rgba(249,251,248,.38) 43%, rgba(249,251,248,.16) 80%),
-    linear-gradient(0deg, rgba(249,251,248,.78), transparent 37%);
-}
-.hero-webgl .aurora-container { width: 100%; height: 100%; }
+.main-content > * { position: relative; z-index: 2; }
 .home-ambient { display: none; }
 .main-content .kinetic-hero {
   perspective: 850px;
@@ -821,20 +806,7 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
 }
 .secondary-button.home-course { background: rgba(229,240,232,.82); }
 .practice-stage { position: relative; isolation: isolate; }
-.practice-stage > .practice-webgl {
-  position: absolute;
-  inset: 0 -8%;
-  z-index: 0;
-  opacity: .88;
-  overflow: hidden;
-  pointer-events: none;
-  mask-image: radial-gradient(ellipse 75% 79% at 50% 55%, #000 0%, transparent 100%);
-}
-.practice-stage > .practice-area {
-  position: relative;
-  z-index: 1;
-}
-.practice-webgl .particles-container { width: 100%; height: 100%; }
+.practice-stage > .practice-area { position: relative; z-index: 1; }
 .success-energy {
   position: absolute;
   z-index: 1;
@@ -859,13 +831,71 @@ html, body, #root { height: 100%; width: 100%; overflow: hidden; }
   transform: scale(.3);
 }
 @media (max-width: 560px) {
-  .hero-webgl { inset: -1% -12% 0; width: 124%; opacity: .84; }
-  .hero-webgl-tint { inset: -1% -18%; background: linear-gradient(90deg,rgba(249,251,248,.72),rgba(249,251,248,.40)),linear-gradient(0deg,rgba(249,251,248,.78),transparent 48%); }
-  .practice-stage > .practice-webgl { inset: 0 -16%; opacity: .67; }
   .success-energy-ring { width: 49px; height: 49px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-webgl, .practice-stage > .practice-webgl { opacity: .3; }
+  .viewport-scene { opacity: .45; }
   .kinetic-hero .hero-line { will-change: auto; }
   .success-energy { display: none; }
+}
+
+
+/* V0.12 · WebGL layers belong to the viewport, NOT to the 1000px content column.
+   The previous hero-webgl was absolutely positioned inside .main-content, which
+   created the visible rectangle at the header line and the content-column edges.
+   Both scenes now share one full-bleed fixed stacking layer per active view. */
+.page-shell { position: relative; isolation: isolate; }
+.page-shell > .site-header,
+.page-shell > .main-content,
+.page-shell > .practice-main { position: relative; z-index: 1; }
+.page-shell > .viewport-scene {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #f7f9f6;
+}
+.viewport-scene .aurora-container,
+.viewport-scene .particles-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.viewport-scene-home .aurora-container {
+  opacity: .95;
+  /* Fade the *full viewport* edges, never mask within the layout column. */
+  -webkit-mask-image: radial-gradient(ellipse 84% 82% at 57% 44%,
+    #000 0%, rgba(0,0,0,.98) 34%, rgba(0,0,0,.72) 63%, transparent 100%);
+  mask-image: radial-gradient(ellipse 84% 82% at 57% 44%,
+    #000 0%, rgba(0,0,0,.98) 34%, rgba(0,0,0,.72) 63%, transparent 100%);
+}
+.viewport-scene-home::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+      rgba(247,249,246,.50) 0%, rgba(247,249,246,.24) 36%,
+      rgba(247,249,246,.02) 72%),
+    linear-gradient(0deg, rgba(247,249,246,.46), transparent 32%);
+}
+.viewport-scene-practice .particles-container {
+  opacity: .72;
+  -webkit-mask-image: radial-gradient(ellipse 72% 77% at 50% 50%,
+    #000 0%, rgba(0,0,0,.80) 52%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 77% at 50% 50%,
+    #000 0%, rgba(0,0,0,.80) 52%, transparent 100%);
+}
+@media(max-width:560px) {
+  .viewport-scene-home .aurora-container { opacity: .78; }
+  .viewport-scene-practice .particles-container { opacity: .5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewport-scene-home .aurora-container,
+  .viewport-scene-practice .particles-container { opacity: .28; }
 }

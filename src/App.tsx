@@ -165,6 +165,26 @@ export default function App() {
 
   return (
     <div className="page-shell">
+      {!lexiconLevel && (
+        <div className={session === null ? "viewport-scene viewport-scene-home" : "viewport-scene viewport-scene-practice"} aria-hidden="true">
+          {session === null ? (
+            <Aurora colorStops={["#c3f4d7", "#6db7bd", "#9fb0ec", "#c4f6bd"]}
+              lightMode amplitude={1.6} blend={0.65} speed={1.15} height={0.85}
+              scale={1.15} glow={1.1} brightness={1.05} layers={3}
+              mouseInteraction opacity={0.83} dpr={1.25} />
+          ) : (
+            <Particles particleCount={220} particleSpread={12} speed={0.12}
+              particleColors={["#3b9b78", "#7caca4", "#829ed7", "#8ad1a9"]}
+              moveParticlesOnHover particleHoverFactor={0.8} alphaParticles
+              particleBaseSize={86} sizeRandomness={1.6} cameraDistance={20}
+              disableRotation={false} pixelRatio={1.15} shape="circle"
+              glow={0.7} twinkle={0.5} depthOfField={0.25}
+              connections connectionDistance={130} hoverEffect="parallax"
+              hoverRadius={210} clickBurst drift="up" driftSpeed={0.22}
+              opacity={0.56} lightMode />
+          )}
+        </div>
+      )}
       <header className="site-header">
         <button className="brand brand-button" type="button" onClick={() => { setSession(null); setLexiconLevel(null); }} aria-label="返回首页">
           CET Typing
@@ -178,13 +198,6 @@ export default function App() {
         </main>
       ) : session === null ? (
         <main className="main-content" ref={homeRef}>
-          <div className="hero-webgl" aria-hidden="true">
-            <Aurora colorStops={["#c3f4d7", "#6db7bd", "#9fb0ec", "#c4f6bd"]}
-              lightMode amplitude={1.6} blend={0.65} speed={1.15} height={0.85}
-              scale={1.15} glow={1.1} brightness={1.05} layers={3}
-              mouseInteraction opacity={0.83} dpr={1.25} />
-          </div>
-          <div className="hero-webgl-tint" aria-hidden="true" />
           <p className="home-kicker">每天进步一点</p>
           <h1 className="kinetic-hero">
             <span className="hero-line">把英语</span>
@@ -272,17 +285,6 @@ export default function App() {
         </main>
       ) : (
         <main className="practice-main practice-stage">
-          <div className="practice-webgl" aria-hidden="true">
-            <Particles particleCount={220} particleSpread={12} speed={0.12}
-              particleColors={["#3b9b78", "#7caca4", "#829ed7", "#8ad1a9"]}
-              moveParticlesOnHover particleHoverFactor={0.8} alphaParticles
-              particleBaseSize={86} sizeRandomness={1.6} cameraDistance={20}
-              disableRotation={false} pixelRatio={1.15} shape="circle"
-              glow={0.7} twinkle={0.5} depthOfField={0.25}
-              connections connectionDistance={130} hoverEffect="parallax"
-              hoverRadius={210} clickBurst drift="up" driftSpeed={0.22}
-              opacity={0.56} lightMode />
-          </div>
           <PracticeScreen key={session.level + (session.reviewExercises ? "-review" : "-course")}
             level={session.level} reviewExercises={session.reviewExercises}
             startFromBeginning={session.startFromBeginning}

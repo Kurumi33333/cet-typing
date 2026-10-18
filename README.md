@@ -67,3 +67,18 @@ Cloudflare Pages 连接 `main`，每次推送自动执行测试、类型检查�
 - 「设置」→「系统输入 · 兼容模式」可恢复原生可编辑输入框，方便粘贴、特殊辅助输入或遇到设备兼容问题。偏好保存在 `cet-typing:desktop-input-mode`。
 - 手机触屏保持默认网页英文键盘；主动切回系统拼音键盘时，**网页无权关闭第三方输入法的候选条**。`inputmode` 只是一种布局提示，并非切换系统输入法的控制指令。
 - 自动验收覆盖 Chromium 模拟 `Process`、`code=KeyI`、连续 `like` 输入、点击已输入单词并覆盖、模式切换、390px 网页键盘；**真实 Windows 微软拼音/搜狗、macOS 拼音仍需人工确认候选窗在设备上不弹出**。部分输入法可能不提供物理 `code`，此时必须用系统输入兼容模式。
+
+
+## 可接受的多种译法 · V0.9（2026-10-18）
+
+中译英的正常答案并非唯一，**完整英文字符串等于预设目标**不等于**语义唯一正确**。现有试验题库已为 46 道 CET4/CET6 练习逐条登记 50 个保守核验的替代表达（`src/data/acceptedAnswers.ts`），示例：
+
+- 保持健康：`stay healthy`、`keep healthy`、`remain healthy`、`maintain good health`。其中 `stay healthy` 更常用；`keep healthy` 在英式用法中可接受。没有把强调体能的 `keep fit` 直接当作完全同义。
+- 乘公交车：`by bus`、`take a bus`、`take the bus`。
+- 每天：`every day`、`daily`。
+- 节约能源：`save energy`、`conserve energy`。
+- 充足的证据：`sufficient evidence`、`enough evidence`。
+
+技术：不同长度的合法答案根据已输入字词自动采用正确词槽数；区分前缀与完整正确答案；只有显式列入审校清单的表达会自动通过并保留原生 TTS 和 360ms 的绿色确认。不采用模糊匹配，也不会把拼写错误自动视为同义词。
+
+**局限：** 这只是人工/模型辅助初步审核过的一批备选，不是语义判题模型，更不是完整、官方或教师认证的自由翻译语料。未收录的合理译法仍可能无法自动通过，问题会以「目标表达不同」处理；CET4 既有风险题与 CET6 多词题不会因为这种不确定性自动累积普通练习 FSRS 错题。详情：`docs/CET_MULTI_ANSWER_REVIEW.md`。

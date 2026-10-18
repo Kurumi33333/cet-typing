@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import Magnet from "./components/reactbits/Magnet";
 import type { CetLevel, Exercise } from "./features/course/types";
 import { getLessons } from "./data/curriculum";
 import { loadProgress, type StudyProgress } from "./lib/storage/db";
@@ -154,22 +155,44 @@ export default function App() {
         </main>
       ) : session === null ? (
         <main className="main-content">
-          <p className="home-kicker">每天进步一点</p>
-          <h1>把英语<br /><em>打出来。</em></h1>
-          <p className="intro">从一个单词开始，慢慢说出完整的句子。</p>
+          <motion.div className="home-ambient" aria-hidden="true"
+            initial={false}
+            animate={reducedMotion ? undefined : { x: [0, 16, 0], y: [0, -11, 0], scale: [1, 1.035, 1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
+          <motion.p className="home-kicker"
+            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.25 }}>每天进步一点</motion.p>
+          <motion.h1 initial={reducedMotion ? false : { opacity: 0, y: 14, filter: "blur(5px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={reducedMotion ? { duration: 0 } : {
+              y: { type: "spring", stiffness: 230, damping: 23, mass: 0.8 },
+              opacity: { duration: 0.28 }, filter: { duration: 0.3 },
+            }}>把英语<br /><em>打出来。</em></motion.h1>
+          <motion.p className="intro"
+            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.29, delay: reducedMotion ? 0 : 0.07 }}>
+            从一个单词开始，慢慢说出完整的句子。
+          </motion.p>
           <div className="choice-group" aria-label="选择练习等级">
             {LEVELS.map((level) => (
-              <motion.button key={level} className={level === "CET4" ? "primary-button home-course" : "secondary-button home-course"}
+              <Magnet key={level} wrapperClassName="home-magnet" innerClassName="home-magnet-inner"
+                padding={54} magnetStrength={9} maxOffset={7} tilt={0.65} scale={1.008}
+                spring={{ stiffness: 240, damping: 21, mass: 0.68 }}
+                disabled={Boolean(reducedMotion) || (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches)}>
+              <motion.button className={level === "CET4" ? "primary-button home-course" : "secondary-button home-course"}
                 type="button" onClick={() => setSession({ level })}
-                whileHover={reducedMotion ? undefined : { y: -2 }}
-                whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-                transition={{ type: "spring", stiffness: 430, damping: 32 }}>
+                whileHover={reducedMotion ? undefined : { y: -3 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.972 }}
+                transition={{ type: "spring", stiffness: 370, damping: 24, mass: 0.55 }}>
                 <span className="home-course-copy">
                   <strong>{level === "CET4" ? "大学英语四级" : "大学英语六级"}</strong>
                   <small>{resumeLabel(level)}</small>
                 </span>
                 <span aria-hidden="true">↗</span>
               </motion.button>
+              </Magnet>
             ))}
           </div>
           <div className="home-start-over" aria-label="从基础单词重新开始">

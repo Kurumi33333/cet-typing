@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import ClickSpark from "../../components/reactbits/ClickSpark";
 import { getLessons } from "../../data/curriculum";
 import { isCET4PilotFreeTranslationRisk } from "../../data/cet4-audit";
 import { acceptedAnswerTexts, matchingAcceptedAnswer, selectDisplayAnswer } from "../../data/acceptedAnswers";
@@ -504,7 +505,12 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
         <button className="text-button" type="button" onClick={onBack}>← 返回</button>
         <span className="level-label">{level === "CET4" ? "四级" : "六级"} · {reviewMode ? "复习" : "练习"}</span>
         <div className="practice-top-actions">
-          <span className="question-counter">{String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}</span>
+          <motion.span className="question-counter" key={`${lesson.id}-${index}`}
+            initial={reducedMotion ? false : { opacity: 0.25, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 430, damping: 29, mass: 0.6 }}>
+            {String(index + 1).padStart(2, "0")} / {String(exercises.length).padStart(2, "0")}
+          </motion.span>
           <details className="practice-settings">
             <summary aria-label="打开输入与声音设置">设置 <span aria-hidden="true">⌄</span></summary>
             <div className="practice-settings-options">
@@ -559,12 +565,23 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
       </div>
 
       {!reviewMode && <div className="lesson-navigation">
-        <button className="lesson-toggle" type="button" aria-expanded={showLessonPicker}
-          aria-controls="lesson-options" onClick={() => setShowLessonPicker((value) => !value)}>
+        <ClickSpark className="lesson-spark" style={{ width: "fit-content", height: "auto" }}
+          sparkColor="#7fa58e" sparkCount={5} sparkRadius={21} sparkSize={7}
+          sparkWidth={1.3} duration={300} easing="spring"
+          disabled={Boolean(reducedMotion)}>
+        <motion.button className="lesson-toggle" type="button" aria-expanded={showLessonPicker}
+          aria-controls="lesson-options" onClick={() => setShowLessonPicker((value) => !value)}
+          whileHover={reducedMotion ? undefined : { y: -2, scale: 1.012 }}
+          whileTap={reducedMotion ? undefined : { scale: 0.955 }}
+          transition={{ type: "spring", stiffness: 460, damping: 27, mass: 0.6 }}>
           <span className="lesson-toggle-index">{String(lessonIndex + 1).padStart(2, "0")} / {String(courseList.length).padStart(2, "0")}</span>
           <span className="lesson-toggle-title">{lesson.title}</span>
-          <span aria-hidden="true">{showLessonPicker ? "⌃" : "⌄"}</span>
-        </button>
+          <motion.span aria-hidden="true" animate={{ rotate: showLessonPicker ? 180 : 0 }}
+            transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 460, damping: 26 }}>
+            ⌄
+          </motion.span>
+        </motion.button>
+        </ClickSpark>
         <AnimatePresence initial={false}>
           {showLessonPicker && <motion.div id="lesson-options" className="lesson-options" aria-label="选择训练单元"
             initial={reducedMotion ? false : { opacity: 0, y: -5 }}
@@ -589,9 +606,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
             Waiting for an exit animation would briefly show the previous
             Chinese question beside the new answer slots. */}
         <motion.div className="question-prompt" key={exercise.id}
-          initial={reducedMotion ? false : { opacity: 0.25, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}>
+          initial={reducedMotion ? false : { opacity: 0.12, y: 11, scale: 0.982, filter: "blur(3px)" }}
+          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          transition={reducedMotion ? { duration: 0 } : {
+            y: { type: "spring", stiffness: 360, damping: 28, mass: 0.65 },
+            scale: { type: "spring", stiffness: 360, damping: 28, mass: 0.65 },
+            opacity: { duration: 0.17 }, filter: { duration: 0.2 },
+          }}>
           <div className="eyebrow">
             {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
             {acceptedAnswers.length > 1 ? " · 多种表达可用" : ""}

@@ -100,8 +100,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   }, [ready, level, lesson.id, exercise.id, finished, reviewMode]);
 
   useEffect(() => {
-    if (!finished) inputRef.current?.focus({ preventScroll: true });
-  }, [index, lessonIndex, finished]);
+    // The input is not mounted until async local progress restoration finishes.
+    // Including ready restores initial focus even when the saved index is zero.
+    if (ready && !finished) inputRef.current?.focus({ preventScroll: true });
+  }, [ready, index, lessonIndex, finished]);
 
   useEffect(() => {
     if (phase !== "passed" || sentencePlayback) return;

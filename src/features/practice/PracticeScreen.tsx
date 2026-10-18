@@ -589,12 +589,17 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
             exit={reducedMotion ? undefined : { opacity: 0, y: -3 }}
             transition={{ duration: reducedMotion ? 0 : 0.15, ease: "easeOut" }}>
             {courseList.map((entry, at) => (
-              <button key={entry.id} type="button" className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
-                onClick={() => switchLesson(at)}>
+              <motion.button key={entry.id} type="button" className={`lesson-option ${at === lessonIndex ? "selected" : ""}`}
+                onClick={() => switchLesson(at)}
+                initial={reducedMotion ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 390, damping: 31, mass: 0.65, delay: reducedMotion ? 0 : Math.min(at * 0.018, 0.14) }}
+                whileHover={reducedMotion ? undefined : { x: 3 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.975 }}>
                 <span className="lesson-option-number">{String(at + 1).padStart(2, "0")}</span>
                 <span className="lesson-option-copy"><strong>{entry.title}</strong><small>{entry.description}</small></span>
                 <span aria-hidden="true">{at === lessonIndex ? "✓" : "↗"}</span>
-              </button>
+              </motion.button>
             ))}
           </motion.div>}
         </AnimatePresence>
@@ -701,7 +706,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
             className={`slot-feedback ${phase === "review" ? (targetOnly ? "feedback-target" : "feedback-error") : phase === "passed" ? "feedback-success" : ""}`}
             initial={reducedMotion || phase === "passed" ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reducedMotion || phase === "passed" ? 0 : 0.2 }} role="status" aria-live="polite">
-            {phase === "review" ? (targetOnly ? "◇ " : "● ") : phase === "passed" ? "✓ " : "⌨ "}{feedback}
+            {phase === "passed" ? (
+              <motion.span className="feedback-glyph" aria-hidden="true"
+                initial={reducedMotion ? false : { opacity: 0.3, scale: 0.65, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 490, damping: 21, mass: 0.42 }}>✓</motion.span>
+            ) : <span aria-hidden="true">{phase === "review" ? (targetOnly ? "◇" : "●") : "⌨"}</span>}
+            {" "}{feedback}
           </motion.p>
           {revealed && <div className="revealed-answer">
             <span>本题目标表达</span><strong>{exercise.english}</strong>

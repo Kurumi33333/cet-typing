@@ -570,19 +570,18 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
 
       {storageNotice && <p className="storage-warning" role="alert">{storageNotice}</p>}
       <div className="question-body centered-practice">
-        {/* ONLY the prompt is keyed. The input + slots below keep their DOM identity. */}
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div className="question-prompt" key={exercise.id}
-            initial={reducedMotion ? false : { opacity: 0, y: 7 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reducedMotion ? undefined : { opacity: 0, y: -4 }}
-            transition={{ duration: reducedMotion ? 0 : 0.17, ease: "easeOut" }}>
-            <div className="eyebrow">
-              {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
-            </div>
-            <h2 className="chinese-sentence">{exercise.chinese}</h2>
-          </motion.div>
-        </AnimatePresence>
+        {/* Prompt and answer slots must update in the same React commit.
+            Waiting for an exit animation would briefly show the previous
+            Chinese question beside the new answer slots. */}
+        <motion.div className="question-prompt" key={exercise.id}
+          initial={reducedMotion ? false : { opacity: 0.25, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}>
+          <div className="eyebrow">
+            {targetOnly ? "目标表达 · " : ""}{exercise.kind === "word" ? "单词" : exercise.kind === "phrase" ? "语块" : "句子"}
+          </div>
+          <h2 className="chinese-sentence">{exercise.chinese}</h2>
+        </motion.div>
 
         <form className="slot-form" onSubmit={handleSubmit}>
           <div className={`slot-stage ${focused ? "stage-focused" : ""}`} onClick={focusInput}

@@ -7,7 +7,7 @@ import { clearStudyRecords, createStudyBackup, importStudyBackup, parseStudyBack
 import { PracticeScreen } from "./features/practice/PracticeScreen";
 import { VocabularyScreen } from "./features/vocabulary/VocabularyScreen";
 
-type Session = { level: CetLevel; reviewExercises?: Exercise[] };
+type Session = { level: CetLevel; reviewExercises?: Exercise[]; startFromBeginning?: boolean };
 const LEVELS: CetLevel[] = ["CET4", "CET6"];
 
 export default function App() {
@@ -107,7 +107,11 @@ export default function App() {
     const position = positions[level];
     if (!position) return "从基础单词开始";
     const lesson = getLessons(level).find((entry) => entry.id === position.lessonId);
-    return lesson ? `继续 · ${lesson.title}` : "从基础单词开始";
+    if (!lesson) return "从基础单词开始";
+    const at = lesson.exercises.findIndex((item) => item.id === position.exerciseId);
+    const target = lesson.exercises[Math.max(0, at)];
+    const type = target.kind === "word" ? "单词" : target.kind === "phrase" ? "语块" : "句子";
+    return `继续 · ${lesson.title} · 第 ${Math.max(0, at) + 1} 题（${type}）`;
   }
 
   async function startReview(level: CetLevel) {
@@ -160,6 +164,14 @@ export default function App() {
                   <small>{resumeLabel(level)}</small>
                 </span>
                 <span aria-hidden="true">↗</span>
+              </button>
+            ))}
+          </div>
+          <div className="home-start-over" aria-label="从基础单词重新开始">
+            {LEVELS.map((level) => (
+              <button key={level} type="button"
+                onClick={() => setSession({ level, startFromBeginning: true })}>
+                {level === "CET4" ? "四级" : "六级"} · 从第一课单词开始 ↺
               </button>
             ))}
           </div>
@@ -218,6 +230,7 @@ export default function App() {
         <main className="practice-main">
           <PracticeScreen key={session.level + (session.reviewExercises ? "-review" : "-course")}
             level={session.level} reviewExercises={session.reviewExercises}
+            startFromBeginning={session.startFromBeginning}
             onBack={() => setSession(null)} />
         </main>
       )}

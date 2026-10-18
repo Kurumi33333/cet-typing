@@ -17,6 +17,7 @@ import { allSlotsCorrect, incorrectSlots, matchesSlot, sentenceToSlots } from ".
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
+const SUCCESS_CONFIRM_MS = 360; // Visible final character and green confirmation, no long success page.
 
 interface PracticeScreenProps {
   level: CetLevel;
@@ -75,6 +76,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   const valuesRef = useRef<string[]>([]);
   const activeRef = useRef(0);
   const completedExerciseRef = useRef<string | null>(null);
+  const successTimerRef = useRef<number | null>(null);
 
   const exercise = exercises[index];
   const targetOnly = isCET4PilotFreeTranslationRisk(level, exercise.id) && !reviewMode;
@@ -90,6 +92,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   };
 
   useEffect(() => () => stopPronunciation(), []);
+  // A delayed success must never advance a different lesson after restart or unmount.
+  useEffect(() => () => {
+    if (successTimerRef.current !== null) window.clearTimeout(successTimerRef.current);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -144,6 +150,10 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   }
 
   function clearQuestion(preserveSpeech = false) {
+    if (successTimerRef.current !== null) {
+      window.clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
     if (!preserveSpeech) stopPronunciation();
     valuesRef.current = [];
     activeRef.current = 0;
@@ -184,8 +194,15 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     ping("success");
     setLastCorrectEnglish(exercise.english);
     setCompleted((previous) => previous + 1);
-    // No success screen, no animation delay, and preserve the last word's TTS.
-    advanceQuestion(true);
+    // Render the last typed letter and green correct state before leaving.
+    // Keep the focused input mounted and let its word TTS finish naturally.
+    setPhase("passed");
+    setFeedback("正确");
+    const completedId = exercise.id;
+    successTimerRef.current = window.setTimeout(() => {
+      successTimerRef.current = null;
+      if (completedExerciseRef.current === completedId) advanceQuestion(true);
+    }, SUCCESS_CONFIRM_MS);
   }
 
   function checkAnswer() {
@@ -223,7 +240,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   }
 
   function applyText(text: string, previousValue?: string) {
-    if (phase === "passed") return;
+    if (phase === "passed" || completedExerciseRef.current === exercise.id) return;
     const at = activeRef.current;
     const previous = slots.map((_, index) => valuesRef.current[index] ?? "");
     const before = previousValue ?? previous[at];
@@ -298,7 +315,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   function handleSiteKey(key: string) {
     if (key === "Backspace") backspaceLetter();
     else if (key === "Space") nextSlotOrCheck();
-    else if (key === "Enter") phase === "passed" ? advanceQuestion() : checkAnswer();
+    else if (key === "Enter" && phase !== "passed") checkAnswer();
     else if (key === "Shift") { setShiftEnabled((prev) => !prev); return; }
     else {
       typeLetter(shiftEnabled ? key.toUpperCase() : key);
@@ -358,17 +375,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
       if (code === "Backspace") { event.preventDefault(); backspaceLetter(); return; }
       if (code === "Enter") {
         event.preventDefault();
-        if (phase === "passed") advanceQuestion();
-        else checkAnswer();
+        if (phase !== "passed") checkAnswer();
         return;
       }
     }
     if (composingNow) return;
     if (phase === "passed") {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        advanceQuestion();
-      }
+      if (event.key === "Enter" || event.key === " ") event.preventDefault();
       return;
     }
     if (event.key === "Enter") {
@@ -393,8 +406,7 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (composing.current) return;
-    if (phase === "passed") advanceQuestion();
-    else checkAnswer();
+    if (phase !== "passed") checkAnswer();
     focusInput();
   }
 
@@ -597,8 +609,8 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
           </div>
           <motion.p key={`${exercise.id}-${phase}-${errorPulse}`} id="practice-feedback"
             className={`slot-feedback ${phase === "review" ? (targetOnly ? "feedback-target" : "feedback-error") : phase === "passed" ? "feedback-success" : ""}`}
-            initial={reducedMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.2 }} role="status" aria-live="polite">
+            initial={reducedMotion || phase === "passed" ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion || phase === "passed" ? 0 : 0.2 }} role="status" aria-live="polite">
             {phase === "review" ? (targetOnly ? "◇ " : "● ") : phase === "passed" ? "✓ " : "⌨ "}{feedback}
           </motion.p>
           {revealed && <div className="revealed-answer"><span>本题目标表达</span><strong>{exercise.english}</strong></div>}
@@ -612,8 +624,8 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
                 }}
                 aria-label="重播当前选中单词">🔉 重播单词</button>
             )}
-            <button className="submit-minimal" type="submit">
-              {phase === "passed" ? "下一句 →" : "检查答案 →"}
+            <button className="submit-minimal" type="submit" disabled={phase === "passed"}>
+              {phase === "passed" ? "✓ 正确" : "检查答案 →"}
             </button>
             {phase !== "passed" && <button className="text-button" type="button" onClick={() => {
               setRevealed((value) => !value);

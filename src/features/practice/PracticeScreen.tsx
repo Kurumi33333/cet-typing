@@ -22,6 +22,7 @@ interface PracticeScreenProps {
   level: CetLevel;
   onBack: () => void;
   reviewExercises?: Exercise[];
+  startFromBeginning?: boolean;
 }
 
 /**
@@ -29,7 +30,7 @@ interface PracticeScreenProps {
  * This preserves the focused native element across questions (mobile IME).
  * Slots can always be selected, regardless of the correctness of other words.
  */
-export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScreenProps) {
+export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginning = false }: PracticeScreenProps) {
   const reviewMode = reviewExercises !== undefined;
   const reviewLesson: Lesson = {
     id: `review-${level}`, level, title: "错题复习", description: "回顾容易拼错的单词与句子",
@@ -92,7 +93,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
 
   useEffect(() => {
     let alive = true;
-    if (reviewMode) {
+    if (reviewMode || startFromBeginning) {
       setReady(true);
       return () => { alive = false; };
     }
@@ -108,7 +109,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       setReady(true);
     });
     return () => { alive = false; };
-  }, [level, reviewMode]);
+  }, [level, reviewMode, startFromBeginning]);
 
   useEffect(() => {
     if (!ready || finished || reviewMode) return;
@@ -288,8 +289,10 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
   }
 
   function nextSlotOrCheck() {
-    if (activeRef.current + 1 < slots.length) chooseSlot(activeRef.current + 1, "navigate");
-    else if (valuesRef.current.some((word) => word.trim())) checkAnswer();
+    if (slots.length < 2) return;
+    // Space is navigation ONLY. At the last slot, wrap around to the first.
+    // Only exact all-slot matching auto-submits; Enter explicitly checks errors.
+    chooseSlot((activeRef.current + 1) % slots.length, "navigate");
   }
 
   function handleSiteKey(key: string) {
@@ -335,12 +338,19 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
       typeLetter(letter);
       return;
     }
+    // Physical Space is a navigation key, even if a Chinese IME reports
+    // key="Process", isComposing=true and keyCode=229. Never let the IME
+    // consume Space as "select a Chinese candidate".
+    if (interceptPhysical && code === "Space") {
+      event.preventDefault();
+      nextSlotOrCheck();
+      return;
+    }
     // Once a physical English key was captured, also route control keys even
     // if the desktop IME still marks the event as composing/Process/229.
     const composingNow = composing.current || event.nativeEvent.isComposing || event.keyCode === 229;
     if (composingNow && interceptPhysical && physicalComposed.current) {
       if (code === "Backspace") { event.preventDefault(); backspaceLetter(); return; }
-      if (code === "Space") { event.preventDefault(); nextSlotOrCheck(); return; }
       if (code === "Enter") {
         event.preventDefault();
         if (phase === "passed") advanceQuestion();
@@ -365,7 +375,7 @@ export function PracticeScreen({ level, onBack, reviewExercises }: PracticeScree
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
       chooseSlot(moveSlot(activeRef.current, -1, slots.length), "navigate");
-    } else if (event.key === " ") {
+    } else if (event.key === " " || code === "Space") {
       event.preventDefault();
       nextSlotOrCheck();
     } else if (event.key === "Backspace" && interceptPhysical) {

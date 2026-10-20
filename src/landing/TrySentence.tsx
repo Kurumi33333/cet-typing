@@ -76,7 +76,7 @@ export function TrySentence({
   const stageRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const [errorPulse, setErrorPulse] = useState(0);
-  const spoken = useRef("");
+  const spoken = useRef(new Set<string>());
   const composition = useRef(false);
 
   const done = phase === "passed" || phase === "done";
@@ -90,7 +90,7 @@ export function TrySentence({
     setPhase("typing");
     setAttempts(0);
     setShift(false);
-    spoken.current = "";
+    spoken.current.clear();
     setRound(nextRound);
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
@@ -170,8 +170,8 @@ export function TrySentence({
       const value = input.values[at] ?? "";
       if (!value || value.includes(" ")) continue;
       const key = `${demo.id}:${at}:${value}`;
-      if (matchesSlot(value, slots[at]) && spoken.current !== key) {
-        spoken.current = key;
+      if (matchesSlot(value, slots[at]) && !spoken.current.has(key)) {
+        spoken.current.add(key);
         speakEnglish(value, "word");
         break;
       }

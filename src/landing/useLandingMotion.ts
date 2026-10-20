@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { landingSound } from "./landingSound";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,8 +36,8 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
         ScrollTrigger.create({
           trigger: panel,
           start: "top 78%",
-          onEnter: () => timeline.play(),
-          onLeaveBack: () => timeline.reverse(),
+          onEnter: () => { timeline.play(); landingSound.enter(index); },
+          onLeaveBack: () => { timeline.reverse(); landingSound.leave(index); },
         });
       });
 
@@ -60,7 +61,7 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
         ScrollTrigger.create({
           trigger: steps,
           start: "top 80%",
-          onEnter: () => grow.play(),
+          onEnter: () => { grow.play(); landingSound.sweep(); },
           onLeaveBack: () => grow.reverse(),
         });
       }
@@ -68,7 +69,7 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
       // Counters in the stats band tick up on arrival and back down on leaving.
       const counters = gsap.utils.toArray<HTMLElement>("[data-count]", scope);
       if (counters.length) {
-        const run = gsap.timeline({ paused: true });
+        const run = gsap.timeline({ paused: true, onComplete: () => { if (!run.reversed()) landingSound.settle(); } });
         counters.forEach((node) => {
           const to = Number(node.dataset.count);
           const state = { value: 0 };
@@ -77,7 +78,10 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
             value: to,
             duration: 1.4,
             ease: "power2.out",
-            onUpdate: () => { node.textContent = Math.round(state.value).toLocaleString("zh-CN"); },
+            onUpdate: () => {
+              node.textContent = Math.round(state.value).toLocaleString("zh-CN");
+              if (!run.reversed() && run.isActive()) landingSound.count(state.value / to);
+            },
           }, 0);
         });
         const band = counters[0].closest("section") ?? counters[0];

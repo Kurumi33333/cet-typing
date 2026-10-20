@@ -19,7 +19,7 @@ export function writeSoundPreference(enabled: boolean): void {
   catch { /* Some privacy modes disallow persistent settings. */ }
 }
 
-function tone(ctx: AudioContext, start: number, hz: number, duration: number, volume: number,
+export function tone(ctx: AudioContext, start: number, hz: number, duration: number, volume: number,
   shape: OscillatorType = "sine", endHz = hz): void {
   const osc = ctx.createOscillator();
   const envelope = ctx.createGain();
@@ -35,7 +35,7 @@ function tone(ctx: AudioContext, start: number, hz: number, duration: number, vo
   osc.stop(start + duration + 0.005);
 }
 
-function tap(ctx: AudioContext, now: number, volume: number, duration: number): void {
+export function tap(ctx: AudioContext, now: number, volume: number, duration: number): void {
   if (!noiseBuffer) {
     noiseBuffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.05), ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -54,6 +54,19 @@ function tap(ctx: AudioContext, now: number, volume: number, duration: number): 
   gain.connect(ctx.destination);
   src.start(now);
   src.stop(now + duration);
+}
+
+/** Shared lazily-created context for sound palettes built on tone()/tap(). */
+export function sharedAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const Audio = window.AudioContext ??
+    (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Audio) return null;
+  try {
+    const ctx = context ?? (context = new Audio());
+    if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+    return ctx;
+  } catch { return null; }
 }
 
 export function playFeedback(kind: FeedbackSound): void {

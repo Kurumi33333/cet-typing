@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useSyncExternalStore, type CSSProperties } from "react";
 import type { CetLevel } from "../features/course/types";
 import type { StudyProgress } from "../lib/storage/db";
 import type { ReviewOverview } from "../features/review/queue";
@@ -6,7 +6,8 @@ import {
   AUDIO_FEEDBACK_COUNT, LEXICON_SIZE, LEXICON_SOURCE, LEVEL_FACTS, TOTAL_LESSONS, TOTAL_STEPS,
 } from "../data/landingFacts";
 import Aurora from "../components/reactbits/Aurora";
-import { playFeedback, readSoundPreference } from "../features/practice/sounds";
+import { landingSound } from "./landingSound";
+import { useLandingSound } from "./useLandingSound";
 import { HeroTyper } from "./HeroTyper";
 import { TrySentence } from "./TrySentence";
 import { useLandingScroll } from "./useLandingScroll";
@@ -136,6 +137,8 @@ export function Landing(props: LandingProps) {
   useLandingScroll(scopeRef);
   useLandingMotion(scopeRef);
   useClipCalm();
+  useLandingSound(scopeRef);
+  const soundOn = useSyncExternalStore(landingSound.subscribe, landingSound.isOn, () => true);
 
   const levelFacts = [LEVEL_FACTS.CET4, LEVEL_FACTS.CET6];
   const dueTotal = props.review.CET4.due + props.review.CET6.due;
@@ -161,6 +164,11 @@ export function Landing(props: LandingProps) {
             <a href="#source">内容</a>
             <a href="#faq">常见问题</a>
           </nav>
+          <button type="button" className="landing__sound" data-silent aria-pressed={soundOn}
+            onClick={() => landingSound.setOn(!soundOn)}>
+            <span className="landing__sound-bars" aria-hidden="true"><i /><i /><i /></span>
+            音效 {soundOn ? "开" : "关"}
+          </button>
           <button type="button" className="landing__nav-action" onClick={onOpenApp}>
             练习台
           </button>
@@ -192,7 +200,7 @@ export function Landing(props: LandingProps) {
           </p>
           <div className="hero__actions" data-rise>
             <button type="button" className="btn btn--solid btn--big"
-              onClick={() => { if (readSoundPreference()) playFeedback("advance"); onStartLevel("CET4"); }}>
+              onClick={() => onStartLevel("CET4")}>
               开始四级
             </button>
             <button type="button" className="btn btn--ghost btn--big" onClick={() => onStartLevel("CET6")}>

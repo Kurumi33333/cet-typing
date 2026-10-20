@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion, useReducedMotion } from "motion/react";
+import { landingSound } from "./landingSound";
 import { sentenceEnergyTiming } from "../features/practice/positiveFeedback";
 import { getLessons } from "../data/curriculum";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "../features/practice/sounds";
@@ -211,7 +212,11 @@ export function TrySentence({
     });
     timeline.to(orb, { opacity: 0, scale: 2.3, duration: trailMs / 1000 }, flowMs / 1000);
     timeline.to(aura, { opacity: 0, scale: 1.48, duration: 0.18 }, 0.15);
-    return () => { timeline.kill(); };
+    const timers = [
+      ...centers.map((_, at) => window.setTimeout(() => landingSound.flow(at, centers.length), at * stepMs)),
+      window.setTimeout(() => landingSound.sparkle(), flowMs + 60),
+    ];
+    return () => { timeline.kill(); timers.forEach((id) => window.clearTimeout(id)); };
   }, [phase, demo.id, reducedMotion, slots.length]);
 
   const stage = phase === "done" ? "done"

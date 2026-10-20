@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { playFeedback, readSoundPreference } from "../features/practice/sounds";
+import { landingSound } from "./landingSound";
 
 /**
  * The hero's own demonstration: a Chinese line, and its English being typed out
@@ -54,10 +55,11 @@ export function HeroTyper() {
         setTyped(count);
         if (unlocked.current && readSoundPreference() && target[count - 1] !== " ") playFeedback("typing");
         wait = 55 + Math.random() * 70;
-        if (count >= target.length) { mode = "hold"; wait = 2200; }
+        if (count >= target.length) { mode = "hold"; wait = 2200; if (visible) landingSound.bell(); }
       } else if (mode === "hold") {
         mode = "erase";
         wait = 60;
+        if (visible) landingSound.wipe();
       } else {
         count = Math.max(0, count - 2);
         setTyped(count);

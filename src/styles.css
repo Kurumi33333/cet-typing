@@ -968,3 +968,17 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 @media (prefers-reduced-motion: reduce) {
   .word-lock-light, .sentence-energy-node, .sentence-flow { display: none; }
 }
+
+/* Finish screen: celebration only */
+.finish { align-items: center; text-align: center; position: relative; }
+.finish__confetti { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 60; }
+.finish h2 { margin: 0 0 14px; }
+.finish__chip {
+  display: inline-block; margin: 6px 0 0; padding: 7px 16px; border-radius: 999px;
+  background: #edf5f0; color: #2b5541 !important; font-weight: 700; font-size: 14px !important; letter-spacing: .02em;
+}
+.finish .choice-group { justify-content: center; margin-top: 34px; }
+.finish__key {
+  margin-left: 10px; padding: 2px 8px; border-radius: 6px; font: inherit; font-size: 12px;
+  background: rgba(255, 255, 255, .18); letter-spacing: .04em;
+}

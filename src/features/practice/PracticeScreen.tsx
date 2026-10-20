@@ -19,6 +19,7 @@ import type { CetLevel, Exercise, Lesson } from "../course/types";
 import { incorrectSlots, matchesSlot, sentenceToSlots } from "./slots";
 import { sentenceEnergyTiming, SUCCESS_HOLD_MS } from "./positiveFeedback";
 import { SiteKeyboard } from "./useSlotKeys";
+import { FinishCelebration } from "./FinishCelebration";
 
 type Phase = "typing" | "review" | "passed";
 const DEFAULT_HINT = "空格 / 方向键切换 · Enter 检查";
@@ -527,21 +528,14 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
   }
 
   if (finished) {
+    const hasNext = !reviewMode && lessonIndex + 1 < courseList.length;
     return (
-      <section className="finished-screen" aria-labelledby="finish-title">
-        <div className="eyebrow"><span className="status-dot" /> 本轮练习完成</div>
-        <h2 id="finish-title">很棒，<br /><em>继续保持。</em></h2>
-        <p>你已完成「{lesson.title}」的 <strong>{completed}</strong> 个练习步骤，共提交 <strong>{attempts}</strong> 次。</p>
-        {lastCorrectEnglish && <button className="text-button" type="button"
-          onClick={() => speakEnglish(lastCorrectEnglish, "sentence")}>🔊 重听最后一句</button>}
-        <div className="choice-group">
-          {!reviewMode && lessonIndex + 1 < courseList.length && (
-            <button className="primary-button" type="button" onClick={() => switchLesson(lessonIndex + 1)}>进入下一单元 →</button>
-          )}
-          <button className="secondary-button" type="button" onClick={restart}>再练一次 ↗</button>
-          <button className="text-button" type="button" onClick={onBack}>返回首页</button>
-        </div>
-      </section>
+      <FinishCelebration
+        completed={completed}
+        reducedMotion={Boolean(reducedMotion)}
+        actionLabel={hasNext ? "进入下一单元" : "返回首页"}
+        onAction={hasNext ? () => switchLesson(lessonIndex + 1) : onBack}
+      />
     );
   }
 

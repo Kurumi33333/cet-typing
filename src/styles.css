@@ -970,7 +970,12 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 }
 
 /* Finish screen: celebration only */
-.finish { align-items: center; text-align: center; position: relative; }
+.finish {
+  position: fixed; inset: 0; z-index: 50; margin: 0; padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  pointer-events: none;
+}
+.finish .choice-group { pointer-events: auto; }
 .finish__confetti { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 60; }
 .finish h2 { margin: 0 0 14px; }
 .finish .choice-group { justify-content: center; margin-top: 34px; }

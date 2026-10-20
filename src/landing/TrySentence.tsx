@@ -107,7 +107,15 @@ export function TrySentence({
 
   const typeLetter = (letter: string) => {
     if (done) return;
-    setInput((current) => insertSlotCharacter(current, letter));
+    setInput((current) => {
+      const next = insertSlotCharacter(current, letter);
+      const at = Math.min(next.active, slots.length - 1);
+      // Same as the practice screen: a word that just became right moves on.
+      if (!matchesSlot(current.values[at] ?? "", slots[at]) && matchesSlot(next.values[at] ?? "", slots[at]) && at < slots.length - 1) {
+        return nextSlot(next);
+      }
+      return next;
+    });
     if (phase === "checked") setPhase("typing");
     ping("typing");
     inputRef.current?.focus({ preventScroll: true });

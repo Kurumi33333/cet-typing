@@ -326,6 +326,13 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     }
     const accepted = matchingAcceptedAnswer(result.values, acceptedAnswers);
     if (accepted) completeCorrectQuestion(accepted);
+    else if (justCorrect && at < updatedSlots.length - 1) {
+      // A word that just became right moves on by itself; no Space needed.
+      activeRef.current = at + 1;
+      replaceSelectedSlotRef.current = true;
+      setActiveIndex(at + 1);
+      window.requestAnimationFrame(() => inputRef.current?.select());
+    }
   }
 
   function restoreCaret(position: number) {

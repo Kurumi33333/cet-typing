@@ -6,18 +6,17 @@ import { landingSound } from "./landingSound";
  * The page before the page: the visitor decides whether the landing page may
  * make sound. Browsers keep audio locked until a gesture anyway, so this one
  * click both unlocks it and records the choice (shared with the practice
- * screen's key-sound switch). It shows once per browser session; coming back
- * from the practice screen goes straight to the page.
+ * screen's key-sound switch). It shows on every page load; coming back from
+ * the practice screen inside the app goes straight to the page.
  */
-const SEEN_KEY = "cet-typing:landing-gate";
 export const GATE_EVENT = "landing-gate-done";
 
+// Module state, not storage: a refresh locks browser audio again, so it asks
+// again; moving around inside the app keeps the answer.
+let seen = false;
+
 function alreadySeen(): boolean {
-  try {
-    return window.sessionStorage.getItem(SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return seen;
 }
 
 export function useGateOpen(): boolean {
@@ -36,6 +35,24 @@ export function SoundGate({ onDone }: { onDone: () => void }) {
   }, []);
 
   useEffect(() => {
+    const root = rootRef.current;
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".gate__in", { opacity: 0, y: 26, duration: 0.8, ease: "power3.out", stagger: 0.09, delay: 0.1 });
+      gsap.fromTo(".gate__bars i", { scaleY: 0.2 }, {
+        scaleY: 1, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: -1,
+        stagger: { each: 0.09, repeat: -1, yoyo: true },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  const choose = (sound: boolean) => {
+    if (leaving) return;
+    setLeaving(true);
+    landingSound.setOn(sound);
+    if (sound) landingSound.start();
+    seen = true;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = gsap.context(() => {

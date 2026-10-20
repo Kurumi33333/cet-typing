@@ -68,6 +68,12 @@ export function pronunciationText(text: string, kind: PronunciationKind): string
  * rapid typing must never build an audible speech queue.
  * Called synchronously from input / click handlers for iOS gesture restrictions.
  */
+// Chrome/Edge can replay or garble a cancelled utterance when speak() follows
+// cancel() in the same tick, and may drop an utterance nobody references.
+// Keep the live one referenced and let only the newest request through.
+let liveUtterance: SpeechSynthesisUtterance | null = null;
+let speakToken = 0;
+
 export function speakEnglish(text: string, kind: PronunciationKind = "word"): boolean {
   if (typeof window === "undefined" || typeof SpeechSynthesisUtterance === "undefined") return false;
   const synth = window.speechSynthesis;
@@ -87,8 +93,19 @@ export function speakEnglish(text: string, kind: PronunciationKind = "word"): bo
       utterance.voice = voice;
       utterance.lang = voice.lang;
     }
-    if (synth.speaking || synth.pending) synth.cancel();
-    synth.speak(utterance);
+    const token = ++speakToken;
+    liveUtterance = utterance;
+    utterance.onend = utterance.onerror = () => { if (liveUtterance === utterance) liveUtterance = null; };
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+      window.setTimeout(() => {
+        if (token !== speakToken) return;
+        synth.resume?.();
+        synth.speak(utterance);
+      }, 70);
+    } else {
+      synth.speak(utterance);
+    }
     return true;
   } catch {
     // No audio device/voice support should not affect typing or grading.
@@ -97,6 +114,7 @@ export function speakEnglish(text: string, kind: PronunciationKind = "word"): bo
 }
 
 export function stopPronunciation(): void {
+  speakToken++;
   try {
     if (typeof window !== "undefined" && window.speechSynthesis &&
       (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {

@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { motion, useReducedMotion } from "motion/react";
+import { sentenceEnergyTiming } from "../features/practice/positiveFeedback";
 import { getLessons } from "../data/curriculum";
 import { playFeedback, readSoundPreference, writeSoundPreference } from "../features/practice/sounds";
 import {
@@ -69,6 +72,9 @@ export function TrySentence({
   const [voiceOn, setVoiceOn] = useState(readPronunciationPreference);
   const touch = useTouchDevice();
   const inputRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+  const [errorPulse, setErrorPulse] = useState(0);
   const spoken = useRef("");
   const composition = useRef(false);
 
@@ -136,6 +142,7 @@ export function TrySentence({
     }
     setAttempts((count) => count + 1);
     setPhase("checked");
+    setErrorPulse((count) => count + 1);
     ping("error");
   };
 
@@ -175,6 +182,37 @@ export function TrySentence({
     if (done) return;
     inputRef.current?.focus({ preventScroll: true });
   };
+
+  // The practice screen's own sentence-complete choreography: an orb travels
+  // between the typed words, each word's underline lights as it passes.
+  useLayoutEffect(() => {
+    const root = stageRef.current;
+    if (phase !== "passed" || reducedMotion || !root || slots.length < 2) return;
+    const words = Array.from(root.querySelectorAll<HTMLElement>(".try__slot"));
+    const glints = Array.from(root.querySelectorAll<HTMLElement>(".sentence-energy-node"));
+    const orb = root.querySelector<HTMLElement>(".sentence-flow-orb");
+    const aura = root.querySelector<HTMLElement>(".sentence-flow-aura");
+    if (!orb || !aura || words.length !== glints.length) return;
+    const origin = root.getBoundingClientRect();
+    const centers = words.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.left - origin.left + rect.width / 2 - 6, y: rect.top - origin.top + rect.height / 2 - 6 };
+    });
+    const { flowMs, stepMs, trailMs } = sentenceEnergyTiming(words.length, 520);
+    const timeline = gsap.timeline();
+    timeline.set(orb, { x: centers[0].x, y: centers[0].y, opacity: 0, scale: 0.55 });
+    timeline.fromTo(aura, { opacity: 0, scale: 0.7 }, { opacity: 0.62, scale: 1.2, duration: 0.14, ease: "power2.out" }, 0);
+    centers.forEach((center, at) => {
+      const when = (at * stepMs) / 1000;
+      timeline.to(orb, { x: center.x, y: center.y, opacity: 0.92, scale: 1,
+        duration: Math.min(0.09, stepMs / 1000 + 0.018), ease: "sine.inOut" }, when);
+      timeline.fromTo(glints[at], { scaleX: 0.06, opacity: 0 }, { scaleX: 1, opacity: 0.97, duration: 0.08, ease: "power2.out" }, when);
+      timeline.to(glints[at], { opacity: 0, duration: 0.11, ease: "power2.in" }, when + 0.075);
+    });
+    timeline.to(orb, { opacity: 0, scale: 2.3, duration: trailMs / 1000 }, flowMs / 1000);
+    timeline.to(aura, { opacity: 0, scale: 1.48, duration: 0.18 }, 0.15);
+    return () => { timeline.kill(); };
+  }, [phase, demo.id, reducedMotion, slots.length]);
 
   const stage = phase === "done" ? "done"
     : phase === "passed" ? "passed"
@@ -247,7 +285,13 @@ export function TrySentence({
 
         <p className="try__chinese" lang="zh-CN">{demo.chinese}</p>
 
-        <div className="try__stage">
+        <div className="try__stage" ref={stageRef}>
+          {phase === "passed" && slots.length > 1 && !reducedMotion && (
+            <div className="sentence-flow" aria-hidden="true">
+              <span className="sentence-flow-aura" />
+              <span className="sentence-flow-orb" />
+            </div>
+          )}
           <input
             ref={inputRef}
             className="try__capture"
@@ -306,9 +350,15 @@ export function TrySentence({
           {phase === "done" ? (
             <span className="try__line">三句都完成了。课程里还有 117 句。</span>
           ) : phase === "passed" ? (
-            <span className="try__line is-good">对了。{voiceOn ? "正在读整句。" : "打开上方的发音，可以听整句。"}</span>
+            <span className="try__line is-good">
+              <motion.span className="feedback-glyph" aria-hidden="true"
+                initial={reducedMotion ? false : { opacity: 0.3, scale: 0.65, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 490, damping: 21, mass: 0.42 }}>✓</motion.span>{" "}
+              对了。{voiceOn ? "正在读整句。" : "打开上方的发音，可以听整句。"}</span>
           ) : phase === "checked" ? (
-            <span className="try__line is-bad">还不是这句。点一下红色的词，改完再按回车。</span>
+            <motion.span className="try__line is-bad" key={`bad-${errorPulse}`}
+              initial={reducedMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>还不是这句。点一下红色的词，改完再按回车。</motion.span>
           ) : (
             <span className="try__line">
               按空格换词，回车检查{attempts > 1 ? `，这是第 ${attempts} 次尝试` : ""}。

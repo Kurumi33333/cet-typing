@@ -978,3 +978,14 @@ html.lenis.lenis-stopped { overflow: hidden; }
 @media (min-width: 62rem) {
   .try__grid { align-items: center; }
 }
+
+/* Practice-screen feedback primitives (styles.css) need the landing's slot geometry. */
+.try__slot { position: relative; isolation: isolate; }
+.try__stage .sentence-flow { z-index: 3; }
+.try__card { transition: box-shadow 320ms ease; }
+.try__card.is-passed {
+  box-shadow: 0 2rem 4rem -2rem color-mix(in srgb, var(--field) 40%, transparent),
+    0 0 0 1.5px color-mix(in srgb, #52966b 60%, transparent),
+    0 0 2.4rem color-mix(in srgb, #69d9a0 35%, transparent);
+}
+.try__line .feedback-glyph { margin-right: 0.15em; }

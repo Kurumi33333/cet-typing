@@ -54,28 +54,6 @@ export function SoundGate({ onDone }: { onDone: () => void }) {
     if (sound) landingSound.start();
     seen = true;
     const root = rootRef.current;
-    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const ctx = gsap.context(() => {
-      gsap.from(".gate__in", { opacity: 0, y: 26, duration: 0.8, ease: "power3.out", stagger: 0.09, delay: 0.1 });
-      gsap.fromTo(".gate__bars i", { scaleY: 0.2 }, {
-        scaleY: 1, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: -1,
-        stagger: { each: 0.09, repeat: -1, yoyo: true },
-      });
-    }, root);
-    return () => ctx.revert();
-  }, []);
-
-  const choose = (sound: boolean) => {
-    if (leaving) return;
-    setLeaving(true);
-    landingSound.setOn(sound);
-    if (sound) landingSound.start();
-    try {
-      window.sessionStorage.setItem(SEEN_KEY, "1");
-    } catch {
-      /* private mode */
-    }
-    const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       onDone();
       window.dispatchEvent(new Event(GATE_EVENT));

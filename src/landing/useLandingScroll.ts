@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * The landing page is an ordinary document: native scrolling, no paging, no
- * pinned screens. This hook only adds the thin reading-progress bar (scrubbed
+ * The landing page is an ordinary document: the wheel is eased by Lenis (the
+ * real scroll position still drives everything), but there is no paging, no
+ * snapping and no pinned screen. Touch and reduced motion keep native scrolling.
+ * This hook also adds the thin reading-progress bar (scrubbed
  * to the real scroll position, so it runs backwards when the reader does) and
  * keeps the section nav's current link in step.
  */
@@ -14,6 +17,16 @@ export function useLandingScroll(scopeRef: React.RefObject<HTMLElement | null>) 
   useEffect(() => {
     const scope = scopeRef.current;
     if (!scope) return;
+
+    let lenis: Lenis | null = null;
+    let tick: ((time: number) => void) | null = null;
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, anchors: { offset: -64 } });
+      lenis.on("scroll", ScrollTrigger.update);
+      tick = (time) => lenis?.raf(time * 1000);
+      gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
+    }
 
     const ctx = gsap.context(() => {
       const bar = scope.querySelector<HTMLElement>(".landing__progress");
@@ -42,6 +55,11 @@ export function useLandingScroll(scopeRef: React.RefObject<HTMLElement | null>) 
       }
     }, scope);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      if (tick) gsap.ticker.remove(tick);
+      gsap.ticker.lagSmoothing(500, 33);
+      lenis?.destroy();
+    };
   }, [scopeRef]);
 }

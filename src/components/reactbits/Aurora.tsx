@@ -508,7 +508,8 @@ const Aurora = ({
       gl.deleteProgram(program.program);
       gl.deleteBuffer(buffer);
       gl.deleteVertexArray(vao);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      // Not loseContext(): React StrictMode re-runs this effect on the same canvas,
+      // and a context lost in the first pass would leave the second one blank.
     };
   }, []);
 

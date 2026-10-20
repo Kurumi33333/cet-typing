@@ -172,9 +172,9 @@ export function Landing(props: LandingProps) {
       {/* 01 · the claim, with the thing it describes happening under it. */}
       <section className="hero" data-panel aria-labelledby="hero-title">
         <div className="hero__aurora" aria-hidden="true">
-          <Aurora colorStops={["#c3f4d7", "#6db7bd", "#9fb0ec", "#c4f6bd"]}
+          <Aurora colorStops={["#7fe3bf", "#6bc3e6", "#a5b4f5", "#9be8b0"]}
             lightMode amplitude={1.5} blend={0.7} speed={0.9} height={0.8}
-            scale={1.1} glow={1.1} brightness={1.05} layers={3} opacity={0.8} dpr={1.1} />
+            scale={1.1} glow={1.1} brightness={1.15} layers={3} opacity={0.9} dpr={1.1} />
         </div>
         <div className="wrap hero__inner">
           <p className="hero__eyebrow" data-rise>CET-4 / CET-6 · 中译英基本功</p>

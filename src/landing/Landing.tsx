@@ -5,6 +5,9 @@ import type { ReviewOverview } from "../features/review/queue";
 import {
   AUDIO_FEEDBACK_COUNT, LEXICON_SIZE, LEXICON_SOURCE, LEVEL_FACTS, TOTAL_LESSONS, TOTAL_STEPS,
 } from "../data/landingFacts";
+import Aurora from "../components/reactbits/Aurora";
+import { playFeedback, readSoundPreference } from "../features/practice/sounds";
+import { HeroTyper } from "./HeroTyper";
 import { TrySentence } from "./TrySentence";
 import { useLandingScroll } from "./useLandingScroll";
 import { useLandingMotion } from "./useLandingMotion";
@@ -164,68 +167,91 @@ export function Landing(props: LandingProps) {
         </div>
       </header>
 
-      {/* 01 · the claim, built out of the thing it describes: two halves of a
-          sentence with the product's own frame standing where a word would be. */}
-      <section className="wrap hero panel" data-panel aria-labelledby="hero-title">
-        <h1 className="hero__stage" id="hero-title">
-          <span className="hero__half hero__half--left" data-rise>看中文，</span>
-          <span className="hero__reel">
-            <span className="hero__sliver hero__sliver--top" aria-hidden="true">
-              <img src={PIC.typewriter.src} alt="" width={PIC.typewriter.width} height={PIC.typewriter.height} decoding="async" />
-            </span>
-            <span className="hero__frame">
-              <Photo picture={PIC.class} eager alt="1950 年代的教室：老师拿教鞭指着地球仪，身后的黑板上写着中文板书" />
-            </span>
-            <span className="hero__sliver hero__sliver--bottom" aria-hidden="true">
-              <img src={PIC.typewriter.src} alt="" width={PIC.typewriter.width} height={PIC.typewriter.height} decoding="async" />
-            </span>
-          </span>
-          <span className="hero__half hero__half--right" data-rise>写英文。</span>
-        </h1>
+      <div className="landing__progress" aria-hidden="true" />
 
-        <div className="hero__below">
-          <div>
-            <p className="hero__support" data-reveal>
-              四六级的中译英，卡住的常常不是不认识词，是写不出来。这一页只练这一件事：
-              看一句中文，把英文一个词一个词打出来，打完才算过。
-            </p>
-            <p className="hero__meta" data-reveal>
-              不用注册，记录只留在这台设备，断网也能继续。
-            </p>
-          </div>
-          <div className="hero__actions" data-reveal>
-            <button type="button" className="btn btn--solid" onClick={() => onStartLevel("CET4")}>
+      {/* 01 · the claim, with the thing it describes happening under it. */}
+      <section className="hero" data-panel aria-labelledby="hero-title">
+        <div className="hero__aurora" aria-hidden="true">
+          <Aurora colorStops={["#c3f4d7", "#6db7bd", "#9fb0ec", "#c4f6bd"]}
+            lightMode amplitude={1.5} blend={0.7} speed={0.9} height={0.8}
+            scale={1.1} glow={1.1} brightness={1.05} layers={3} opacity={0.8} dpr={1.1} />
+        </div>
+        <div className="wrap hero__inner">
+          <p className="hero__eyebrow" data-rise>CET-4 / CET-6 · 中译英基本功</p>
+          <h1 className="hero__stage" id="hero-title">
+            <span className="hero__half" data-rise>看中文，</span>
+            <span className="hero__frame" aria-hidden="true">
+              <img src={PIC.class.src} alt="" width={PIC.class.width} height={PIC.class.height} decoding="async" fetchPriority="high" />
+            </span>
+            <span className="hero__half" data-rise>写英文。</span>
+          </h1>
+          <div data-rise><HeroTyper /></div>
+          <p className="hero__support" data-rise>
+            四六级的中译英，卡住的常常不是不认识词，是写不出来。这一页只练这一件事：
+            看一句中文，把英文一个词一个词打出来，打完才算过。
+          </p>
+          <div className="hero__actions" data-rise>
+            <button type="button" className="btn btn--solid btn--big"
+              onClick={() => { if (readSoundPreference()) playFeedback("advance"); onStartLevel("CET4"); }}>
               开始四级
             </button>
-            <button type="button" className="landing-link" onClick={() => onStartLevel("CET6")}>
+            <button type="button" className="btn btn--ghost btn--big" onClick={() => onStartLevel("CET6")}>
               从六级开始
             </button>
+            <a className="landing-link" href="#try">先试一句 ↓</a>
           </div>
+          <p className="hero__meta" data-rise>不用注册，记录只留在这台设备，断网也能继续。</p>
         </div>
-
-        <figure className="hero__filmwrap" data-reveal>
-          <video
-            className="hero__film"
-            data-clip
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={PIC.poster.src}
-            width={PIC.poster.width}
-            height={PIC.poster.height}
-            aria-label="俯拍：一个人在一台老式打字机上连续打字，纸上逐行出现文字"
-          >
-            <source src="/landing/typing.webm" type="video/webm" />
-          </video>
-          <figcaption>
-            {TOTAL_LESSONS} 个单元、{TOTAL_STEPS} 步原创练习，从两个词的短句练到 {LEVEL_FACTS.CET4.maxWordsInSentence} 个词的长句；
-            参考词库另有 {(LEXICON_SIZE.CET4 + LEXICON_SIZE.CET6).toLocaleString("zh-CN")} 条可查。
-            上面这段是库里的一段打字机实拍。
-          </figcaption>
-        </figure>
       </section>
+
+      <div className="ticker" aria-hidden="true">
+        <div className="ticker__track">
+          {Array.from({ length: 2 }, (_, copy) => (
+            <span className="ticker__row" key={copy}>
+              {["WORD", "PHRASE", "SENTENCE", "单词", "语块", "句子", "TYPE IT", "写出来"].map((word) => (
+                <span key={word}>{word}<i /></span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <section className="stats" data-panel aria-label="课程规模">
+        <div className="wrap stats__grid">
+          {[
+            { n: TOTAL_LESSONS, label: "个单元" },
+            { n: TOTAL_STEPS, label: "步原创练习" },
+            { n: LEXICON_SIZE.CET4 + LEXICON_SIZE.CET6, label: "条词库可查" },
+            { n: AUDIO_FEEDBACK_COUNT, label: "类键音反馈" },
+          ].map((item) => (
+            <div className="stats__item" key={item.label} data-reveal>
+              <strong data-count={item.n}>{item.n.toLocaleString("zh-CN")}</strong>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <figure className="hero__filmwrap" data-panel>
+        <video
+          className="hero__film"
+          data-clip
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={PIC.poster.src}
+          width={PIC.poster.width}
+          height={PIC.poster.height}
+          aria-label="俯拍：一个人在一台老式打字机上连续打字，纸上逐行出现文字"
+        >
+          <source src="/landing/typing.webm" type="video/webm" />
+        </video>
+        <figcaption className="wrap">
+          从两个词的短句练到 {LEVEL_FACTS.CET4.maxWordsInSentence} 个词的长句。上面这段是库里的一段打字机实拍。
+        </figcaption>
+      </figure>
 
       {/* 02 · the live thing: one screen, the card and its sentence. */}
       <TrySentence
@@ -239,7 +265,7 @@ export function Landing(props: LandingProps) {
       />
 
       {/* 03 · how the course is built */}
-      <section className="wrap how panel" id="how" data-panel aria-labelledby="how-title">
+      <section className="wrap how" id="how" data-panel aria-labelledby="how-title">
         <h2 className="statement" id="how-title" data-reveal>
           一个词，一块砖，一句话。
         </h2>
@@ -293,7 +319,7 @@ export function Landing(props: LandingProps) {
       </section>
 
       {/* 04 · the corpus, on the one dark field */}
-      <section className="source panel" id="source" data-panel aria-labelledby="source-title">
+      <section className="source" id="source" data-panel aria-labelledby="source-title">
         <div className="wrap source__layout">
           <div className="source__pinned">
             <h2 className="statement statement--field" id="source-title" data-reveal>
@@ -343,7 +369,7 @@ export function Landing(props: LandingProps) {
       </section>
 
       {/* 05 · spacing, the second half of the loop */}
-      <section className="wrap spacing panel" data-panel aria-labelledby="spacing-title">
+      <section className="wrap spacing" data-panel aria-labelledby="spacing-title">
         <h2 className="statement statement--wide" id="spacing-title" data-reveal>
           隔得越久，越要自己想。
         </h2>
@@ -401,7 +427,7 @@ export function Landing(props: LandingProps) {
       </section>
 
       {/* 06 · the record and the questions share one screen */}
-      <section className="facts panel" data-panel aria-labelledby="facts-title">
+      <section className="facts" data-panel aria-labelledby="facts-title">
         <div className="facts__grid">
         <div className="facts__col">
           <h2 className="statement" id="facts-title" data-reveal>
@@ -445,7 +471,7 @@ export function Landing(props: LandingProps) {
       </section>
 
       {/* 07 · the close */}
-      <section className="closing panel" data-panel aria-labelledby="closing-title">
+      <section className="closing" data-panel aria-labelledby="closing-title">
         <div className="wrap">
           <h2 className="statement closing__title" id="closing-title" data-reveal>
             每天十分钟，

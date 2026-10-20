@@ -182,7 +182,7 @@ export function TrySentence({
         : "typing";
 
   return (
-    <section className="try panel" id="try" data-panel aria-labelledby="try-title">
+    <section className="try" id="try" data-panel aria-labelledby="try-title">
       <div className="try__grid">
         <div className="try__intro">
         <h2 className="try__title" id="try-title" data-reveal>先打一句。</h2>

@@ -398,7 +398,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
    <body>'s height; the document itself must not scroll a second time. */
 /* ScrollSmoother pins its wrapper, hides its own overflow and translates the
    content; the document must not scroll a second time underneath it. */
-html.landing-mode.landing-smooth { overflow: hidden; }
 .page-shell { height: 100dvh; height: 100svh; min-height: 0; overflow: hidden; }
 .site-header {
   flex-shrink: 0;

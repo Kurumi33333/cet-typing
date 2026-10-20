@@ -1043,3 +1043,38 @@ html.landing-gated, html.landing-gated body { overflow: hidden; }
 .gate .btn--ghost { background: transparent; color: #26342f; box-shadow: inset 0 0 0 1.5px #356b54; }
 .gate .btn--big { font-size: 1.15rem; padding: 0.75em 1.7em 0.82em; border-radius: 999px; }
 .gate :focus-visible { outline: 3px solid #356b54; outline-offset: 4px; }
+
+/* ------------------------------------------------------- overlay scrollbar --- */
+/* The native bar narrows the page, so it is hidden and replaced by a floating one. */
+html.landing-mode { scrollbar-width: none; }
+html.landing-mode::-webkit-scrollbar,
+html.landing-mode body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+.landing__scrollbar {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: 18px;
+  z-index: 40;
+  touch-action: none;
+  cursor: pointer;
+}
+.landing__scrollbar.is-idle-hidden { display: none; }
+.landing__scrollbar-thumb {
+  position: absolute;
+  inset-inline: 6px;
+  top: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink, #26342f) 38%, transparent);
+  opacity: 0;
+  transition: opacity 240ms ease, inset 160ms ease, background 160ms ease;
+  will-change: transform;
+}
+.landing__scrollbar.is-awake .landing__scrollbar-thumb,
+.landing__scrollbar:hover .landing__scrollbar-thumb,
+.landing__scrollbar.is-dragging .landing__scrollbar-thumb { opacity: 1; }
+.landing__scrollbar:hover .landing__scrollbar-thumb,
+.landing__scrollbar.is-dragging .landing__scrollbar-thumb {
+  inset-inline: 4px;
+  background: color-mix(in srgb, var(--accent, #356b54) 70%, transparent);
+}
+@media (hover: none) and (pointer: coarse) { .landing__scrollbar { display: none; } }

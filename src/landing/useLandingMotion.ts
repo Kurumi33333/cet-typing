@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { landingSound } from "./landingSound";
+import { GATE_EVENT } from "./SoundGate";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,7 +30,13 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
         const timeline = gsap.timeline({ paused: true, defaults: { ease: "power3.out", duration: 0.85 } });
         timeline.fromTo(parts, { opacity: 0, y: 34 }, { opacity: 1, y: 0, stagger: 0.09 });
         if (index === 0) {
-          timeline.play();
+          // The first screen waits for the sound gate's curtain, if it is up.
+          if (scope.dataset.gated) {
+            gsap.set(parts, { opacity: 0, y: 34 });
+            window.addEventListener(GATE_EVENT, () => timeline.play(), { once: true });
+          } else {
+            timeline.play();
+          }
           return;
         }
         gsap.set(parts, { opacity: 0, y: 34 });
@@ -44,9 +51,10 @@ export function useLandingMotion(scopeRef: React.RefObject<HTMLElement | null>) 
       // The hero photograph opens from its frame.
       const frame = scope.querySelector<HTMLElement>(".hero__frame");
       if (frame) {
-        gsap.fromTo(frame, { clipPath: "inset(0 100% 0 0)" }, {
-          clipPath: "inset(0 0% 0 0)", duration: 1.15, ease: "power3.inOut", delay: 0.1,
+        const open = gsap.fromTo(frame, { clipPath: "inset(0 100% 0 0)" }, {
+          clipPath: "inset(0 0% 0 0)", duration: 1.15, ease: "power3.inOut", delay: 0.1, paused: Boolean(scope.dataset.gated),
         });
+        if (scope.dataset.gated) window.addEventListener(GATE_EVENT, () => open.play(), { once: true });
       }
 
       // Bars grow from their real proportions; scrolling back retracts them.

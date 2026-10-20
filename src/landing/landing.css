@@ -1011,3 +1011,35 @@ html.lenis.lenis-stopped { overflow: hidden; }
 .landing__sound-bars i:nth-child(3) { animation-delay: 300ms; }
 @keyframes sound-bar { 0%, 100% { height: 30%; } 50% { height: 100%; } }
 @media (prefers-reduced-motion: reduce) { .landing__sound-bars i { animation: none !important; } }
+
+/* ------------------------------------------------------------ sound gate --- */
+html.landing-gated, html.landing-gated body { overflow: hidden; }
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.1rem, 3.6vw, 3.5rem);
+  background:
+    radial-gradient(60rem 30rem at 18% 12%, color-mix(in srgb, #9fd8c0 60%, transparent), transparent 70%),
+    radial-gradient(52rem 28rem at 85% 8%, color-mix(in srgb, #a9b8f0 50%, transparent), transparent 70%),
+    #f7f9f6;
+  color: #26342f;
+  font-family: "EB Garamond", "Noto Serif SC", "Songti SC", serif;
+  text-align: center;
+}
+.gate *, .gate *::before, .gate *::after { box-sizing: border-box; }
+.gate__inner { display: grid; justify-items: center; gap: 1.2rem; max-width: 40rem; }
+.gate__bars { display: inline-flex; align-items: center; gap: 5px; height: 2.6rem; }
+.gate__bars i { width: 4px; height: 100%; background: #356b54; border-radius: 2px; }
+.gate__eyebrow { margin: 0; letter-spacing: 0.22em; font-size: 0.95rem; color: #2b5541; }
+.gate__title { margin: 0; font-weight: 500; font-size: clamp(1.9rem, 1rem + 3.6vw, 3.2rem); line-height: 1.15; letter-spacing: -0.03em; text-wrap: balance; }
+.gate__copy { margin: 0; font-size: 1.05rem; line-height: 1.75; color: #55685f; text-wrap: pretty; }
+.gate__actions { display: flex; flex-wrap: wrap; gap: 0.8rem 1rem; justify-content: center; margin-top: 0.6rem; }
+.gate .btn { font: inherit; cursor: pointer; border: 0; }
+.gate .btn--solid { background: #356b54; color: #f7f9f6; }
+.gate .btn--ghost { background: transparent; color: #26342f; box-shadow: inset 0 0 0 1.5px #356b54; }
+.gate .btn--big { font-size: 1.15rem; padding: 0.75em 1.7em 0.82em; border-radius: 999px; }
+.gate :focus-visible { outline: 3px solid #356b54; outline-offset: 4px; }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore, type CSSProperties } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import type { CetLevel } from "../features/course/types";
 import type { StudyProgress } from "../lib/storage/db";
 import type { ReviewOverview } from "../features/review/queue";
@@ -8,6 +8,7 @@ import {
 import Aurora from "../components/reactbits/Aurora";
 import { landingSound } from "./landingSound";
 import { useLandingSound } from "./useLandingSound";
+import { SoundGate, useGateOpen } from "./SoundGate";
 import { HeroTyper } from "./HeroTyper";
 import { TrySentence } from "./TrySentence";
 import { useLandingScroll } from "./useLandingScroll";
@@ -138,6 +139,8 @@ export function Landing(props: LandingProps) {
   useLandingMotion(scopeRef);
   useClipCalm();
   useLandingSound(scopeRef);
+  const gateInitially = useGateOpen();
+  const [gated, setGated] = useState(gateInitially);
   const soundOn = useSyncExternalStore(landingSound.subscribe, landingSound.isOn, () => true);
 
   const levelFacts = [LEVEL_FACTS.CET4, LEVEL_FACTS.CET6];
@@ -152,7 +155,8 @@ export function Landing(props: LandingProps) {
     : "还没有预约";
 
   return (
-    <main className="landing" id="top" ref={scopeRef}>
+    <main className="landing" id="top" ref={scopeRef} data-gated={gated ? "1" : undefined}>
+      {gated && <SoundGate onDone={() => setGated(false)} />}
       <header className="landing__nav">
         <div className="wrap landing__nav-inner">
           <a className="landing__brand" href="#top" aria-label="CET Typing 首页">

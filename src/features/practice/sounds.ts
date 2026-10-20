@@ -69,6 +69,31 @@ export function sharedAudioContext(): AudioContext | null {
   } catch { return null; }
 }
 
+/** Whole-lesson celebration: confetti pops, a rising major arpeggio, a bright final chord. */
+export function playCelebration(): void {
+  const ctx = sharedAudioContext();
+  if (!ctx || ctx.state !== "running") return;
+  try {
+    const t = ctx.currentTime + 0.02;
+    // First cannon pair at 0.12s: two pops and a whoosh.
+    tap(ctx, t + 0.12, 0.05, 0.07);
+    tap(ctx, t + 0.15, 0.04, 0.06);
+    tone(ctx, t + 0.12, 300, 0.22, 0.016, "sine", 1100);
+    // Arpeggio C-E-G-C-E.
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((hz, i) => {
+      tone(ctx, t + 0.1 + i * 0.085, hz, 0.28, 0.03, "triangle");
+      tone(ctx, t + 0.1 + i * 0.085, hz * 2, 0.16, 0.008, "sine");
+    });
+    // Second cannon pair at 0.65s.
+    tap(ctx, t + 0.65, 0.04, 0.06);
+    tap(ctx, t + 0.68, 0.035, 0.06);
+    tone(ctx, t + 0.65, 350, 0.18, 0.012, "sine", 1000);
+    // Final chord, with a shimmer of high notes.
+    [523.25, 659.25, 783.99, 1046.5].forEach((hz) => tone(ctx, t + 0.62, hz, 0.9, 0.022, "sine"));
+    [2093, 2637, 3136].forEach((hz, i) => tone(ctx, t + 0.78 + i * 0.07, hz, 0.3, 0.006, "sine"));
+  } catch { /* audio never blocks the page */ }
+}
+
 export function playFeedback(kind: FeedbackSound): void {
   if (typeof window === "undefined") return;
   const Audio = window.AudioContext ??

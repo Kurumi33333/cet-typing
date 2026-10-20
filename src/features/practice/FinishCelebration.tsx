@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { playFeedback, readSoundPreference } from "./sounds";
+import { playCelebration, readSoundPreference, sharedAudioContext } from "./sounds";
 
 const COLORS = ["#77a993", "#356b54", "#f2c14e", "#f08a6c", "#8fa8e8", "#bfe3d0"];
 
@@ -84,24 +84,25 @@ function useConfetti(canvasRef: React.RefObject<HTMLCanvasElement | null>, enabl
 }
 
 interface Props {
-  completed: number;
   /** Label of the one action; Enter triggers it as well. */
   actionLabel: string;
   onAction: () => void;
   reducedMotion: boolean;
 }
 
-export function FinishCelebration({ completed, actionLabel, onAction, reducedMotion }: Props) {
+export function FinishCelebration({ actionLabel, onAction, reducedMotion }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rootRef = useRef<HTMLElement>(null);
   useConfetti(canvasRef, !reducedMotion);
 
   useEffect(() => {
-    if (readSoundPreference()) {
-      playFeedback("success");
-      const id = window.setTimeout(() => playFeedback("advance"), 420);
-      return () => window.clearTimeout(id);
-    }
+    if (!readSoundPreference()) return;
+    // The practice key press already unlocked audio; wait for it to be running.
+    const ctx = sharedAudioContext();
+    if (!ctx) return;
+    let cancelled = false;
+    void ctx.resume().then(() => { if (!cancelled) playCelebration(); }).catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -109,7 +110,6 @@ export function FinishCelebration({ completed, actionLabel, onAction, reducedMot
     if (!root || reducedMotion) return;
     const ctx = gsap.context(() => {
       gsap.from(".finish__in", { opacity: 0, y: 28, duration: 0.7, ease: "power3.out", stagger: 0.12, delay: 0.05 });
-      gsap.from(".finish__chip", { scale: 0.6, opacity: 0, duration: 0.6, ease: "back.out(2.4)", delay: 0.7 });
     }, root);
     return () => ctx.revert();
   }, [reducedMotion]);
@@ -128,7 +128,6 @@ export function FinishCelebration({ completed, actionLabel, onAction, reducedMot
     <section className="finished-screen finish" aria-labelledby="finish-title" ref={rootRef}>
       <canvas className="finish__confetti" ref={canvasRef} aria-hidden="true" />
       <h2 id="finish-title" className="finish__in">很棒，<br /><em>继续保持。</em></h2>
-      <p className="finish__chip" role="status">+{completed} 步 · 今天又向前一步</p>
       <div className="choice-group finish__in">
         <button className="primary-button" type="button" autoFocus onClick={onAction}>
           {actionLabel} <kbd className="finish__key">Enter ↵</kbd>

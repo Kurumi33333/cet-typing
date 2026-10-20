@@ -531,7 +531,6 @@ export function PracticeScreen({ level, onBack, reviewExercises, startFromBeginn
     const hasNext = !reviewMode && lessonIndex + 1 < courseList.length;
     return (
       <FinishCelebration
-        completed={completed}
         reducedMotion={Boolean(reducedMotion)}
         actionLabel={hasNext ? "进入下一单元" : "返回首页"}
         onAction={hasNext ? () => switchLesson(lessonIndex + 1) : onBack}

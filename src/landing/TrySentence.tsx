@@ -138,7 +138,6 @@ export function TrySentence({
       setPhase("passed");
       setSolved((count) => count + 1);
       ping("success");
-      if (voiceOn) speakEnglish(demo.english, "sentence");
       return;
     }
     setAttempts((count) => count + 1);

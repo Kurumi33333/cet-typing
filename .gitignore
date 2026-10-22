@@ -30,3 +30,14 @@ assets/*.png
 assets/*.webm
 assets/*.mp4
 assets/*.ogv
+
+# AI tool config and local state (kept on disk, not published)
+/.claude/
+/.agents/
+/.codex/
+/.impeccable/
+/AGENTS.md
+/CLAUDE.md
+/skills-lock.json
+/.codebuffignore
+/.freebuffignore

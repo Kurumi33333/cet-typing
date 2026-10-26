@@ -1,0 +1,757 @@
+{
+ "file": "bgm-tech-house.mp3",
+ "license": "Mixkit Stock Music Free License (no attribution required)",
+ "bpm": 124.0036,
+ "T": 0.483857,
+ "fps": 30,
+ "framesPerBeat": 14.5157,
+ "source_beat0_s": 87.8411,
+ "source_end_s": 122.6788,
+ "window_s": 34.8377,
+ "n_bars": 18,
+ "total_beats": 72,
+ "total_frames": 1045,
+ "residual_ms": 11.4,
+ "beats": [
+  {
+   "beat": 0,
+   "bar": 0,
+   "beatInBar": 0,
+   "t": 0.0,
+   "frame": 0,
+   "kick": 0.885,
+   "snare": 2.683,
+   "hat": 11.096
+  },
+  {
+   "beat": 1,
+   "bar": 0,
+   "beatInBar": 1,
+   "t": 0.4839,
+   "frame": 15,
+   "kick": 0.782,
+   "snare": 3.053,
+   "hat": 10.106
+  },
+  {
+   "beat": 2,
+   "bar": 0,
+   "beatInBar": 2,
+   "t": 0.9677,
+   "frame": 29,
+   "kick": 0.725,
+   "snare": 1.723,
+   "hat": 10.532
+  },
+  {
+   "beat": 3,
+   "bar": 0,
+   "beatInBar": 3,
+   "t": 1.4516,
+   "frame": 44,
+   "kick": 0.676,
+   "snare": 2.368,
+   "hat": 12.082
+  },
+  {
+   "beat": 4,
+   "bar": 1,
+   "beatInBar": 0,
+   "t": 1.9354,
+   "frame": 58,
+   "kick": 0.676,
+   "snare": 1.74,
+   "hat": 9.698
+  },
+  {
+   "beat": 5,
+   "bar": 1,
+   "beatInBar": 1,
+   "t": 2.4193,
+   "frame": 73,
+   "kick": 0.413,
+   "snare": 3.186,
+   "hat": 13.288
+  },
+  {
+   "beat": 6,
+   "bar": 1,
+   "beatInBar": 2,
+   "t": 2.9031,
+   "frame": 87,
+   "kick": 0.637,
+   "snare": 1.401,
+   "hat": 11.143
+  },
+  {
+   "beat": 7,
+   "bar": 1,
+   "beatInBar": 3,
+   "t": 3.387,
+   "frame": 102,
+   "kick": 0.524,
+   "snare": 3.09,
+   "hat": 10.631
+  },
+  {
+   "beat": 8,
+   "bar": 2,
+   "beatInBar": 0,
+   "t": 3.8709,
+   "frame": 116,
+   "kick": 1.194,
+   "snare": 2.772,
+   "hat": 10.845
+  },
+  {
+   "beat": 9,
+   "bar": 2,
+   "beatInBar": 1,
+   "t": 4.3547,
+   "frame": 131,
+   "kick": 0.859,
+   "snare": 3.08,
+   "hat": 12.577
+  },
+  {
+   "beat": 10,
+   "bar": 2,
+   "beatInBar": 2,
+   "t": 4.8386,
+   "frame": 145,
+   "kick": 0.326,
+   "snare": 0.961,
+   "hat": 9.237
+  },
+  {
+   "beat": 11,
+   "bar": 2,
+   "beatInBar": 3,
+   "t": 5.3224,
+   "frame": 160,
+   "kick": 0.437,
+   "snare": 1.286,
+   "hat": 11.757
+  },
+  {
+   "beat": 12,
+   "bar": 3,
+   "beatInBar": 0,
+   "t": 5.8063,
+   "frame": 174,
+   "kick": 0.97,
+   "snare": 2.26,
+   "hat": 11.818
+  },
+  {
+   "beat": 13,
+   "bar": 3,
+   "beatInBar": 1,
+   "t": 6.2901,
+   "frame": 189,
+   "kick": 0.562,
+   "snare": 3.017,
+   "hat": 11.575
+  },
+  {
+   "beat": 14,
+   "bar": 3,
+   "beatInBar": 2,
+   "t": 6.774,
+   "frame": 203,
+   "kick": 0.643,
+   "snare": 1.69,
+   "hat": 10.355
+  },
+  {
+   "beat": 15,
+   "bar": 3,
+   "beatInBar": 3,
+   "t": 7.2579,
+   "frame": 218,
+   "kick": 0.328,
+   "snare": 3.462,
+   "hat": 12.375
+  },
+  {
+   "beat": 16,
+   "bar": 4,
+   "beatInBar": 0,
+   "t": 7.7417,
+   "frame": 232,
+   "kick": 0.583,
+   "snare": 1.073,
+   "hat": 10.425
+  },
+  {
+   "beat": 17,
+   "bar": 4,
+   "beatInBar": 1,
+   "t": 8.2256,
+   "frame": 247,
+   "kick": 0.456,
+   "snare": 3.059,
+   "hat": 11.799
+  },
+  {
+   "beat": 18,
+   "bar": 4,
+   "beatInBar": 2,
+   "t": 8.7094,
+   "frame": 261,
+   "kick": 0.991,
+   "snare": 1.495,
+   "hat": 11.045
+  },
+  {
+   "beat": 19,
+   "bar": 4,
+   "beatInBar": 3,
+   "t": 9.1933,
+   "frame": 276,
+   "kick": 0.312,
+   "snare": 1.921,
+   "hat": 10.957
+  },
+  {
+   "beat": 20,
+   "bar": 5,
+   "beatInBar": 0,
+   "t": 9.6771,
+   "frame": 290,
+   "kick": 0.928,
+   "snare": 1.74,
+   "hat": 9.195
+  },
+  {
+   "beat": 21,
+   "bar": 5,
+   "beatInBar": 1,
+   "t": 10.161,
+   "frame": 305,
+   "kick": 0.38,
+   "snare": 3.721,
+   "hat": 12.712
+  },
+  {
+   "beat": 22,
+   "bar": 5,
+   "beatInBar": 2,
+   "t": 10.6449,
+   "frame": 319,
+   "kick": 0.276,
+   "snare": 0.649,
+   "hat": 10.772
+  },
+  {
+   "beat": 23,
+   "bar": 5,
+   "beatInBar": 3,
+   "t": 11.1287,
+   "frame": 334,
+   "kick": 0.608,
+   "snare": 2.609,
+   "hat": 9.139
+  },
+  {
+   "beat": 24,
+   "bar": 6,
+   "beatInBar": 0,
+   "t": 11.6126,
+   "frame": 348,
+   "kick": 0.557,
+   "snare": 1.422,
+   "hat": 11.739
+  },
+  {
+   "beat": 25,
+   "bar": 6,
+   "beatInBar": 1,
+   "t": 12.0964,
+   "frame": 363,
+   "kick": 0.895,
+   "snare": 3.432,
+   "hat": 11.123
+  },
+  {
+   "beat": 26,
+   "bar": 6,
+   "beatInBar": 2,
+   "t": 12.5803,
+   "frame": 377,
+   "kick": 0.645,
+   "snare": 1.287,
+   "hat": 8.862
+  },
+  {
+   "beat": 27,
+   "bar": 6,
+   "beatInBar": 3,
+   "t": 13.0641,
+   "frame": 392,
+   "kick": 0.283,
+   "snare": 1.806,
+   "hat": 11.383
+  },
+  {
+   "beat": 28,
+   "bar": 7,
+   "beatInBar": 0,
+   "t": 13.548,
+   "frame": 406,
+   "kick": 0.423,
+   "snare": 1.48,
+   "hat": 10.954
+  },
+  {
+   "beat": 29,
+   "bar": 7,
+   "beatInBar": 1,
+   "t": 14.0318,
+   "frame": 421,
+   "kick": 0.805,
+   "snare": 2.912,
+   "hat": 10.591
+  },
+  {
+   "beat": 30,
+   "bar": 7,
+   "beatInBar": 2,
+   "t": 14.5157,
+   "frame": 435,
+   "kick": 0.694,
+   "snare": 2.965,
+   "hat": 11.242
+  },
+  {
+   "beat": 31,
+   "bar": 7,
+   "beatInBar": 3,
+   "t": 14.9996,
+   "frame": 450,
+   "kick": 0.902,
+   "snare": 3.514,
+   "hat": 10.977
+  },
+  {
+   "beat": 32,
+   "bar": 8,
+   "beatInBar": 0,
+   "t": 15.4834,
+   "frame": 465,
+   "kick": 0.998,
+   "snare": 2.514,
+   "hat": 10.186
+  },
+  {
+   "beat": 33,
+   "bar": 8,
+   "beatInBar": 1,
+   "t": 15.9673,
+   "frame": 479,
+   "kick": 0.552,
+   "snare": 2.945,
+   "hat": 10.994
+  },
+  {
+   "beat": 34,
+   "bar": 8,
+   "beatInBar": 2,
+   "t": 16.4511,
+   "frame": 494,
+   "kick": 1.087,
+   "snare": 1.828,
+   "hat": 10.889
+  },
+  {
+   "beat": 35,
+   "bar": 8,
+   "beatInBar": 3,
+   "t": 16.935,
+   "frame": 508,
+   "kick": 0.498,
+   "snare": 1.903,
+   "hat": 9.434
+  },
+  {
+   "beat": 36,
+   "bar": 9,
+   "beatInBar": 0,
+   "t": 17.4188,
+   "frame": 523,
+   "kick": 0.556,
+   "snare": 1.837,
+   "hat": 10.904
+  },
+  {
+   "beat": 37,
+   "bar": 9,
+   "beatInBar": 1,
+   "t": 17.9027,
+   "frame": 537,
+   "kick": 0.58,
+   "snare": 3.391,
+   "hat": 11.979
+  },
+  {
+   "beat": 38,
+   "bar": 9,
+   "beatInBar": 2,
+   "t": 18.3866,
+   "frame": 552,
+   "kick": 0.384,
+   "snare": 2.105,
+   "hat": 10.207
+  },
+  {
+   "beat": 39,
+   "bar": 9,
+   "beatInBar": 3,
+   "t": 18.8704,
+   "frame": 566,
+   "kick": 0.144,
+   "snare": 3.551,
+   "hat": 11.407
+  },
+  {
+   "beat": 40,
+   "bar": 10,
+   "beatInBar": 0,
+   "t": 19.3543,
+   "frame": 581,
+   "kick": 0.522,
+   "snare": 2.16,
+   "hat": 10.625
+  },
+  {
+   "beat": 41,
+   "bar": 10,
+   "beatInBar": 1,
+   "t": 19.8381,
+   "frame": 595,
+   "kick": 0.726,
+   "snare": 3.139,
+   "hat": 10.164
+  },
+  {
+   "beat": 42,
+   "bar": 10,
+   "beatInBar": 2,
+   "t": 20.322,
+   "frame": 610,
+   "kick": 0.52,
+   "snare": 1.413,
+   "hat": 10.41
+  },
+  {
+   "beat": 43,
+   "bar": 10,
+   "beatInBar": 3,
+   "t": 20.8058,
+   "frame": 624,
+   "kick": 0.299,
+   "snare": 1.589,
+   "hat": 11.785
+  },
+  {
+   "beat": 44,
+   "bar": 11,
+   "beatInBar": 0,
+   "t": 21.2897,
+   "frame": 639,
+   "kick": 0.661,
+   "snare": 1.952,
+   "hat": 10.026
+  },
+  {
+   "beat": 45,
+   "bar": 11,
+   "beatInBar": 1,
+   "t": 21.7736,
+   "frame": 653,
+   "kick": 0.445,
+   "snare": 2.649,
+   "hat": 12.435
+  },
+  {
+   "beat": 46,
+   "bar": 11,
+   "beatInBar": 2,
+   "t": 22.2574,
+   "frame": 668,
+   "kick": 0.967,
+   "snare": 3.576,
+   "hat": 11.184
+  },
+  {
+   "beat": 47,
+   "bar": 11,
+   "beatInBar": 3,
+   "t": 22.7413,
+   "frame": 682,
+   "kick": 0.389,
+   "snare": 3.049,
+   "hat": 10.757
+  },
+  {
+   "beat": 48,
+   "bar": 12,
+   "beatInBar": 0,
+   "t": 23.2251,
+   "frame": 697,
+   "kick": 0.54,
+   "snare": 1.85,
+   "hat": 10.082
+  },
+  {
+   "beat": 49,
+   "bar": 12,
+   "beatInBar": 1,
+   "t": 23.709,
+   "frame": 711,
+   "kick": 0.31,
+   "snare": 2.833,
+   "hat": 13.032
+  },
+  {
+   "beat": 50,
+   "bar": 12,
+   "beatInBar": 2,
+   "t": 24.1928,
+   "frame": 726,
+   "kick": 1.001,
+   "snare": 1.684,
+   "hat": 9.649
+  },
+  {
+   "beat": 51,
+   "bar": 12,
+   "beatInBar": 3,
+   "t": 24.6767,
+   "frame": 740,
+   "kick": 0.284,
+   "snare": 1.651,
+   "hat": 11.245
+  },
+  {
+   "beat": 52,
+   "bar": 13,
+   "beatInBar": 0,
+   "t": 25.1606,
+   "frame": 755,
+   "kick": 0.489,
+   "snare": 1.701,
+   "hat": 11.559
+  },
+  {
+   "beat": 53,
+   "bar": 13,
+   "beatInBar": 1,
+   "t": 25.6444,
+   "frame": 769,
+   "kick": 0.453,
+   "snare": 3.046,
+   "hat": 11.806
+  },
+  {
+   "beat": 54,
+   "bar": 13,
+   "beatInBar": 2,
+   "t": 26.1283,
+   "frame": 784,
+   "kick": 0.905,
+   "snare": 2.155,
+   "hat": 8.809
+  },
+  {
+   "beat": 55,
+   "bar": 13,
+   "beatInBar": 3,
+   "t": 26.6121,
+   "frame": 798,
+   "kick": 0.324,
+   "snare": 4.177,
+   "hat": 12.96
+  },
+  {
+   "beat": 56,
+   "bar": 14,
+   "beatInBar": 0,
+   "t": 27.096,
+   "frame": 813,
+   "kick": 0.662,
+   "snare": 3.127,
+   "hat": 10.896
+  },
+  {
+   "beat": 57,
+   "bar": 14,
+   "beatInBar": 1,
+   "t": 27.5798,
+   "frame": 827,
+   "kick": 0.58,
+   "snare": 2.678,
+   "hat": 9.448
+  },
+  {
+   "beat": 58,
+   "bar": 14,
+   "beatInBar": 2,
+   "t": 28.0637,
+   "frame": 842,
+   "kick": 0.378,
+   "snare": 1.22,
+   "hat": 11.116
+  },
+  {
+   "beat": 59,
+   "bar": 14,
+   "beatInBar": 3,
+   "t": 28.5476,
+   "frame": 856,
+   "kick": 0.075,
+   "snare": 1.725,
+   "hat": 11.61
+  },
+  {
+   "beat": 60,
+   "bar": 15,
+   "beatInBar": 0,
+   "t": 29.0314,
+   "frame": 871,
+   "kick": 1.236,
+   "snare": 2.652,
+   "hat": 9.122
+  },
+  {
+   "beat": 61,
+   "bar": 15,
+   "beatInBar": 1,
+   "t": 29.5153,
+   "frame": 885,
+   "kick": 0.267,
+   "snare": 2.892,
+   "hat": 13.57
+  },
+  {
+   "beat": 62,
+   "bar": 15,
+   "beatInBar": 2,
+   "t": 29.9991,
+   "frame": 900,
+   "kick": 1.429,
+   "snare": 3.462,
+   "hat": 11.254
+  },
+  {
+   "beat": 63,
+   "bar": 15,
+   "beatInBar": 3,
+   "t": 30.483,
+   "frame": 914,
+   "kick": 0.703,
+   "snare": 2.887,
+   "hat": 9.768
+  },
+  {
+   "beat": 64,
+   "bar": 16,
+   "beatInBar": 0,
+   "t": 30.9668,
+   "frame": 929,
+   "kick": 0.781,
+   "snare": 2.235,
+   "hat": 10.604
+  },
+  {
+   "beat": 65,
+   "bar": 16,
+   "beatInBar": 1,
+   "t": 31.4507,
+   "frame": 944,
+   "kick": 0.279,
+   "snare": 2.523,
+   "hat": 12.373
+  },
+  {
+   "beat": 66,
+   "bar": 16,
+   "beatInBar": 2,
+   "t": 31.9346,
+   "frame": 958,
+   "kick": 0.862,
+   "snare": 1.698,
+   "hat": 9.522
+  },
+  {
+   "beat": 67,
+   "bar": 16,
+   "beatInBar": 3,
+   "t": 32.4184,
+   "frame": 973,
+   "kick": 0.274,
+   "snare": 1.592,
+   "hat": 12.716
+  },
+  {
+   "beat": 68,
+   "bar": 17,
+   "beatInBar": 0,
+   "t": 32.9023,
+   "frame": 987,
+   "kick": 1.125,
+   "snare": 2.475,
+   "hat": 11.383
+  },
+  {
+   "beat": 69,
+   "bar": 17,
+   "beatInBar": 1,
+   "t": 33.3861,
+   "frame": 1002,
+   "kick": 0.125,
+   "snare": 2.063,
+   "hat": 10.62
+  },
+  {
+   "beat": 70,
+   "bar": 17,
+   "beatInBar": 2,
+   "t": 33.87,
+   "frame": 1016,
+   "kick": 0.681,
+   "snare": 2.757,
+   "hat": 10.781
+  },
+  {
+   "beat": 71,
+   "bar": 17,
+   "beatInBar": 3,
+   "t": 34.3538,
+   "frame": 1031,
+   "kick": 0.283,
+   "snare": 3.215,
+   "hat": 12.318
+  }
+ ],
+ "rms_bars": [
+  0.1516,
+  0.144,
+  0.1657,
+  0.1342,
+  0.1641,
+  0.1387,
+  0.1641,
+  0.1482,
+  0.1597,
+  0.15,
+  0.1763,
+  0.1722,
+  0.1713,
+  0.1662,
+  0.1973,
+  0.2147,
+  0.2242,
+  0.2598
+ ]
+}

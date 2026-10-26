@@ -1,0 +1,31 @@
+{
+ "video": "promo-bgm.mp4",
+ "frames": 1103,
+ "mean_delta": 572.258,
+ "events": [
+  {
+   "frame": 232,
+   "delta_mu": 4497.48,
+   "neighbour_mu": 96.7,
+   "ratio": 46.5
+  },
+  {
+   "frame": 435,
+   "delta_mu": 4765.96,
+   "neighbour_mu": 96.67,
+   "ratio": 49.3
+  },
+  {
+   "frame": 885,
+   "delta_mu": 915.27,
+   "neighbour_mu": 64.6,
+   "ratio": 14.2
+  },
+  {
+   "frame": 1078,
+   "delta_mu": 245.0,
+   "neighbour_mu": 47.78,
+   "ratio": 5.1
+  }
+ ]
+}

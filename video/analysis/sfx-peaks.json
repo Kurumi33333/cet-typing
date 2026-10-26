@@ -1,0 +1,134 @@
+{
+ "camera-shutter-vintage.mp3": {
+  "duration_s": 1.159,
+  "peak_at_s": 0.118,
+  "onset_at_s": 0.1,
+  "peak_db": -2.4
+ },
+ "clock-tick-single.mp3": {
+  "duration_s": 0.849,
+  "peak_at_s": 0.457,
+  "onset_at_s": 0.177,
+  "peak_db": -12.6
+ },
+ "hit-weak.mp3": {
+  "duration_s": 0.591,
+  "peak_at_s": 0.15,
+  "onset_at_s": 0.111,
+  "peak_db": -2.8
+ },
+ "impact-cine-big.mp3": {
+  "duration_s": 7.929,
+  "peak_at_s": 2.172,
+  "onset_at_s": 1.88,
+  "peak_db": 2.5
+ },
+ "impact-deep-whoosh.mp3": {
+  "duration_s": 4.063,
+  "peak_at_s": 0.551,
+  "onset_at_s": 0.349,
+  "peak_db": 2.1
+ },
+ "marker-pen-line.mp3": {
+  "duration_s": 1.24,
+  "peak_at_s": 0.047,
+  "onset_at_s": 0.009,
+  "peak_db": -9.6
+ },
+ "paper-slide.mp3": {
+  "duration_s": 1.094,
+  "peak_at_s": 0.357,
+  "onset_at_s": 0.172,
+  "peak_db": 2.5
+ },
+ "paper-staple.mp3": {
+  "duration_s": 1.154,
+  "peak_at_s": 0.055,
+  "onset_at_s": 0.0,
+  "peak_db": 0.5
+ },
+ "pop.mp3": {
+  "duration_s": 0.479,
+  "peak_at_s": 0.034,
+  "onset_at_s": 0.023,
+  "peak_db": 0.9
+ },
+ "riser-cine.mp3": {
+  "duration_s": 4.809,
+  "peak_at_s": 1.042,
+  "onset_at_s": 0.389,
+  "peak_db": 2.9
+ },
+ "sparkle-touch.mp3": {
+  "duration_s": 2.333,
+  "peak_at_s": 0.475,
+  "onset_at_s": 0.443,
+  "peak_db": -3.8
+ },
+ "sparkle.mp3": {
+  "duration_s": 4.549,
+  "peak_at_s": 1.455,
+  "onset_at_s": 1.227,
+  "peak_db": -6.9
+ },
+ "stardust-swish.mp3": {
+  "duration_s": 4.804,
+  "peak_at_s": 0.977,
+  "onset_at_s": 0.485,
+  "peak_db": -1.5
+ },
+ "switch-light.mp3": {
+  "duration_s": 0.167,
+  "peak_at_s": 0.063,
+  "onset_at_s": 0.011,
+  "peak_db": -7.9
+ },
+ "swoosh-quick.mp3": {
+  "duration_s": 0.781,
+  "peak_at_s": 0.296,
+  "onset_at_s": 0.203,
+  "peak_db": -0.9
+ },
+ "transition-soft.mp3": {
+  "duration_s": 1.275,
+  "peak_at_s": 0.435,
+  "onset_at_s": 0.334,
+  "peak_db": 1.9
+ },
+ "typewriter-hit-hard.mp3": {
+  "duration_s": 1.101,
+  "peak_at_s": 0.036,
+  "onset_at_s": 0.025,
+  "peak_db": 2.0
+ },
+ "typewriter-hit-single.mp3": {
+  "duration_s": 0.705,
+  "peak_at_s": 0.171,
+  "onset_at_s": 0.111,
+  "peak_db": -0.4
+ },
+ "typewriter-hit-soft.mp3": {
+  "duration_s": 0.534,
+  "peak_at_s": 0.141,
+  "onset_at_s": 0.131,
+  "peak_db": -0.7
+ },
+ "typewriter-return-bell.mp3": {
+  "duration_s": 1.788,
+  "peak_at_s": 0.666,
+  "onset_at_s": 0.121,
+  "peak_db": -1.0
+ },
+ "ui-zoom-in.mp3": {
+  "duration_s": 0.657,
+  "peak_at_s": 0.113,
+  "onset_at_s": 0.1,
+  "peak_db": -12.8
+ },
+ "whoosh-fast.mp3": {
+  "duration_s": 1.757,
+  "peak_at_s": 0.713,
+  "onset_at_s": 0.572,
+  "peak_db": -3.3
+ }
+}

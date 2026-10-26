@@ -1,0 +1,118 @@
+{
+ "pins": [
+  {
+   "frame": 8,
+   "src": "marker-pen-line.mp3",
+   "over_db": 15.6,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "S1 \u00b7 the first rule is drawn on empty paper"
+  },
+  {
+   "frame": 146,
+   "src": "impact-deep-whoosh.mp3",
+   "over_db": 16.6,
+   "needed_db": 14.0,
+   "reads": true,
+   "note": "S1 \u00b7 the sentence completes (SLAM #1)"
+  },
+  {
+   "frame": 149,
+   "src": "typewriter-return-bell.mp3",
+   "over_db": 11.5,
+   "needed_db": 7.0,
+   "reads": true,
+   "note": "S1 \u00b7 the sentence closes with a bell"
+  },
+  {
+   "frame": 233,
+   "src": "paper-slide.mp3",
+   "over_db": 18.1,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "C1 \u00b7 a sheet is set down"
+  },
+  {
+   "frame": 290,
+   "src": "paper-slide.mp3",
+   "over_db": 13.1,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "S2 \u00b7 cut into the page"
+  },
+  {
+   "frame": 316,
+   "src": "marker-pen-line.mp3",
+   "over_db": 12.0,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "S2 \u00b7 the tier is underlined with a pen"
+  },
+  {
+   "frame": 374,
+   "src": "clock-mech-retract.mp3",
+   "over_db": 15.1,
+   "needed_db": 9.0,
+   "reads": true,
+   "note": "S2 \u00b7 12 \u5355\u5143 lands"
+  },
+  {
+   "frame": 384,
+   "src": "clock-mech-retract.mp3",
+   "over_db": 9.9,
+   "needed_db": 9.0,
+   "reads": true,
+   "note": "S2 \u00b7 120 \u6b65"
+  },
+  {
+   "frame": 394,
+   "src": "clock-mech-retract.mp3",
+   "over_db": 11.7,
+   "needed_db": 9.0,
+   "reads": true,
+   "note": "S2 \u00b7 8,534 \u8bcd"
+  },
+  {
+   "frame": 436,
+   "src": "paper-slide.mp3",
+   "over_db": 16.7,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "C2 \u00b7 a sheet is set down"
+  },
+  {
+   "frame": 756,
+   "src": "paper-slide.mp3",
+   "over_db": 14.3,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "C3 \u00b7 a sheet is set down"
+  },
+  {
+   "frame": 815,
+   "src": "paper-slide.mp3",
+   "over_db": 12.8,
+   "needed_db": 8.0,
+   "reads": true,
+   "note": "S4 \u00b7 cut into the dark field"
+  },
+  {
+   "frame": 825,
+   "src": "clock-mech-retract.mp3",
+   "over_db": 13.1,
+   "needed_db": 9.0,
+   "reads": true,
+   "note": "S4 \u00b7 the due count rolls"
+  },
+  {
+   "frame": 929,
+   "src": "riser-cine.mp3",
+   "over_db": 11.9,
+   "needed_db": 7.0,
+   "reads": true,
+   "note": "S5 \u00b7 the assembly is lifted"
+  }
+ ],
+ "buried": 0,
+ "total": 14
+}

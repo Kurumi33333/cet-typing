@@ -1,0 +1,26 @@
+{
+  "name": "cet-typing-promo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CET Typing promo film — Remotion project (self-contained; nothing outside this folder is touched)",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts CetTypingPromo",
+    "render": "remotion render src/index.ts CetTypingPromo out/promo.mp4",
+    "render:nobgm": "remotion render src/index.ts CetTypingPromo out/promo-nobgm.mp4 --props=props-nobgm.json",
+    "capture": "node scripts/capture.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.538",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.538"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "puppeteer-core": "25.16.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,117 @@
+{
+ "camera-shutter-vintage.mp3": {
+  "rms_out_db": -21.4,
+  "peak_out_db": -3.9,
+  "gain": 2.119
+ },
+ "clock-mech-retract.mp3": {
+  "rms_out_db": -19.1,
+  "peak_out_db": -5.1,
+  "gain": 2.119
+ },
+ "clock-tick-single.mp3": {
+  "rms_out_db": -21.9,
+  "peak_out_db": -4.4,
+  "gain": 6.852
+ },
+ "hit-weak.mp3": {
+  "rms_out_db": -18.5,
+  "peak_out_db": -6.4,
+  "gain": 0.845
+ },
+ "impact-cine-big.mp3": {
+  "rms_out_db": -18.4,
+  "peak_out_db": -8.8,
+  "gain": 0.285
+ },
+ "impact-deep-whoosh.mp3": {
+  "rms_out_db": -18.4,
+  "peak_out_db": -9.8,
+  "gain": 0.266
+ },
+ "marker-pen-line.mp3": {
+  "rms_out_db": -18.8,
+  "peak_out_db": -6.2,
+  "gain": 1.474
+ },
+ "paper-slide.mp3": {
+  "rms_out_db": -23.2,
+  "peak_out_db": -5.4,
+  "gain": 2.304
+ },
+ "paper-staple.mp3": {
+  "rms_out_db": -22.6,
+  "peak_out_db": -3.7,
+  "gain": 1.599
+ },
+ "pop.mp3": {
+  "rms_out_db": -21.5,
+  "peak_out_db": -6.3,
+  "gain": 0.972
+ },
+ "riser-cine.mp3": {
+  "rms_out_db": -18.4,
+  "peak_out_db": -12.0,
+  "gain": 0.19
+ },
+ "sparkle-touch.mp3": {
+  "rms_out_db": -19.0,
+  "peak_out_db": -5.7,
+  "gain": 1.003
+ },
+ "sparkle.mp3": {
+  "rms_out_db": -18.9,
+  "peak_out_db": -5.6,
+  "gain": 1.731
+ },
+ "stardust-swish.mp3": {
+  "rms_out_db": -18.4,
+  "peak_out_db": -6.3,
+  "gain": 0.667
+ },
+ "switch-light.mp3": {
+  "rms_out_db": -20.9,
+  "peak_out_db": -5.5,
+  "gain": 3.663
+ },
+ "swoosh-quick.mp3": {
+  "rms_out_db": -18.5,
+  "peak_out_db": -6.5,
+  "gain": 0.641
+ },
+ "transition-soft.mp3": {
+  "rms_out_db": -18.8,
+  "peak_out_db": -6.1,
+  "gain": 0.696
+ },
+ "typewriter-hit-hard.mp3": {
+  "rms_out_db": -20.3,
+  "peak_out_db": -5.7,
+  "gain": 1.519
+ },
+ "typewriter-hit-single.mp3": {
+  "rms_out_db": -21.1,
+  "peak_out_db": -4.8,
+  "gain": 1.954
+ },
+ "typewriter-hit-soft.mp3": {
+  "rms_out_db": -22.0,
+  "peak_out_db": -4.6,
+  "gain": 3.266
+ },
+ "typewriter-return-bell.mp3": {
+  "rms_out_db": -18.9,
+  "peak_out_db": -3.4,
+  "gain": 1.623
+ },
+ "ui-zoom-in.mp3": {
+  "rms_out_db": -20.5,
+  "peak_out_db": -5.5,
+  "gain": 3.444
+ },
+ "whoosh-fast.mp3": {
+  "rms_out_db": -18.9,
+  "peak_out_db": -5.5,
+  "gain": 1.231
+ }
+}

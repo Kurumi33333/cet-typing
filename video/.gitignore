@@ -1,0 +1,18 @@
+node_modules/
+out/
+.DS_Store
+*.log
+
+# keep the deliverables and the captured product textures; drop intermediates
+out/qa/
+!out/promo-bgm.mp4
+!out/promo-nobgm.mp4
+
+# process docs and superseded / regenerable audio (analysis/compose-bgm*.py rebuilds the scores)
+DESIGN.md
+REVIEW-self.md
+FREEZE.txt
+public/audio/hifi/bgm.wav
+public/audio/hifi/bgm-keynote.wav
+public/audio/hifi/bgm-keynote-eq.wav
+public/audio/hifi/bgm-v4.wav

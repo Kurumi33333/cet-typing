@@ -1,0 +1,12 @@
+{
+ "video": "_full23.mp4",
+ "frames": 1103,
+ "median_delta": 0.405,
+ "stalled_share": 0.0027,
+ "longest_stall": 2,
+ "jerk_p99": 0.7159,
+ "jerk_max": 2.4434,
+ "worst_flip_px": 10401,
+ "worst_flip_frame": 245,
+ "verdict": "NOT SMOOTH YET"
+}

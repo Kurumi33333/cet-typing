@@ -1,0 +1,125 @@
+{
+ "pins": [
+  {
+   "label": "S1 rule draws",
+   "frame": 8,
+   "bgm_db": -28.3,
+   "sfx_db": -37.0
+  },
+  {
+   "label": "S1 letters",
+   "frame": 118,
+   "bgm_db": -28.3,
+   "sfx_db": -41.3
+  },
+  {
+   "label": "S1 sentence completes",
+   "frame": 196,
+   "bgm_db": -14.4,
+   "sfx_db": -14.6
+  },
+  {
+   "label": "C1 card press",
+   "frame": 233,
+   "bgm_db": -26.9,
+   "sfx_db": -34.3
+  },
+  {
+   "label": "S2 page cut",
+   "frame": 290,
+   "bgm_db": -23.2,
+   "sfx_db": -27.6
+  },
+  {
+   "label": "S2 tier 1",
+   "frame": 316,
+   "bgm_db": -27.5,
+   "sfx_db": -46.8
+  },
+  {
+   "label": "S2 stat 1",
+   "frame": 386,
+   "bgm_db": -22.3,
+   "sfx_db": -44.4
+  },
+  {
+   "label": "C2 card press",
+   "frame": 436,
+   "bgm_db": -26.5,
+   "sfx_db": -34.3
+  },
+  {
+   "label": "S3 page handover",
+   "frame": 498,
+   "bgm_db": -22.0,
+   "sfx_db": -28.8
+  },
+  {
+   "label": "S3 word lands",
+   "frame": 558,
+   "bgm_db": -26.8,
+   "sfx_db": -44.8
+  },
+  {
+   "label": "S3 orb walks",
+   "frame": 722,
+   "bgm_db": -24.8,
+   "sfx_db": -33.4
+  },
+  {
+   "label": "S3 page advances",
+   "frame": 742,
+   "bgm_db": -24.4,
+   "sfx_db": -36.5
+  },
+  {
+   "label": "C3 card press",
+   "frame": 756,
+   "bgm_db": -24.1,
+   "sfx_db": -34.3
+  },
+  {
+   "label": "S4 dark field",
+   "frame": 815,
+   "bgm_db": -22.7,
+   "sfx_db": -27.2
+  },
+  {
+   "label": "S4 due count",
+   "frame": 833,
+   "bgm_db": -24.2,
+   "sfx_db": -44.8
+  },
+  {
+   "label": "S4 163 days",
+   "frame": 907,
+   "bgm_db": -22.3,
+   "sfx_db": -55.9
+  },
+  {
+   "label": "S5 riser",
+   "frame": 929,
+   "bgm_db": -15.3,
+   "sfx_db": -17.0
+  },
+  {
+   "label": "S5 wordmark stamp",
+   "frame": 1003,
+   "bgm_db": -14.0,
+   "sfx_db": -14.6
+  },
+  {
+   "label": "S5 rule draws",
+   "frame": 1029,
+   "bgm_db": -23.0,
+   "sfx_db": -27.9
+  },
+  {
+   "label": "S5 sparkle",
+   "frame": 1041,
+   "bgm_db": -21.2,
+   "sfx_db": -30.0
+  }
+ ],
+ "bgm_floor_db": -21.8
+}

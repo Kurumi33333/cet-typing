@@ -1,0 +1,166 @@
+{
+ "pins": [
+  {
+   "label": "S1 rule draw",
+   "frame": 8,
+   "sfx_db": -25.5,
+   "bed_db": -31.8,
+   "snr_db": 6.3,
+   "reads": true
+  },
+  {
+   "label": "S1 sentence complete (SLAM 1)",
+   "frame": 196,
+   "sfx_db": -19.3,
+   "bed_db": -30.9,
+   "snr_db": 11.6,
+   "reads": true
+  },
+  {
+   "label": "S1 last slot locks",
+   "frame": 199,
+   "sfx_db": -24.7,
+   "bed_db": -31.5,
+   "snr_db": 6.7,
+   "reads": true
+  },
+  {
+   "label": "C1 card press",
+   "frame": 233,
+   "sfx_db": -24.9,
+   "bed_db": -32.1,
+   "snr_db": 7.2,
+   "reads": true
+  },
+  {
+   "label": "S2 page cut",
+   "frame": 290,
+   "sfx_db": -23.9,
+   "bed_db": -29.4,
+   "snr_db": 5.5,
+   "reads": false
+  },
+  {
+   "label": "S2 stat 1",
+   "frame": 370,
+   "sfx_db": -27.6,
+   "bed_db": -29.2,
+   "snr_db": 1.6,
+   "reads": false
+  },
+  {
+   "label": "C2 card press",
+   "frame": 436,
+   "sfx_db": -24.9,
+   "bed_db": -31.2,
+   "snr_db": 6.2,
+   "reads": true
+  },
+  {
+   "label": "S3 page handover",
+   "frame": 500,
+   "sfx_db": -27.4,
+   "bed_db": -26.7,
+   "snr_db": -0.6,
+   "reads": false
+  },
+  {
+   "label": "S3 WRONG word marked red",
+   "frame": 560,
+   "sfx_db": -20.5,
+   "bed_db": -32.0,
+   "snr_db": 11.5,
+   "reads": true
+  },
+  {
+   "label": "S3 caret returns",
+   "frame": 670,
+   "sfx_db": -29.2,
+   "bed_db": -28.4,
+   "snr_db": -0.7,
+   "reads": false
+  },
+  {
+   "label": "S3 fix lands",
+   "frame": 696,
+   "sfx_db": -26.4,
+   "bed_db": -29.6,
+   "snr_db": 3.2,
+   "reads": false
+  },
+  {
+   "label": "S3 energy orb",
+   "frame": 706,
+   "sfx_db": -25.0,
+   "bed_db": -29.5,
+   "snr_db": 4.5,
+   "reads": false
+  },
+  {
+   "label": "C3 card press",
+   "frame": 756,
+   "sfx_db": -24.9,
+   "bed_db": -28.8,
+   "snr_db": 3.9,
+   "reads": false
+  },
+  {
+   "label": "S4 dark field cut",
+   "frame": 815,
+   "sfx_db": -27.0,
+   "bed_db": -29.0,
+   "snr_db": 2.0,
+   "reads": false
+  },
+  {
+   "label": "S4 interval 1",
+   "frame": 851,
+   "sfx_db": -26.5,
+   "bed_db": -27.3,
+   "snr_db": 0.8,
+   "reads": false
+  },
+  {
+   "label": "S4 interval 4",
+   "frame": 899,
+   "sfx_db": -28.0,
+   "bed_db": -24.4,
+   "snr_db": -3.6,
+   "reads": false
+  },
+  {
+   "label": "S5 riser",
+   "frame": 929,
+   "sfx_db": -25.7,
+   "bed_db": -23.1,
+   "snr_db": -2.6,
+   "reads": false
+  },
+  {
+   "label": "S5 WORDMARK STAMP (SLAM 2)",
+   "frame": 1003,
+   "sfx_db": -21.0,
+   "bed_db": -25.2,
+   "snr_db": 4.2,
+   "reads": false
+  },
+  {
+   "label": "S5 rule draws",
+   "frame": 1029,
+   "sfx_db": -24.8,
+   "bed_db": -27.7,
+   "snr_db": 2.9,
+   "reads": false
+  },
+  {
+   "label": "S5 sparkle",
+   "frame": 1041,
+   "sfx_db": -25.1,
+   "bed_db": -24.8,
+   "snr_db": -0.3,
+   "reads": false
+  }
+ ],
+ "buried": 14,
+ "total": 20
+}

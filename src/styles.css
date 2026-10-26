@@ -37,7 +37,6 @@ h1 em { color: #7ba995; font-style: normal; }
 .secondary-button:hover { background: #e2ece2; }
 .primary-button:disabled { opacity: .4; cursor: not-allowed; }
 .primary-button:not(:disabled):active, .secondary-button:active { transform: translateY(1px); }
-.demo-note { font-size: 12px; color: #829087; margin-top: 22px; }
 .practice-main { flex: 1; display: flex; flex-direction: column; padding: 28px 0 58px; }
 .practice-area { width: 100%; max-width: 850px; margin: 0 auto; }
 .practice-topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 12px; color: #708077; }
@@ -169,36 +168,10 @@ h1 em { color: #7ba995; font-style: normal; }
   .slot-actions { gap: 10px 17px; }
 }
 
-/* Study v0.4 · quiet saved progress and error review entrance */
-.review-entry { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; max-width: 540px; margin: 27px 0 22px; padding: 19px 0 2px; border-top: 1px solid #dde7df; }
-.review-entry-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; color: #456453; }
-.review-entry-heading strong { font-size: 14px; font-weight: 650; }
-.review-entry-heading span { color: #86938b; font-size: 12px; line-height: 1.7; }
-.review-entry-actions { display: flex; gap: 10px; }
-.review-entry-button { border: 1px solid #d7e5da; background: #edf4ee; color: #456e56; border-radius: 12px; padding: 10px 13px; display: inline-flex; gap: 13px; align-items: center; font-size: 13px; cursor: pointer; }
-.review-entry-button:hover:not(:disabled) { background: #e1eee3; }
-.review-entry-button:disabled { opacity: .5; cursor: not-allowed; }
-.review-count { min-width: 24px; padding: 2px 6px; text-align: center; background: #dce9df; border-radius: 8px; font-variant-numeric: tabular-nums; font-size: 12px; }
+/* Study v0.4 · quiet saved progress notice */
 .storage-warning { margin: 12px auto; padding: 11px 14px; max-width: 570px; background: #fbf0e6; color: #9b5c35; border-radius: 10px; font-size: 13px; line-height: 1.7; }
-@media (max-width: 560px) { .review-entry { margin-top: 22px; }.review-entry-heading span { display: block; } }
-
-/* Explicit, local-only data portability tools. */
-.data-tools { display:flex; flex-wrap:wrap; gap:12px 15px; align-items:center; max-width:570px; padding-top:14px; border-top:1px solid #e2e9e3; }
-.data-tools span { font-size:12px; font-weight:650; color:#63786a; margin-right:4px; }
-.data-tools button { padding:6px 0; border:0; background:transparent; font-size:12px; cursor:pointer; color:#52765e; }
-.data-tools button:hover:not(:disabled) { text-decoration:underline; text-underline-offset:4px; }
-.data-tools button:disabled { opacity:.4; cursor:wait; }
-.data-tools .danger-text { color:#ad7770; }
 
 /* V0.5: reference wordbook is separate from verified progressive lessons. */
-.lexicon-entry { margin: 24px 0 18px; padding: 17px 0; border-top: 1px solid #dce7df; max-width: 580px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-.lexicon-entry-copy { display:flex; flex-direction:column; gap:6px; }
-.lexicon-entry-copy strong { color:#486c55; font-size:14px; font-weight:660; }
-.lexicon-entry-copy span { font-size:12px; color:#809486; line-height:1.6; }
-.lexicon-entry-actions { display:flex; gap:11px; flex-wrap:wrap; }
-.lexicon-entry-actions button { cursor:pointer; border:1px solid #dbe7dd; border-radius:999px; padding:8px 12px; color:#526b57; background:#f0f5f1; font-size:12px; }
-.lexicon-entry-actions button:hover { background:#e1eee4; }
-.review-future { font-size:12px; color:#82988a; margin:0; }
 .lexicon-page { padding:35px 0 75px; width:100%; max-width:800px; margin:0 auto; flex:1; }
 .lexicon-page .eyebrow { margin-top:42px; }
 .lexicon-page h1 { font-size:clamp(36px,5.2vw,54px); font-weight:650; letter-spacing:-.05em; margin:18px 0; }
@@ -223,44 +196,17 @@ h1 em { color: #7ba995; font-style: normal; }
 @media (max-width: 560px) { .lexicon-page { padding-top:18px; } .lexicon-page .eyebrow { margin-top:28px; } .lexicon-result > span { max-width:100%; } }
 
 
-/* Visual reduction 01 · make practice the only primary action on home. */
+/* Visual reduction 01 · the app's shared shell typography. */
 .main-content { padding: clamp(46px, 7vw, 84px) 0 52px; }
-.home-kicker { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .11em; color: #779786; }
 .main-content h1 { margin: 21px 0 12px; }
 .main-content .intro { max-width: 460px; font-size: clamp(14px, 1.8vw, 17px); line-height: 1.85; margin: 0; }
 .main-content .choice-group { margin-top: 32px; gap: 12px; }
-.home-course { width: clamp(218px, 24vw, 260px); min-height: 80px; padding: 15px 19px; justify-content: space-between; text-align: left; gap: 14px; border-radius: 14px; }
-.home-course-copy { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-.home-course-copy strong { font-size: 15px; line-height: 1.2; font-weight: 660; }
-.home-course-copy small { font-size: 11px; font-weight: 430; opacity: .75; line-height: 1.4; }
-.home-course > span:last-child { font-size: 16px; font-weight: 400; }
-.main-content .review-entry { margin: 32px 0 0; padding: 20px 0 0; border-top: 1px solid #e1e9e2; gap: 11px; }
-.main-content .review-entry-heading strong { color: #415c4b; }
-.main-content .review-entry-heading span { color: #89968b; }
-.main-content .review-entry-button { border: 0; padding: 8px 12px; background: #e7efe8; }
-.main-content .review-count { background: #d4e4d8; }
-.main-content .review-future { margin: 0; color: #8c9a90; }
-.home-tools { margin-top: 28px; width: min(580px, 100%); color: #78897c; }
-.home-tools > summary { display: flex; align-items: center; width: fit-content; gap: 12px; cursor: pointer; list-style: none; padding: 10px 0; font-size: 12px; font-weight: 590; color: #77897d; }
-.home-tools > summary::-webkit-details-marker { display: none; }
-.home-tools > summary span { font-size: 15px; transition: transform .17s ease; }
-.home-tools[open] > summary span { transform: rotate(180deg); }
-.home-tools > summary:focus-visible { outline: 2px solid #8eaa96; outline-offset: 4px; border-radius: 3px; }
-.home-tools-inner { padding: 3px 0 10px; }
-.home-tools .lexicon-entry { margin: 0 0 16px; border-top: 0; padding: 12px 0; }
-.home-tools .data-tools { padding-top: 14px; }
-.home-tools .lexicon-entry-copy span { font-size: 12px; }
-.main-content .demo-note { margin: 18px 0 0; color: #97a49a; font-size: 11px; line-height: 1.7; }
 .site-footer { padding: 18px 0 23px; color: #a0ada4; letter-spacing: 0; }
 @media(max-width:560px) {
   .main-content { justify-content: flex-start; padding: 54px 0 44px; }
   .main-content h1 { font-size: clamp(54px, 14vw, 76px); }
   .main-content .choice-group { width: 100%; flex-direction: column; gap: 10px; margin-top: 28px; }
-  .home-course { width: 100%; min-height: 72px; }
-  .main-content .review-entry { margin-top: 28px; }
-  .home-tools { margin-top: 21px; }
 }
-@media(prefers-reduced-motion:reduce) { .home-tools > summary span { transition: none; } }
 
 
 /* Visual reduction 02 · keep question, blanks and feedback in a single focus path. */
@@ -508,20 +454,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 .main-content h1 { font-size: clamp(48px, 8svh, 96px); line-height: 1.16; margin: 11px 0 7px; }
 .main-content .intro { line-height: 1.6; }
 .main-content .choice-group { margin-top: clamp(13px, 2.6svh, 27px); }
-.main-content .review-entry { margin-top: clamp(14px, 2.7svh, 27px); padding-top: clamp(9px, 1.6svh, 15px); }
-.home-tools { margin-top: clamp(9px, 1.5svh, 18px); position: relative; }
-.home-tools-inner {
-  position: absolute;
-  z-index: 20;
-  top: 100%;
-  width: min(100%, 570px);
-  padding: 9px 15px 15px;
-  border: 1px solid #dfe8e0;
-  border-radius: 13px;
-  background: #fbfdfb;
-  box-shadow: 0 12px 30px #30473912;
-}
-.main-content .demo-note { margin-top: clamp(6px, 1.4svh, 14px); }
 
 @media (max-width: 560px) {
   .page-shell { padding-inline: clamp(12px, 5vw, 24px); }
@@ -548,11 +480,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
   .main-content h1 { font-size: clamp(40px, 7.7svh, 65px); margin: 7px 0 5px; }
   .main-content .intro { font-size: 13px; line-height: 1.5; }
   .main-content .choice-group { margin-top: clamp(8px, 1.7svh, 15px); gap: 7px; }
-  .home-course { min-height: clamp(49px, 8.3svh, 68px); padding: 9px 14px; }
-  .home-course-copy { gap: 3px; }
-  .home-course-copy strong { font-size: 13px; }
-  .main-content .review-entry { margin-top: clamp(9px, 1.5svh, 16px); gap: 6px; }
-  .home-tools { margin-top: clamp(5px, 1svh, 11px); }
 }
 @media (max-height: 690px) {
   .site-header { padding: 7px 0; }
@@ -568,7 +495,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
   .keyboard-panel { margin-top: 2px; }
   .main-content h1 { font-size: clamp(37px, 7svh, 54px); }
   .main-content .intro { font-size: 12px; }
-  .home-course { min-height: 46px; }
 }
 
 
@@ -676,32 +602,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 }
 
 
-/* S7 hotfix · explicit restart is secondary to the saved checkpoint. */
-.home-start-over {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin-top: clamp(5px, .9svh, 9px);
-}
-.home-start-over button {
-  background: transparent;
-  border: none;
-  color: #718a7c;
-  font-size: 11px;
-  line-height: 1.5;
-  padding: 3px 0;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: #bfcec4;
-  text-underline-offset: 3px;
-}
-.home-start-over button:hover { color: #345d47; text-decoration-color: currentColor; }
-@media (max-width: 560px) {
-  .home-start-over { gap: 3px 13px; }
-  .home-start-over button { font-size: 10px; }
-}
-
-
 /* V0.8 · restrained Motion cues. Absolute marker never changes word geometry. */
 .slot-unit { isolation: isolate; }
 .slot-focus-marker {
@@ -720,37 +620,7 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 }
 
 
-/* V0.10 Motion × React Bits · soft depth without changing the one-screen layout. */
-.main-content { position: relative; isolation: isolate; }
-.main-content > :not(.home-ambient) { position: relative; z-index: 1; }
-.home-ambient {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  width: clamp(220px, 44vw, 520px);
-  height: clamp(220px, 32vw, 420px);
-  top: 3%;
-  right: -7%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(169, 207, 180, .25), rgba(193, 217, 202, .08) 48%, transparent 72%);
-  filter: blur(26px);
-}
-.main-content .choice-group > .home-magnet {
-  flex: 0 0 clamp(218px, 24vw, 260px);
-  width: clamp(218px, 24vw, 260px);
-  min-width: 0;
-}
-.home-magnet-inner { width: 100%; }
-.home-magnet .home-course {
-  width: 100%;
-  transition: box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
-}
-.home-magnet:hover .home-course {
-  box-shadow: 0 13px 30px -20px rgba(31, 74, 48, .34), 0 4px 11px -8px rgba(38, 73, 48, .17);
-}
-.home-magnet .home-course > span:last-child { transition: translate 200ms ease; }
-.home-magnet:hover .home-course > span:last-child { translate: 2px -2px; }
-.home-magnet:focus-within .home-course { outline: 2px solid #80a993; outline-offset: 3px; }
+/* V0.10 Motion × React Bits · soft depth for the practice stage (lesson chips). */
 .lesson-spark { display: inline-flex; flex: 0 0 auto; max-width: 95%; }
 .lesson-spark > .lesson-toggle { max-width: 100%; }
 .lesson-spark:focus-within { border-radius: 999px; }
@@ -765,19 +635,11 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 .lesson-options .lesson-option {
   transition: background-color 180ms ease, border-color 180ms ease;
 }
-@media (max-width: 560px) {
-  .main-content .choice-group > .home-magnet { width: 100%; flex-basis: auto; }
-  .home-ambient { top: 10%; right: -22%; opacity: .65; }
-  .home-magnet .home-course { width: 100%; }
-}
 @media (hover: none), (pointer: coarse) {
-  .home-magnet:hover .home-course { box-shadow: none; }
   .lesson-toggle:hover { box-shadow: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-ambient { transform: none !important; }
-  .home-magnet .home-course, .lesson-toggle, .lesson-options .lesson-option,
-  .home-magnet .home-course > span:last-child { transition: none !important; }
+  .lesson-toggle, .lesson-options .lesson-option { transition: none !important; }
 }
 
 
@@ -785,12 +647,9 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
 .feedback-glyph { display: inline-block; transform-origin: 50% 70%; color: #52966b; font-weight: 700; }
 
 
-/* V0.11 · actual React Bits GPU scene + GSAP kinetic identity */
+/* V0.11 · Kinetic identity for the remaining status screens. */
 .main-content { position: relative; isolation: isolate; }
-.main-content > .hero-webgl,
-.main-content > .hero-webgl-tint { position: absolute; z-index: 0; pointer-events: none; }
 .main-content > * { position: relative; z-index: 2; }
-.home-ambient { display: none; }
 .main-content .kinetic-hero {
   perspective: 850px;
   transform-style: preserve-3d;
@@ -812,11 +671,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
   color: transparent;
   font-style: normal;
 }
-.home-course {
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(9px);
-}
-.secondary-button.home-course { background: rgba(229,240,232,.82); }
 .practice-stage { position: relative; isolation: isolate; }
 .practice-stage > .practice-area { position: relative; z-index: 1; }
 .success-energy {
@@ -878,24 +732,6 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
   width: 100%;
   height: 100%;
 }
-.viewport-scene-home .aurora-container {
-  opacity: .95;
-  /* Fade the *full viewport* edges, never mask within the layout column. */
-  -webkit-mask-image: radial-gradient(ellipse 84% 82% at 57% 44%,
-    #000 0%, rgba(0,0,0,.98) 34%, rgba(0,0,0,.72) 63%, transparent 100%);
-  mask-image: radial-gradient(ellipse 84% 82% at 57% 44%,
-    #000 0%, rgba(0,0,0,.98) 34%, rgba(0,0,0,.72) 63%, transparent 100%);
-}
-.viewport-scene-home::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg,
-      rgba(247,249,246,.50) 0%, rgba(247,249,246,.24) 36%,
-      rgba(247,249,246,.02) 72%),
-    linear-gradient(0deg, rgba(247,249,246,.46), transparent 32%);
-}
 .viewport-scene-practice .particles-container {
   opacity: .72;
   -webkit-mask-image: radial-gradient(ellipse 72% 77% at 50% 50%,
@@ -904,11 +740,9 @@ html.landing-mode #root { height: auto; min-height: 0; overflow: visible; }
     #000 0%, rgba(0,0,0,.80) 52%, transparent 100%);
 }
 @media(max-width:560px) {
-  .viewport-scene-home .aurora-container { opacity: .78; }
   .viewport-scene-practice .particles-container { opacity: .5; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .viewport-scene-home .aurora-container,
   .viewport-scene-practice .particles-container { opacity: .28; }
 }
 

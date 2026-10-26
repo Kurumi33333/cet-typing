@@ -17,7 +17,6 @@ import { useClipCalm } from "./useClipCalm";
 
 export interface LandingProps {
   onStartLevel: (level: CetLevel) => void;
-  onOpenApp: () => void;
   onOpenLexicon: (level: CetLevel) => void;
   onExport: () => void;
   onImport: () => void;
@@ -133,7 +132,7 @@ function Photo({
 }
 
 export function Landing(props: LandingProps) {
-  const { onStartLevel, onOpenApp, onOpenLexicon, onExport, onImport, onReset, onStartReview } = props;
+  const { onStartLevel, onOpenLexicon, onExport, onImport, onReset, onStartReview } = props;
   const scopeRef = useRef<HTMLElement>(null);
   useLandingScroll(scopeRef);
   useLandingMotion(scopeRef);
@@ -173,8 +172,8 @@ export function Landing(props: LandingProps) {
             <span className="landing__sound-bars" aria-hidden="true"><i /><i /><i /></span>
             音效 {soundOn ? "开" : "关"}
           </button>
-          <button type="button" className="landing__nav-action" onClick={onOpenApp}>
-            练习台
+          <button type="button" className="landing__nav-action" onClick={() => onStartLevel(resume?.level ?? "CET4")}>
+            {resume ? "接着练" : "开始练习"}
           </button>
         </div>
       </header>

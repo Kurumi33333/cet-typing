@@ -2,11 +2,11 @@ import type { CetLevel } from "../features/course/types";
 
 /**
  * The app's address map. Every screen has a real URL so a refresh, a bookmark
- * and a shared link all land where the visitor left off.
+ * and a shared link all land where the visitor left off. `/app` on its own is
+ * only a legacy shape: there is one entry page, and it is the landing page.
  */
 export const ROUTES = {
   landing: "/",
-  app: "/app",
   course: (level: CetLevel) => `/app/${level === "CET4" ? "cet4" : "cet6"}`,
   review: (level: CetLevel) => `/app/${level === "CET4" ? "cet4" : "cet6"}/review`,
   lexicon: (level: CetLevel) => `/lexicon/${level === "CET4" ? "cet4" : "cet6"}`,

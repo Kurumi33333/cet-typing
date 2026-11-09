@@ -1,0 +1,19 @@
+#!name=CN Games + WeChat Direct
+#!desc=国服明日方舟、国服荒野乱斗、微信及小程序基础域名直连；作为独立模块加载，不修改机场订阅。
+
+[Rule]
+# 明日方舟国服 / 鹰角网络（基础域名，非完整游戏 IP 列表）
+DOMAIN-SUFFIX,hypergryph.com,DIRECT
+
+# 荒野乱斗国服 / 腾讯相关（官网/国服相关域名，非完整对战 IP 列表）
+DOMAIN,bs.qq.com,DIRECT
+DOMAIN-SUFFIX,brawlstars.cn,DIRECT
+
+# 微信及小程序基础平台域名
+DOMAIN-SUFFIX,servicewechat.com,DIRECT
+DOMAIN-SUFFIX,weixin.qq.com,DIRECT
+DOMAIN-SUFFIX,wechat.com,DIRECT
+DOMAIN-SUFFIX,qpic.cn,DIRECT
+
+# 注意：第三方小程序业务域名和游戏未列出的服务器不一定命中。
+# 不自动开启 GEOIP,CN,DIRECT，避免改变其它国内流量的既有分流。
